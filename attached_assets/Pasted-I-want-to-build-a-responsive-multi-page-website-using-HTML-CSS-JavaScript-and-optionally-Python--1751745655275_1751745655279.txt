@@ -1,0 +1,109 @@
+I want to build a responsive, multi-page website using HTML, CSS, JavaScript, and optionally Python/Flask that showcases the Camden Health Equity Data Visualization Initiative (CHEDVI). The platform should be interactive, data-driven, and community-focused, supporting:
+
+🌐 General Specs:
+Use modern HTML5/CSS3 best practices.
+
+The theme should be clean, accessible, and professional (preferably using a health-equity inspired color palette: blues, greens, and soft grays).
+
+Include a navigation bar with links to all core pages.
+
+Use placeholder charts and maps that I can replace later (e.g., via Chart.js, Plotly, or embedded iframe).
+
+The site must be mobile-friendly and responsive.
+
+🧭 Site Structure:
+Home Page
+
+Hero section: "Camden Health Equity Data Visualization Initiative"
+
+Brief overview of the project
+
+Call to action: “Explore the Data” or “Learn More”
+
+Background image or animation relevant to urban health and data
+
+About the Project
+
+Text block summarizing the problem (Camden’s health disparities), the goals, and the CHEDVI mission
+
+Visual timeline showing project evolution
+
+Icons or infographics for SDOH categories (income, food, housing, air quality, etc.)
+
+Interactive Dashboard
+
+Section for placeholder GIS map (add iframe, dummy heatmap, or use Leaflet.js)
+
+Add dropdown filters (e.g., select variable: obesity, diabetes, air quality)
+
+Side panel that updates key metrics dynamically (using dummy data now)
+
+Space for 3–4 visualizations (charts: bar, scatter, boxplots)
+
+Neighborhood Profiles
+
+Create cards or tabs for each Camden neighborhood (or census tract)
+
+Display demographic, economic, and health data for each
+
+Include chart placeholders and image icons
+
+Policy Insights
+
+Embed key insights and correlations (positive/negative relationships)
+
+Include collapsible boxes for each theme: housing, insurance, food access, mental health
+
+Suggest space for uploading a downloadable policy brief (PDF)
+
+Get Involved / Resources
+
+Embed referral links or mock-up for "Find a Resource" tool
+
+Placeholder for resource matching tool (form or dynamic map)
+
+Contact form (Name, Email, Organization, Message)
+
+Social media links and newsletter signup
+
+Admin / Upload Area (optional)
+
+Allow login and upload of new datasets or insights (just mocked for now)
+
+Placeholder for CSV file parser or update function
+
+📦 Bonus Features (Optional but Recommended)
+Use Bootstrap or TailwindCSS for layout
+
+Use Plotly.js or Chart.js for graphs
+
+Leaflet.js or Mapbox for GIS elements
+
+Optionally integrate Google Sheets or Airtable as a mock backend
+
+Add animation on scroll for modern UX
+
+📁 Folder & File Suggestions:
+/index.html
+
+/about.html
+
+/dashboard.html
+
+/neighborhoods.html
+
+/policy.html
+
+/resources.html
+
+/assets/css/style.css
+
+/assets/js/main.js
+
+/assets/img/ (placeholders for icons, charts, logos)
+
+💡 Final Notes:
+Generate placeholder code for all pages and visuals, so I can later replace with live data and visuals.
+
+This project should reflect community-driven, spatially informed health equity work—combining storytelling with interactivity and usability.
+

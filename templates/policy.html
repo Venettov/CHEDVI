@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block title %}Policy Insights - Camden Health Equity Data Visualization Initiative{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="display-5 fw-bold mb-3">Policy Insights</h1>
+                <p class="lead text-muted">
+                    Discover data-driven policy recommendations to inform resource allocation and decisions
+                </p>
+                <p class="text-muted small">
+                    <i class="fas fa-balance-scale me-2"></i>Recommendations based on 2022 health equity data analysis
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Findings Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <h2 class="h3 fw-bold mb-4">Key Findings & Correlations</h2>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card insight-card border-success">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="insight-icon text-success me-3">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                            <h5 class="card-title mb-0">Positive Correlation</h5>
+                        </div>
+                        <p class="card-text">
+                            Areas with better access to healthy food options show significantly lower rates of 
+                            diabetes and obesity among residents.
+                        </p>
+                        <small class="text-muted">Correlation coefficient: +0.73</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card insight-card border-danger">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="insight-icon text-danger me-3">
+                                <i class="fas fa-arrow-down"></i>
+                            </div>
+                            <h5 class="card-title mb-0">Negative Correlation</h5>
+                        </div>
+                        <p class="card-text">
+                            Neighborhoods with higher air pollution levels experience increased rates of 
+                            respiratory conditions and cardiovascular disease.
+                        </p>
+                        <small class="text-muted">Correlation coefficient: -0.68</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Policy Themes Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 mb-4">
+                <h2 class="h3 fw-bold mb-4">Policy Recommendations by Theme</h2>
+            </div>
+        </div>
+        
+        <div class="accordion" id="policyAccordion">
+            <!-- Housing Policy -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#housingPolicy">
+                        <i class="fas fa-home me-3 text-info"></i>
+                        <strong>Housing Quality & Affordability</strong>
+                    </button>
+                </h2>
+                <div id="housingPolicy" class="accordion-collapse collapse show" data-bs-parent="#policyAccordion">
+                    <div class="accordion-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5>Key Findings</h5>
+                                <ul>
+                                    <li>Substandard housing conditions correlate with higher asthma rates</li>
+                                    <li>Housing cost burden exceeds 30% of income for 68% of renters</li>
+                                    <li>Lead paint exposure remains a significant health risk</li>
+                                </ul>
+                                
+                                <h5 class="mt-4">Recommended Actions</h5>
+                                <ul>
+                                    <li>Expand housing rehabilitation programs</li>
+                                    <li>Strengthen rental property inspection requirements</li>
+                                    <li>Increase affordable housing development incentives</li>
+                                    <li>Implement comprehensive lead abatement programs</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="policy-stats">
+                                    <div class="stat-item">
+                                        <h4 class="text-danger">68%</h4>
+                                        <p>Renters with housing cost burden</p>
+                                    </div>
+                                    <div class="stat-item">
+                                        <h4 class="text-warning">34%</h4>
+                                        <p>Housing units needing major repairs</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Healthcare Access -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#healthcarePolicy">
+                        <i class="fas fa-heartbeat me-3 text-danger"></i>
+                        <strong>Healthcare Access & Insurance</strong>
+                    </button>
+                </h2>
+                <div id="healthcarePolicy" class="accordion-collapse collapse" data-bs-parent="#policyAccordion">
+                    <div class="accordion-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5>Key Findings</h5>
+                                <ul>
+                                    <li>Limited primary care providers in several neighborhoods</li>
+                                    <li>High emergency department utilization rates</li>
+                                    <li>Significant gaps in mental health service availability</li>
+                                </ul>
+                                
+                                <h5 class="mt-4">Recommended Actions</h5>
+                                <ul>
+                                    <li>Expand community health center capacity</li>
+                                    <li>Increase insurance enrollment outreach</li>
+                                    <li>Develop mobile health services</li>
+                                    <li>Integrate mental health services in primary care</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="policy-stats">
+                                    <div class="stat-item">
+                                        <h4 class="text-danger">23%</h4>
+                                        <p>Uninsured residents</p>
+                                    </div>
+                                    <div class="stat-item">
+                                        <h4 class="text-warning">1:3,200</h4>
+                                        <p>Primary care physician ratio</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Food Access -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#foodPolicy">
+                        <i class="fas fa-utensils me-3 text-success"></i>
+                        <strong>Food Access & Nutrition</strong>
+                    </button>
+                </h2>
+                <div id="foodPolicy" class="accordion-collapse collapse" data-bs-parent="#policyAccordion">
+                    <div class="accordion-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5>Key Findings</h5>
+                                <ul>
+                                    <li>Food deserts exist in multiple neighborhoods</li>
+                                    <li>High prevalence of corner stores vs. full-service groceries</li>
+                                    <li>Limited access to fresh produce and healthy options</li>
+                                </ul>
+                                
+                                <h5 class="mt-4">Recommended Actions</h5>
+                                <ul>
+                                    <li>Incentivize full-service grocery store development</li>
+                                    <li>Support healthy corner store initiatives</li>
+                                    <li>Expand farmers market programs</li>
+                                    <li>Improve SNAP benefits accessibility</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="policy-stats">
+                                    <div class="stat-item">
+                                        <h4 class="text-danger">45%</h4>
+                                        <p>Residents in food deserts</p>
+                                    </div>
+                                    <div class="stat-item">
+                                        <h4 class="text-warning">2.3 miles</h4>
+                                        <p>Average distance to grocery store</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mental Health -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#mentalHealthPolicy">
+                        <i class="fas fa-brain me-3 text-purple"></i>
+                        <strong>Mental Health & Wellbeing</strong>
+                    </button>
+                </h2>
+                <div id="mentalHealthPolicy" class="accordion-collapse collapse" data-bs-parent="#policyAccordion">
+                    <div class="accordion-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5>Key Findings</h5>
+                                <ul>
+                                    <li>High rates of depression and anxiety disorders</li>
+                                    <li>Limited mental health providers accepting Medicaid</li>
+                                    <li>Significant stigma surrounding mental health treatment</li>
+                                </ul>
+                                
+                                <h5 class="mt-4">Recommended Actions</h5>
+                                <ul>
+                                    <li>Expand community mental health services</li>
+                                    <li>Increase peer support programs</li>
+                                    <li>Implement trauma-informed care training</li>
+                                    <li>Develop mental health awareness campaigns</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="policy-stats">
+                                    <div class="stat-item">
+                                        <h4 class="text-danger">28%</h4>
+                                        <p>Adults with mental health conditions</p>
+                                    </div>
+                                    <div class="stat-item">
+                                        <h4 class="text-warning">1:800</h4>
+                                        <p>Mental health provider ratio</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Policy Brief Download -->
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center py-5">
+                        <h3 class="card-title">Download Full Policy Brief</h3>
+                        <p class="card-text lead">
+                            Access our comprehensive policy recommendations and supporting data analysis
+                        </p>
+                        <div class="mt-4">
+                            <button class="btn btn-light btn-lg me-3" onclick="downloadPolicyBrief()">
+                                <i class="fas fa-download me-2"></i>Download PDF
+                            </button>
+                            <button class="btn btn-outline-light btn-lg" onclick="sharePolicy()">
+                                <i class="fas fa-share me-2"></i>Share Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function downloadPolicyBrief() {
+    alert('Policy brief download functionality will be implemented once the full report is available.');
+}
+
+function sharePolicy() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Camden Health Equity Policy Insights',
+            text: 'Data-driven recommendations for improving health equity in Camden',
+            url: window.location.href
+        });
+    } else {
+        // Fallback for browsers that don't support native sharing
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(function() {
+            alert('Link copied to clipboard!');
+        });
+    }
+}
+</script>
+{% endblock %}

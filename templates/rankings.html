@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+
+{% block title %}Rankings - Camden Health Equity Data Visualization Initiative{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <!-- Breadcrumb Navigation -->
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Health Rankings</li>
+            </ol>
+        </nav>
+        
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-5 fw-bold mb-2">Comprehensive Health Rankings</h1>
+                <p class="lead text-muted">
+                    Compare Camden's 19 neighborhoods across extensive health outcomes, healthcare access, and social determinants
+                </p>
+                <p class="text-muted small">
+                    <i class="fas fa-database me-2"></i>Data from 2022 US Census Bureau and CDC PLACES
+                </p>
+                <div class="row text-center mt-3">
+                    <div class="col-3">
+                        <div class="small fw-bold text-primary">19</div>
+                        <div class="small text-muted">Neighborhoods</div>
+                    </div>
+                    <div class="col-3">
+                        <div class="small fw-bold text-primary">30+</div>
+                        <div class="small text-muted">Health Metrics</div>
+                    </div>
+                    <div class="col-3">
+                        <div class="small fw-bold text-primary">6</div>
+                        <div class="small text-muted">Categories</div>
+                    </div>
+                    <div class="col-3">
+                        <div class="small fw-bold text-primary">Real</div>
+                        <div class="small text-muted">Census Data</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex flex-column gap-2">
+                    <button class="btn btn-outline-primary" onclick="exportRankingsData('csv')" 
+                            aria-label="Export rankings data as CSV">
+                        <i class="fas fa-download me-2"></i>Export Data
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="CHEDVI.toggleAccessibilityPanel()" 
+                            aria-label="Open accessibility options">
+                        <i class="fas fa-universal-access me-2"></i>Accessibility
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Comprehensive Filters Section -->
+<section class="py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <label for="metricSelector" class="form-label fw-bold">
+                    <i class="fas fa-chart-bar me-2"></i>Select Health Metric
+                </label>
+                <select class="form-select form-select-lg" id="metricSelector" aria-describedby="metricHelp">
+                    <option value="diabetes">Diabetes Rate (%)</option>
+                    <!-- Options will be populated by JavaScript with comprehensive data -->
+                </select>
+                <div id="metricHelp" class="form-text">
+                    Choose from 30+ health outcomes, healthcare access, and social determinant metrics
+                </div>
+            </div>
+            <div class="col-md-3">
+                <label for="sortOrder" class="form-label fw-bold">
+                    <i class="fas fa-sort me-2"></i>Sort Order
+                </label>
+                <select class="form-select form-select-lg" id="sortOrder">
+                    <option value="asc">Best to Worst</option>
+                    <option value="desc">Worst to Best</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="categoryFilter" class="form-label fw-bold">
+                    <i class="fas fa-filter me-2"></i>Category Filter
+                </label>
+                <select class="form-select form-select-lg" id="categoryFilter">
+                    <option value="all">All Categories</option>
+                    <option value="Health Outcomes">Health Outcomes</option>
+                    <option value="Healthcare Access">Healthcare Access</option>
+                    <option value="Economic Factors">Economic Factors</option>
+                    <option value="Education">Education</option>
+                    <option value="Housing">Housing</option>
+                    <option value="Food Security">Food Security</option>
+                    <option value="Demographics">Demographics</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Stats Overview -->
+<section class="py-3 bg-light border-top border-bottom">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="card border-0 bg-transparent">
+                    <div class="card-body py-2">
+                        <h6 class="card-title text-primary fw-bold mb-1">Health Outcomes</h6>
+                        <p class="card-text small text-muted mb-0">Diabetes, Obesity, Mental Health, Chronic Conditions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 bg-transparent">
+                    <div class="card-body py-2">
+                        <h6 class="card-title text-primary fw-bold mb-1">Healthcare Access</h6>
+                        <p class="card-text small text-muted mb-0">Insurance, Primary Care, Dental Care, Preventive Services</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 bg-transparent">
+                    <div class="card-body py-2">
+                        <h6 class="card-title text-primary fw-bold mb-1">Social Determinants</h6>
+                        <p class="card-text small text-muted mb-0">Income, Education, Housing, Employment, Food Access</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 bg-transparent">
+                    <div class="card-body py-2">
+                        <h6 class="card-title text-primary fw-bold mb-1">Demographics</h6>
+                        <p class="card-text small text-muted mb-0">Population, Age, Race/Ethnicity, Geographic Distribution</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Comprehensive Rankings Table -->
+<section class="py-4">
+    <div class="container">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-trophy me-2"></i>Camden Neighborhood Health Rankings
+                        </h5>
+                        <small class="opacity-75">Real census and health data across 30+ metrics</small>
+                    </div>
+                    <div class="col-auto">
+                        <div class="btn-group" role="group" aria-label="Sort options">
+                            <button type="button" class="btn btn-outline-light btn-sm sort-control active" data-sort="asc">
+                                <i class="fas fa-sort-amount-up me-1"></i>Best to Worst
+                            </button>
+                            <button type="button" class="btn btn-outline-light btn-sm sort-control" data-sort="desc">
+                                <i class="fas fa-sort-amount-down me-1"></i>Worst to Best
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <div id="rankingsTable" aria-label="Camden neighborhoods health rankings table">
+                        <!-- Comprehensive table will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer bg-light">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Data sources: US Census Bureau, CDC PLACES, Camden County Health Department
+                        </small>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-sm btn-outline-primary me-2" onclick="exportRankingsData('csv')">
+                            <i class="fas fa-download me-1"></i>Export CSV
+                        </button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="window.print()">
+                            <i class="fas fa-print me-1"></i>Print
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Ranking Visualization -->
+<section class="py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Visual Rankings
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="rankingsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Ranking Details
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="rankingDetails">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-chart-bar fa-2x mb-3"></i>
+                                <p>Select a ranking metric to view details</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Methodology Section -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-calculator me-2"></i>Ranking Methodology
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Data Sources</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>US Census Bureau</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>NJ Department of Health</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Camden County Health Department</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>EPA Environmental Data</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Ranking Criteria</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-info text-primary me-2"></i>Population-weighted averages</li>
+                                    <li><i class="fas fa-info text-primary me-2"></i>Age-adjusted health outcomes</li>
+                                    <li><i class="fas fa-info text-primary me-2"></i>Composite index scoring</li>
+                                    <li><i class="fas fa-info text-primary me-2"></i>Statistical significance testing</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Data Status Alert -->
+<div class="container">
+    <div class="alert alert-info" role="alert">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Data Status:</strong> Rankings are currently being calculated based on available data sources. 
+        This section will display comprehensive neighborhood rankings once all data integration is complete.
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/rankings-enhanced.js') }}"></script>
+{% endblock %}

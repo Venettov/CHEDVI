@@ -1,0 +1,320 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Camden Health Equity Data Visualization Initiative{% endblock %}
+
+{% block body_class %}home-page{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section bg-primary text-white">
+    <div class="container">
+        <div class="row min-vh-100 align-items-center">
+            <div class="col-lg-6">
+                <h1 class="hero-title fw-bold mb-4 animate-slide-in">
+                    Camden Health Equity Data Visualization Initiative
+                </h1>
+                <p class="lead mb-4">
+                    Empowering communities through data-driven insights and visualization tools 
+                    to address health disparities and promote equity in Camden, NJ.
+                </p>
+                <p class="text-light small mb-4">
+                    <i class="fas fa-calendar me-2"></i>Data Source: 2022 US Census Bureau & CDC PLACES
+                </p>
+                <div class="d-flex gap-3 flex-wrap">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-lg">
+                        <i class="fas fa-chart-bar me-2"></i>Explore the Data
+                    </a>
+                    <a href="{{ url_for('about') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-info-circle me-2"></i>Learn More
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-visual d-flex justify-content-center align-items-center">
+                    <img src="{{ url_for('static', filename='images/happy-family.avif') }}" 
+                         alt="Happy African American family taking selfie together - representing CHEDVI's mission to promote health equity in Camden communities" 
+                         class="img-fluid rounded-3 shadow-lg"
+                         style="max-width: 100%; height: auto; border-radius: 15px;">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold mb-3">Transforming Health Data Into Action</h2>
+                <p class="lead text-muted">
+                    Our platform combines cutting-edge visualization with community-focused insights
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-map-marked-alt text-primary"></i>
+                        </div>
+                        <h4 class="card-title">Interactive Mapping</h4>
+                        <p class="card-text">
+                            Explore health disparities across Camden neighborhoods with interactive maps 
+                            and geographic visualizations.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-users text-success"></i>
+                        </div>
+                        <h4 class="card-title">Community Profiles</h4>
+                        <p class="card-text">
+                            Access detailed demographic, economic, and health profiles for each 
+                            neighborhood and census tract.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-lightbulb text-warning"></i>
+                        </div>
+                        <h4 class="card-title">Policy Insights</h4>
+                        <p class="card-text">
+                            Discover data-driven policy recommendations and correlations between 
+                            social determinants and health outcomes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SDOH Categories Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-5 fw-bold mb-3">Social Determinants of Health</h2>
+                <p class="lead text-muted">
+                    Exploring the key factors that influence health outcomes in Camden
+                </p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="sdoh-card text-center p-4">
+                    <div class="sdoh-icon mb-3">
+                        <i class="fas fa-dollar-sign text-primary"></i>
+                    </div>
+                    <h5>Economic Stability</h5>
+                    <p class="text-muted">Income, employment, and financial security</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="sdoh-card text-center p-4">
+                    <div class="sdoh-icon mb-3">
+                        <i class="fas fa-utensils text-success"></i>
+                    </div>
+                    <h5>Food Access</h5>
+                    <p class="text-muted">Nutrition and food security</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="sdoh-card text-center p-4">
+                    <div class="sdoh-icon mb-3">
+                        <i class="fas fa-home text-info"></i>
+                    </div>
+                    <h5>Housing</h5>
+                    <p class="text-muted">Safe and affordable housing</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="sdoh-card text-center p-4">
+                    <div class="sdoh-icon mb-3">
+                        <i class="fas fa-wind text-secondary"></i>
+                    </div>
+                    <h5>Environment</h5>
+                    <p class="text-muted">Air quality and environmental health</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Camden Health Statistics Section -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="display-6 fw-bold mb-3">Camden Health by the Numbers</h2>
+                <p class="lead text-muted">Real data reveals significant health disparities across neighborhoods</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card stat-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="stat-icon mb-3">
+                            <i class="fas fa-users fa-3x text-primary"></i>
+                        </div>
+                        <h3 class="stat-number text-primary">69,587</h3>
+                        <h5 class="stat-label">Total Population</h5>
+                        <p class="text-muted small">Across 19 neighborhoods</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card stat-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="stat-icon mb-3">
+                            <i class="fas fa-dollar-sign fa-3x text-primary"></i>
+                        </div>
+                        <h3 class="stat-number text-primary">4.9x</h3>
+                        <h5 class="stat-label">Income Inequality</h5>
+                        <p class="text-muted small">$12k to $59k range</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card stat-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="stat-icon mb-3">
+                            <i class="fas fa-heartbeat fa-3x text-primary"></i>
+                        </div>
+                        <h3 class="stat-number text-primary">9.7%</h3>
+                        <h5 class="stat-label">Diabetes Disparity</h5>
+                        <p class="text-muted small">Gap between neighborhoods</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="card stat-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="stat-icon mb-3">
+                            <i class="fas fa-percentage fa-3x text-primary"></i>
+                        </div>
+                        <h3 class="stat-number text-primary">42.5%</h3>
+                        <h5 class="stat-label">Poverty Gap</h5>
+                        <p class="text-muted small">54.4% to 11.9% range</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Findings Section -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-6 fw-bold">Key Health Equity Findings</h2>
+                <p class="lead text-muted">Data-driven insights from Camden neighborhood analysis</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="card finding-card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="finding-icon mb-3">
+                            <div class="icon-circle bg-primary text-white">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title">Critical Health Disparities</h5>
+                        <p class="card-text">
+                            Bergen Square faces the highest poverty rate (54.4%) and lowest income ($12,104), while 
+                            Beideman has the highest income ($58,983) and lowest diabetes rate (13.4%).
+                        </p>
+                        <div class="correlation-badge">
+                            <span class="badge bg-primary">High Priority</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card finding-card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="finding-icon mb-3">
+                            <div class="icon-circle bg-primary text-white">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title">Income-Health Correlation</h5>
+                        <p class="card-text">
+                            Neighborhoods with higher median income consistently show better health outcomes. 
+                            This pattern demonstrates the strong link between economic stability and health.
+                        </p>
+                        <div class="correlation-badge">
+                            <span class="badge bg-primary">Strong Correlation</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card finding-card h-100 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="finding-icon mb-3">
+                            <div class="icon-circle bg-primary text-white">
+                                <i class="fas fa-map-marked-alt"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title">Geographic Health Patterns</h5>
+                        <p class="card-text">
+                            Health outcomes vary dramatically by neighborhood location, with waterfront and 
+                            central areas showing different health profiles than outlying communities.
+                        </p>
+                        <div class="correlation-badge">
+                            <span class="badge bg-primary">Geographic Factor</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-12">
+                <h2 class="display-6 fw-bold mb-3">Explore Real Camden Health Disparities</h2>
+                <p class="lead mb-4">
+                    Interactive maps and visualizations using authentic census and health data
+                </p>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-light btn-lg">
+                    <i class="fas fa-map me-2"></i>View Dual-Map Dashboard
+                </a>
+                <a href="{{ url_for('insights') }}" class="btn btn-outline-light btn-lg ms-3">
+                    <i class="fas fa-chart-line me-2"></i>See Health Insights
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

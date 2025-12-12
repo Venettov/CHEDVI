@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Camden Health Equity Data Visualization Initiative{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    
+    {% block head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm" style="border-bottom: 1px solid #dee2e6; min-height: 60px;">
+        <div class="container-fluid px-4">
+            <!-- Brand -->
+            <a class="navbar-brand fw-bold text-primary d-flex align-items-center" href="{{ url_for('index') }}" style="font-size: 1.1rem;">
+                <i class="fas fa-chart-line me-2"></i>
+                <span>CHEDVI</span>
+            </a>
+            
+            <!-- Search Bar (Center) -->
+            <div class="mx-auto d-none d-lg-flex" style="max-width: 350px; flex: 1;">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0" style="color: #6c757d;">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input class="form-control border-start-0" type="search" placeholder="Search neighborhoods, metrics..." id="globalSearch" style="box-shadow: none;">
+                </div>
+            </div>
+            
+            <!-- Mobile Toggle -->
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Navigation Links -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link text-dark px-3" href="{{ url_for('index') }}" style="font-size: 0.9rem;">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark px-3" href="{{ url_for('about') }}" style="font-size: 0.9rem;">
+                            <i class="fas fa-info-circle me-1"></i>About
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark px-3" href="{{ url_for('dashboard') }}" style="font-size: 0.9rem;">
+                            <i class="fas fa-chart-area me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark px-3" href="{{ url_for('neighborhoods') }}" style="font-size: 0.9rem;">
+                            <i class="fas fa-map-marker-alt me-1"></i>Neighborhoods
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark px-3" href="{{ url_for('rankings') }}" style="font-size: 0.9rem;">
+                            <i class="fas fa-list-ol me-1"></i>Rankings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark px-3" href="{{ url_for('insights') }}" style="font-size: 0.9rem;">
+                            <i class="fas fa-lightbulb me-1"></i>Insights
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark px-3" href="{{ url_for('policy') }}" style="font-size: 0.9rem;">
+                            <i class="fas fa-clipboard-list me-1"></i>Policy
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-dark px-3" href="{{ url_for('resources') }}" style="font-size: 0.9rem;">
+                            <i class="fas fa-hands-helping me-1"></i>Resources
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-outline-primary btn-sm ms-2" id="startTour" title="Help" style="font-size: 0.8rem;">
+                            <i class="fas fa-question-circle"></i>
+                        </button>
+                    </li>
+                </ul>
+                
+                <!-- Mobile Search -->
+                <div class="d-lg-none mt-3">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input class="form-control" type="search" placeholder="Search neighborhoods, metrics...">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>CHEDVI</h5>
+                    <p>Camden Health Equity Data Visualization Initiative - Empowering communities through data-driven insights.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('about') }}" class="text-light">About the Project</a></li>
+                        <li><a href="{{ url_for('dashboard') }}" class="text-light">Data Dashboard</a></li>
+                        <li><a href="{{ url_for('resources') }}" class="text-light">Get Involved</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Connect With Us</h5>
+                    <div class="social-links">
+                        <a href="#" class="text-light me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-light me-3"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-light me-3"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-light"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <p>&copy; 2025 Camden Health Equity Data Visualization Initiative. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block title %}Resources - Camden Health Equity Data Visualization Initiative{% endblock %}
+
+{% block content %}
+
+
+
+
+<!-- Community Resource Directory -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-6 fw-bold">Camden Community Resource Directory</h2>
+                <p class="lead text-muted">Connect with local resources and services</p>
+                <p class="text-muted small">
+                    <i class="fas fa-hands-helping me-2"></i>Community resources informed by 2022 health equity analysis
+                </p>
+            </div>
+        </div>
+        
+        <!-- Featured Resource - MyResourcePal -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-primary bg-light" style="border-width: 3px;">
+                    <div class="card-header bg-primary text-white py-4">
+                        <h3 class="card-title mb-0 text-center">
+                            <i class="fas fa-star me-3" style="font-size: 1.5rem;"></i>Featured Resource
+                        </h3>
+                    </div>
+                    <div class="card-body py-5 px-5">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h3 class="text-primary mb-4 display-6">MyResourcePal - Camden's Strategic Resource Hub</h3>
+                                <p class="text-muted mb-4 lead">
+                                    A comprehensive digital platform connecting Camden residents to essential community resources, 
+                                    services, and support programs. Navigate local assistance programs with ease and find the help you need.
+                                </p>
+                                <div class="row g-3">
+                                    <div class="col-sm-6">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="fas fa-check-circle text-success me-3" style="font-size: 1.2rem;"></i>
+                                            <span>Comprehensive resource database</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="fas fa-check-circle text-success me-3" style="font-size: 1.2rem;"></i>
+                                            <span>Easy-to-use search tools</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="fas fa-check-circle text-success me-3" style="font-size: 1.2rem;"></i>
+                                            <span>Up-to-date contact information</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="fas fa-check-circle text-success me-3" style="font-size: 1.2rem;"></i>
+                                            <span>Mobile-friendly access</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="mb-5">
+                                    <i class="fas fa-hands-helping text-primary" style="font-size: 8rem;"></i>
+                                </div>
+                                <a href="https://www.myresourcepal.org/" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg px-4 py-3 mb-3">
+                                    <i class="fas fa-external-link-alt me-2"></i>Visit MyResourcePal
+                                </a>
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-globe me-1"></i>myresourcepal.org
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Healthcare Services -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-danger text-white">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-heartbeat me-2"></i>Healthcare Services
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="resource-item p-3 border rounded">
+                                    <h5 class="text-primary">CAMcare Health Corporation</h5>
+                                    <p class="text-muted mb-2">Comprehensive healthcare services including primary care, dental, and behavioral health</p>
+                                    <p class="mb-1"><strong>Address:</strong> 721 Market Street, Camden, NJ 08102</p>
+                                    <p class="mb-1"><strong>Phone:</strong> (856) 966-0202</p>
+                                    <p class="mb-0"><strong>Services:</strong> Primary care, dental care, behavioral health, pharmacy</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="resource-item p-3 border rounded">
+                                    <h5 class="text-primary">Cooper University Hospital</h5>
+                                    <p class="text-muted mb-2">Level 1 trauma center and academic medical center</p>
+                                    <p class="mb-1"><strong>Address:</strong> 1 Cooper Plaza, Camden, NJ 08103</p>
+                                    <p class="mb-1"><strong>Phone:</strong> (856) 342-2000</p>
+                                    <p class="mb-0"><strong>Services:</strong> Emergency care, specialty care, surgery, maternity</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Food Access -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-utensils me-2"></i>Food Access & Nutrition
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="resource-item p-3 border rounded">
+                                    <h5 class="text-success">Camden County Food Bank</h5>
+                                    <p class="text-muted mb-2">Emergency food assistance and nutrition programs</p>
+                                    <p class="mb-1"><strong>Address:</strong> 2500 McClellan Drive, Camden, NJ 08104</p>
+                                    <p class="mb-1"><strong>Phone:</strong> (856) 963-0900</p>
+                                    <p class="mb-0"><strong>Services:</strong> Food pantry, mobile pantry, nutrition education</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="resource-item p-3 border rounded">
+                                    <h5 class="text-success">Sacred Heart Food Pantry</h5>
+                                    <p class="text-muted mb-2">Community food pantry serving Camden families</p>
+                                    <p class="mb-1"><strong>Address:</strong> 1001 S 6th Street, Camden, NJ 08104</p>
+                                    <p class="mb-1"><strong>Phone:</strong> (856) 365-0445</p>
+                                    <p class="mb-0"><strong>Services:</strong> Weekly food distribution, holiday meals</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Housing Assistance -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-home me-2"></i>Housing Assistance
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="resource-item p-3 border rounded">
+                                    <h5 class="text-info">Camden County Housing Authority</h5>
+                                    <p class="text-muted mb-2">Public housing and rental assistance programs</p>
+                                    <p class="mb-1"><strong>Address:</strong> 2600 Mt. Ephraim Avenue, Camden, NJ 08104</p>
+                                    <p class="mb-1"><strong>Phone:</strong> (856) 966-3800</p>
+                                    <p class="mb-0"><strong>Services:</strong> Public housing, Section 8 vouchers, homeownership</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="resource-item p-3 border rounded">
+                                    <h5 class="text-info">Volunteers of America Delaware Valley</h5>
+                                    <p class="text-muted mb-2">Emergency shelter and transitional housing</p>
+                                    <p class="mb-1"><strong>Address:</strong> 1601 N 2nd Street, Camden, NJ 08102</p>
+                                    <p class="mb-1"><strong>Phone:</strong> (856) 963-2265</p>
+                                    <p class="mb-0"><strong>Services:</strong> Emergency shelter, transitional housing, case management</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mental Health -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-brain me-2"></i>Mental Health & Counseling
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="resource-item p-3 border rounded">
+                                    <h5 class="text-warning">Crisis Intervention Services</h5>
+                                    <p class="text-muted mb-2">24/7 crisis intervention and mental health support</p>
+                                    <p class="mb-1"><strong>Address:</strong> 1090 Kaighns Avenue, Camden, NJ 08103</p>
+                                    <p class="mb-1"><strong>Phone:</strong> (856) 964-3300</p>
+                                    <p class="mb-0"><strong>Services:</strong> Crisis hotline, counseling, peer support</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="resource-item p-3 border rounded">
+                                    <h5 class="text-warning">Family Service of Camden County</h5>
+                                    <p class="text-muted mb-2">Family counseling and mental health services</p>
+                                    <p class="mb-1"><strong>Address:</strong> 1301 Kaighns Avenue, Camden, NJ 08103</p>
+                                    <p class="mb-1"><strong>Phone:</strong> (856) 964-1990</p>
+                                    <p class="mb-0"><strong>Services:</strong> Individual therapy, family counseling, support groups</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Emergency Resources -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-phone me-2"></i>Emergency & Crisis Resources
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="text-center p-3">
+                                    <h5 class="text-danger">Emergency Services</h5>
+                                    <p class="display-6 fw-bold text-danger">911</p>
+                                    <p class="text-muted">Police, Fire, Medical Emergency</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center p-3">
+                                    <h5 class="text-danger">Crisis Hotline</h5>
+                                    <p class="display-6 fw-bold text-danger">988</p>
+                                    <p class="text-muted">Suicide & Crisis Lifeline</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center p-3">
+                                    <h5 class="text-danger">Domestic Violence</h5>
+                                    <p class="display-6 fw-bold text-danger">1-800-572-7233</p>
+                                    <p class="text-muted">National Domestic Violence Hotline</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Resource Request -->
+        <div class="row">
+            <div class="col-12 text-center">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h5 class="card-title">Need Additional Resources?</h5>
+                        <p class="text-muted mb-3">
+                            Can't find what you're looking for? Use MyResourcePal to access Camden's comprehensive resource database or contact us directly for assistance.
+                        </p>
+                        <div class="d-flex gap-2 justify-content-center flex-wrap">
+                            <a href="https://www.myresourcepal.org/" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+                                <i class="fas fa-external-link-alt me-2"></i>Visit MyResourcePal
+                            </a>
+                            <a href="#contact" class="btn btn-outline-primary">
+                                <i class="fas fa-envelope me-2"></i>Contact Us
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Form -->
+<section class="py-5" id="contact">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="card-title mb-0">
+                            <i class="fas fa-envelope me-2"></i>Contact Us
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" action="{{ url_for('resources') }}">
+                            {{ contact_form.hidden_tag() }}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    {{ contact_form.name.label(class="form-label") }}
+                                    {{ contact_form.name(class="form-control") }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ contact_form.email.label(class="form-label") }}
+                                    {{ contact_form.email(class="form-control") }}
+                                </div>
+                                <div class="col-12">
+                                    {{ contact_form.organization.label(class="form-label") }}
+                                    {{ contact_form.organization(class="form-control") }}
+                                </div>
+                                <div class="col-12">
+                                    {{ contact_form.message.label(class="form-label") }}
+                                    {{ contact_form.message(class="form-control", rows="5") }}
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" name="contact_submit" class="btn btn-success">
+                                        <i class="fas fa-paper-plane me-2"></i>Send Message
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Newsletter & Social Media -->
+<section class="py-5 bg-primary text-white">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <h3 class="mb-3">Stay Connected</h3>
+                <p class="mb-4">
+                    Subscribe to our newsletter for updates on health equity initiatives and new data insights.
+                </p>
+                <form method="POST" action="{{ url_for('resources') }}" class="d-flex">
+                    {{ newsletter_form.hidden_tag() }}
+                    <div class="flex-grow-1 me-2">
+                        {{ newsletter_form.email(class="form-control", placeholder="Enter your email") }}
+                    </div>
+                    <button type="submit" name="newsletter_submit" class="btn btn-light">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+            <div class="col-lg-6">
+                <h3 class="mb-3">Follow Us</h3>
+                <p class="mb-4">
+                    Connect with us on social media for the latest updates and community discussions.
+                </p>
+                <div class="social-links">
+                    <a href="#" class="btn btn-outline-light me-3">
+                        <i class="fab fa-twitter"></i> Twitter
+                    </a>
+                    <a href="#" class="btn btn-outline-light me-3">
+                        <i class="fab fa-facebook"></i> Facebook
+                    </a>
+                    <a href="#" class="btn btn-outline-light">
+                        <i class="fab fa-linkedin"></i> LinkedIn
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

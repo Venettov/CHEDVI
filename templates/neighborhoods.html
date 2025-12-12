@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Neighborhoods - Camden Health Equity Data Visualization Initiative{% endblock %}
+
+{% block content %}
+<!-- Header Section -->
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="display-5 fw-bold mb-3">Neighborhood Profiles</h1>
+                <p class="lead text-muted">
+                    Explore detailed health and demographic profiles for each Camden neighborhood
+                </p>
+                <p class="text-muted small">
+                    <i class="fas fa-chart-area me-2"></i>2022 Census and health outcome data
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Neighborhood Selection Section -->
+<section class="py-4">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="fas fa-map-marker-alt me-2"></i>Select a Camden Neighborhood
+                        </h5>
+                        <select class="form-select form-select-lg" id="neighborhood-selector">
+                            <option value="">Choose a neighborhood to view detailed profile...</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Neighborhood Details Section -->
+<section class="py-4 neighborhoods-page" id="neighborhood-details" style="display: none;">
+    <div class="container">
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h3 class="card-title mb-0" id="neighborhood-name">
+                            <i class="fas fa-home me-2"></i>Neighborhood Name
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <!-- Demographics -->
+                            <div class="col-md-6">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-users me-2"></i>Demographics
+                                </h5>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="stat-item mb-3">
+                                            <h6 class="text-muted">Population</h6>
+                                            <h4 class="text-primary" id="population-stat">-</h4>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat-item mb-3">
+                                            <h6 class="text-muted">Median Income</h6>
+                                            <h4 class="text-success" id="income-stat">-</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Health Metrics -->
+                            <div class="col-md-6">
+                                <h5 class="text-danger mb-3">
+                                    <i class="fas fa-heartbeat me-2"></i>Health Metrics
+                                </h5>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="stat-item mb-3">
+                                            <h6 class="text-muted">Diabetes Rate</h6>
+                                            <h4 class="text-danger" id="diabetes-stat">-</h4>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="stat-item mb-3">
+                                            <h6 class="text-muted">Poverty Rate</h6>
+                                            <h4 class="text-warning" id="poverty-stat">-</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Detailed Analysis -->
+                        <div class="mt-4">
+                            <h5 class="text-info mb-3">
+                                <i class="fas fa-chart-line me-2"></i>Health Equity Analysis
+                            </h5>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-muted">Equity Status</h6>
+                                            <h4 id="equity-status">-</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-muted">Camden Rank</h6>
+                                            <h4 id="health-rank">-</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h6 class="text-muted">Priority Level</h6>
+                                            <h4 id="priority-level">-</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Community Context -->
+                        <div class="mt-4">
+                            <h5 class="text-secondary mb-3">
+                                <i class="fas fa-users me-2"></i>Community Context
+                            </h5>
+                            <div id="community-context">
+                                <p class="text-muted">Select a neighborhood to view community context and health disparities.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recommendations Sidebar -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm sticky-top">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>Development Recommendations
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="recommendations-content">
+                            <p class="text-muted">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Select a neighborhood to view targeted development recommendations and solution strategies.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Action Items -->
+                <div class="card shadow-sm mt-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-tasks me-2"></i>Priority Actions
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="action-items">
+                            <p class="text-muted small">Priority actions will appear here when you select a neighborhood.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Strategic Resource -->
+                <div class="card shadow-sm mt-4 border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-star me-2"></i>Find Local Resources
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="text-primary mb-2">MyResourcePal</h6>
+                        <p class="text-muted small mb-3">
+                            Access Camden's comprehensive resource database to find services and support in your neighborhood.
+                        </p>
+                        <a href="https://www.myresourcepal.org/" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm">
+                            <i class="fas fa-external-link-alt me-1"></i>Visit Resource Hub
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="{{ url_for('static', filename='js/neighborhoods.js') }}"></script>
+{% endblock %}
