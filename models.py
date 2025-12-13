@@ -22,3 +22,41 @@ class Newsletter(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), nullable=False, unique=True)
     subscribed_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class NeighborhoodHealth(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    census_tract = db.Column(db.String(50))
+    
+    # Demographics
+    total_population = db.Column(db.Integer)
+    median_income = db.Column(db.Integer)
+    poverty_rate = db.Column(db.Float)
+    unemployment_rate = db.Column(db.Float)
+    
+    # Health Metrics
+    diabetes_rate = db.Column(db.Float)
+    obesity_rate = db.Column(db.Float)
+    asthma_rate = db.Column(db.Float)
+    mental_distress_rate = db.Column(db.Float)
+    high_blood_pressure = db.Column(db.Float)
+    
+    # Access Metrics
+    food_access_score = db.Column(db.Float)
+    lack_health_insurance = db.Column(db.Float)
+    
+    # Metadata
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def to_dict(self):
+        """Helper to convert the row to JSON for the graphs"""
+        return {
+            'name': self.name,
+            'income': self.median_income,
+            'poverty': self.poverty_rate,
+            'diabetes': self.diabetes_rate,
+            'obesity': self.obesity_rate,
+            'asthma': self.asthma_rate,
+            'mental_distress': self.mental_distress_rate,
+            'population': self.total_population
+        }
