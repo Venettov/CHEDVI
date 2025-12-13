@@ -1,6 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from app import app, db
-from models import Contact, ResourceRequest, Newsletter
+# ADDED NeighborhoodHealth to the imports below
+from models import Contact, ResourceRequest, Newsletter, NeighborhoodHealth
 from forms import ContactForm, ResourceRequestForm, NewsletterForm
 
 @app.route('/')
@@ -13,7 +14,54 @@ def about():
 
 @app.route('/dashboard')
 def dashboard():
-    return render_template('dashboard.html')
+    # 1. Fetch all neighborhood data from the database
+    all_neighborhoods = NeighborhoodHealth.query.all()
+    
+    # Safety check: If database is empty, return placeholder data to prevent crash
+    if not all_neighborhoods:
+        return render_template('dashboard.html', 
+                               total_population="0",
+                               neighborhood_count=0,
+                               min_diabetes=0, max_diabetes=0, diabetes_gap=0,
+                               min_income=0, max_income=0, income_ratio=0,
+                               min_poverty=0, max_poverty=0, poverty_gap=0)
+
+    # 2. Calculate "Total Population"
+    total_population = sum(n.total_population for n in all_neighborhoods)
+    
+    # 3. Calculate "Diabetes Range"
+    diabetes_rates = [n.diabetes_rate for n in all_neighborhoods]
+    min_diabetes = min(diabetes_rates)
+    max_diabetes = max(diabetes_rates)
+    diabetes_gap = round(max_diabetes - min_diabetes, 1)
+
+    # 4. Calculate "Income Range"
+    incomes = [n.median_income for n in all_neighborhoods]
+    min_income = min(incomes)
+    max_income = max(incomes)
+    # Calculate inequality ratio (Max divided by Min)
+    income_ratio = round(max_income / min_income, 1) if min_income > 0 else 0
+
+    # 5. Calculate "Poverty Range"
+    poverty_rates = [n.poverty_rate for n in all_neighborhoods]
+    min_poverty = min(poverty_rates)
+    max_poverty = max(poverty_rates)
+    poverty_gap = round(max_poverty - min_poverty, 1)
+
+    # 6. Pass variables to the template
+    # We format numbers here (e.g. 12000 -> 12k) to make HTML cleaner
+    return render_template('dashboard.html', 
+                           total_population=f"{total_population:,}", 
+                           neighborhood_count=len(all_neighborhoods),
+                           min_diabetes=min_diabetes,
+                           max_diabetes=max_diabetes,
+                           diabetes_gap=diabetes_gap,
+                           min_income=f"{min_income/1000:.0f}k", 
+                           max_income=f"{max_income/1000:.0f}k",
+                           income_ratio=income_ratio,
+                           min_poverty=min_poverty,
+                           max_poverty=max_poverty,
+                           poverty_gap=poverty_gap)
 
 @app.route('/neighborhoods')
 def neighborhoods():

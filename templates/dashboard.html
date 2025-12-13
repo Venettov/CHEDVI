@@ -3,14 +3,13 @@
 {% block title %}Dashboard - Camden Health Equity Data Visualization Initiative{% endblock %}
 
 {% block content %}
-<!-- Dashboard Header -->
 <section class="py-4 bg-light">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-8">
                 <h1 class="display-5 fw-bold mb-2">Interactive Health Equity Dashboard</h1>
                 <p class="lead text-muted">
-                    Explore and compare health disparities across Camden's 19 neighborhoods using real census data
+                    Explore and compare health disparities across Camden's {{ neighborhood_count }} neighborhoods using real census data
                 </p>
                 <p class="text-muted small">
                     <i class="fas fa-info-circle me-2"></i>Based on 2022 US Census Bureau and CDC PLACES data
@@ -48,7 +47,6 @@
     </div>
 </section>
 
-<!-- Key Health Metrics Overview -->
 <section class="py-4 bg-white border-bottom">
     <div class="container">
         <div class="row g-3">
@@ -58,8 +56,8 @@
                         <i class="fas fa-heartbeat text-primary"></i>
                     </div>
                     <h6 class="text-muted mb-1">Diabetes Rate Range</h6>
-                    <h4 class="text-primary mb-0">13.4% - 23.1%</h4>
-                    <small class="text-muted">9.7% disparity gap</small>
+                    <h4 class="text-primary mb-0">{{ min_diabetes }}% - {{ max_diabetes }}%</h4>
+                    <small class="text-muted">{{ diabetes_gap }}% disparity gap</small>
                 </div>
             </div>
             <div class="col-md-3">
@@ -68,8 +66,8 @@
                         <i class="fas fa-dollar-sign text-primary"></i>
                     </div>
                     <h6 class="text-muted mb-1">Income Range</h6>
-                    <h4 class="text-primary mb-0">$12k - $59k</h4>
-                    <small class="text-muted">4.9x inequality ratio</small>
+                    <h4 class="text-primary mb-0">${{ min_income }} - ${{ max_income }}</h4>
+                    <small class="text-muted">{{ income_ratio }}x inequality ratio</small>
                 </div>
             </div>
             <div class="col-md-3">
@@ -78,8 +76,8 @@
                         <i class="fas fa-percentage text-primary"></i>
                     </div>
                     <h6 class="text-muted mb-1">Poverty Rate Range</h6>
-                    <h4 class="text-primary mb-0">11.9% - 54.4%</h4>
-                    <small class="text-muted">42.5% disparity gap</small>
+                    <h4 class="text-primary mb-0">{{ min_poverty }}% - {{ max_poverty }}%</h4>
+                    <small class="text-muted">{{ poverty_gap }}% disparity gap</small>
                 </div>
             </div>
             <div class="col-md-3">
@@ -88,24 +86,21 @@
                         <i class="fas fa-users text-primary"></i>
                     </div>
                     <h6 class="text-muted mb-1">Total Population</h6>
-                    <h4 class="text-primary mb-0">69,587</h4>
-                    <small class="text-muted">19 neighborhoods</small>
+                    <h4 class="text-primary mb-0">{{ total_population }}</h4>
+                    <small class="text-muted">{{ neighborhood_count }} neighborhoods</small>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Dashboard Content -->
 <section class="py-4">
     <div class="container-fluid">
-        <!-- Dual Map Section for Disparity Analysis -->
         <div class="row mb-4">
             <div class="col-12 text-center">
                 <h2 class="display-6 fw-bold mb-3">Health Disparity Comparison</h2>
                 <p class="lead text-muted">Compare different health metrics across Camden neighborhoods to visualize disparities</p>
                 
-                <!-- Comparison Tools -->
                 <div class="comparison-tools mb-3">
                     <div class="btn-group" role="group" aria-label="Comparison tools">
                         <button type="button" class="btn btn-outline-primary" id="addToComparison" disabled>
@@ -120,7 +115,6 @@
                     </div>
                 </div>
                 
-                <!-- User Onboarding Tour -->
                 <div class="user-onboarding" id="onboardingTour" style="display: none;">
                     <div class="alert alert-info alert-dismissible fade show" role="alert">
                         <strong>Welcome to Camden Health Equity Dashboard!</strong> 
@@ -133,7 +127,6 @@
         </div>
         
         <div class="row g-3">
-            <!-- Left Map - Health Outcomes -->
             <div class="col-lg-6">
                 <div class="card h-100">
                     <div class="card-header bg-danger text-white">
@@ -167,7 +160,6 @@
                 </div>
             </div>
             
-            <!-- Right Map - Social Determinants -->
             <div class="col-lg-6">
                 <div class="card h-100">
                     <div class="card-header bg-success text-white">
@@ -202,7 +194,6 @@
             </div>
         </div>
         
-        <!-- Overlay Controls and Disparity Analysis -->
         <div class="row mt-4">
             <div class="col-12">
                 <div class="card border-warning">
@@ -254,7 +245,6 @@
             </div>
         </div>
         
-        <!-- Visualization Charts -->
         <div class="row">
             <div class="col-lg-6 mb-4">
                 <div class="card">
@@ -313,7 +303,6 @@
     </div>
 </section>
 
-<!-- Data Interpretation Section -->
 <section class="py-5 bg-white">
     <div class="container">
         <div class="row">
@@ -398,7 +387,7 @@
                         <i class="fas fa-database me-3"></i>
                         <div>
                             <strong>Data Source:</strong> Real census tract data from 19 Camden neighborhoods, 
-                            providing authentic insights into health disparities and social determinants affecting 69,587 residents.
+                            providing authentic insights into health disparities and social determinants affecting {{ total_population }} residents.
                         </div>
                     </div>
                 </div>
@@ -407,7 +396,6 @@
     </div>
 </section>
 
-<!-- Neighborhood Details Modal -->
 <div class="modal fade" id="neighborhoodModal" tabindex="-1" aria-labelledby="neighborhoodModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
