@@ -3,8 +3,6 @@ from app import app, db
 from models import Contact, ResourceRequest, Newsletter
 from forms import ContactForm, ResourceRequestForm, NewsletterForm
 
-# FORCE UPDATE: Debugging Session 1
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -39,13 +37,12 @@ def resources():
     resource_form = ResourceRequestForm()
     newsletter_form = NewsletterForm()
     
-    # NUCLEAR DEBUG: Print everything happening on this page
     if request.method == 'POST':
         print(f"🚀 POST RECEIVED! Form Data Keys: {list(request.form.keys())}")
         
-        # Check Contact Form
-        if 'contact_submit' in request.form:
-            print("👀 Checking Contact Form...")
+        # SMART CHECK 1: It is the CONTACT FORM if it has an 'organization' field
+        if 'contact_submit' in request.form or 'organization' in request.form:
+            print("👀 Detected Contact Form Data")
             if contact_form.validate_on_submit():
                 print("✅ Contact Form Valid! Saving...")
                 contact = Contact(
@@ -61,8 +58,9 @@ def resources():
             else:
                 print(f"❌ CONTACT FORM FAILED ERRORS: {contact_form.errors}")
         
-        # Check Resource Form
-        elif 'resource_submit' in request.form:
+        # SMART CHECK 2: It is the RESOURCE FORM if it has a 'zip_code' field
+        elif 'resource_submit' in request.form or 'zip_code' in request.form:
+            print("👀 Detected Resource Form Data")
             if resource_form.validate_on_submit():
                 resource_request = ResourceRequest(
                     name=resource_form.name.data,
@@ -78,7 +76,7 @@ def resources():
             else:
                 print(f"❌ RESOURCE FORM FAILED: {resource_form.errors}")
         
-        # Check Newsletter
+        # SMART CHECK 3: Newsletter (Fallback)
         elif 'newsletter_submit' in request.form:
             if newsletter_form.validate_on_submit():
                 existing_subscriber = Newsletter.query.filter_by(email=newsletter_form.email.data).first()
@@ -94,7 +92,7 @@ def resources():
                 print(f"❌ NEWSLETTER FAILED: {newsletter_form.errors}")
         
         else:
-            print("⚠️ POST received but NO known button was clicked (Enter key issue?)")
+            print("⚠️ Still could not identify form type.")
 
     return render_template('resources.html', 
                          contact_form=contact_form,
