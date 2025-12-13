@@ -3,7 +3,6 @@
 {% block title %}Neighborhoods - Camden Health Equity Data Visualization Initiative{% endblock %}
 
 {% block content %}
-<!-- Header Section -->
 <section class="py-4 bg-light">
     <div class="container">
         <div class="row">
@@ -20,7 +19,6 @@
     </div>
 </section>
 
-<!-- Neighborhood Selection Section -->
 <section class="py-4">
     <div class="container">
         <div class="row mb-4">
@@ -32,6 +30,9 @@
                         </h5>
                         <select class="form-select form-select-lg" id="neighborhood-selector">
                             <option value="">Choose a neighborhood to view detailed profile...</option>
+                            {% for n in neighborhood_data %}
+                            <option value="{{ loop.index0 }}">{{ n.name }}</option>
+                            {% endfor %}
                         </select>
                     </div>
                 </div>
@@ -40,11 +41,9 @@
     </div>
 </section>
 
-<!-- Neighborhood Details Section -->
 <section class="py-4 neighborhoods-page" id="neighborhood-details" style="display: none;">
     <div class="container">
         <div class="row">
-            <!-- Main Content -->
             <div class="col-lg-8">
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-primary text-white">
@@ -54,7 +53,6 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-4">
-                            <!-- Demographics -->
                             <div class="col-md-6">
                                 <h5 class="text-primary mb-3">
                                     <i class="fas fa-users me-2"></i>Demographics
@@ -75,7 +73,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Health Metrics -->
                             <div class="col-md-6">
                                 <h5 class="text-danger mb-3">
                                     <i class="fas fa-heartbeat me-2"></i>Health Metrics
@@ -97,7 +94,6 @@
                             </div>
                         </div>
                         
-                        <!-- Detailed Analysis -->
                         <div class="mt-4">
                             <h5 class="text-info mb-3">
                                 <i class="fas fa-chart-line me-2"></i>Health Equity Analysis
@@ -114,7 +110,7 @@
                                 <div class="col-md-4">
                                     <div class="card bg-light">
                                         <div class="card-body text-center">
-                                            <h6 class="text-muted">Camden Rank</h6>
+                                            <h6 class="text-muted">Rank by Income</h6>
                                             <h4 id="health-rank">-</h4>
                                         </div>
                                     </div>
@@ -130,20 +126,18 @@
                             </div>
                         </div>
                         
-                        <!-- Community Context -->
                         <div class="mt-4">
                             <h5 class="text-secondary mb-3">
                                 <i class="fas fa-users me-2"></i>Community Context
                             </h5>
                             <div id="community-context">
-                                <p class="text-muted">Select a neighborhood to view community context and health disparities.</p>
+                                <p class="text-muted" id="context-text">Select a neighborhood to view community context and health disparities.</p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Recommendations Sidebar -->
             <div class="col-lg-4">
                 <div class="card shadow-sm sticky-top">
                     <div class="card-header bg-success text-white">
@@ -153,15 +147,14 @@
                     </div>
                     <div class="card-body">
                         <div id="recommendations-content">
-                            <p class="text-muted">
+                            <p class="text-muted" id="recommendation-text">
                                 <i class="fas fa-info-circle me-2"></i>
-                                Select a neighborhood to view targeted development recommendations and solution strategies.
+                                Select a neighborhood to view targeted development recommendations.
                             </p>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Action Items -->
                 <div class="card shadow-sm mt-4">
                     <div class="card-header bg-warning text-dark">
                         <h6 class="card-title mb-0">
@@ -170,12 +163,13 @@
                     </div>
                     <div class="card-body">
                         <div id="action-items">
-                            <p class="text-muted small">Priority actions will appear here when you select a neighborhood.</p>
+                            <ul class="list-unstyled" id="actions-list">
+                                <li class="text-muted small">Priority actions will appear here when you select a neighborhood.</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
                 
-                <!-- Strategic Resource -->
                 <div class="card shadow-sm mt-4 border-primary">
                     <div class="card-header bg-primary text-white">
                         <h6 class="card-title mb-0">
@@ -197,5 +191,67 @@
     </div>
 </section>
 
-<script src="{{ url_for('static', filename='js/neighborhoods.js') }}"></script>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // DYNAMIC DATA FROM SERVER
+    const allNeighborhoods = {{ neighborhood_data | tojson | safe }};
+
+    document.getElementById('neighborhood-selector').addEventListener('change', function() {
+        const index = this.value;
+        const detailsSection = document.getElementById('neighborhood-details');
+        
+        if (index === "") {
+            detailsSection.style.display = 'none';
+            return;
+        }
+
+        // Get selected neighborhood data
+        const n = allNeighborhoods[index];
+        detailsSection.style.display = 'block';
+
+        // Update basic fields
+        document.getElementById('neighborhood-name').innerHTML = `<i class="fas fa-home me-2"></i>${n.name}`;
+        document.getElementById('population-stat').innerText = n.population.toLocaleString();
+        document.getElementById('income-stat').innerText = "$" + n.income.toLocaleString();
+        document.getElementById('diabetes-stat').innerText = n.diabetes + "%";
+        document.getElementById('poverty-stat').innerText = n.poverty + "%";
+        
+        // Update Status
+        const statusEl = document.getElementById('equity-status');
+        statusEl.innerText = n.equity_status;
+        statusEl.className = n.equity_status === 'High Priority' ? 'text-danger' : 'text-success';
+
+        // Dynamic Priority Logic
+        let priority = "Medium";
+        if (n.poverty > 30) priority = "High";
+        if (n.poverty < 15) priority = "Low";
+        document.getElementById('priority-level').innerText = priority;
+        document.getElementById('health-rank').innerText = "#" + (parseInt(index) + 1); // Simple index based rank for now
+
+        // Generate Context Text based on data
+        let contextHTML = "";
+        if (n.diabetes > 18) {
+            contextHTML += `<p><strong class="text-danger">Health Alert:</strong> This neighborhood has a diabetes rate (${n.diabetes}%) significantly higher than the national average.</p>`;
+        } else {
+            contextHTML += `<p><strong class="text-success">Health Status:</strong> Diabetes rates are relatively controlled compared to city averages.</p>`;
+        }
+        if (n.income < 25000) {
+            contextHTML += `<p><strong class="text-warning">Economic Alert:</strong> Median income is critically low, suggesting high financial stress.</p>`;
+        }
+        document.getElementById('context-text').innerHTML = contextHTML;
+
+        // Generate Recommendations
+        let recsHTML = "<ul class='list-unstyled'>";
+        if (n.poverty > 30) {
+            recsHTML += "<li class='mb-2'><i class='fas fa-check text-success me-2'></i>Expand food pantry access</li>";
+            recsHTML += "<li class='mb-2'><i class='fas fa-check text-success me-2'></i>Implement subsidized preventative care clinics</li>";
+        } else {
+            recsHTML += "<li class='mb-2'><i class='fas fa-check text-success me-2'></i>Support community wellness programs</li>";
+        }
+        recsHTML += "</ul>";
+        document.getElementById('recommendation-text').innerHTML = recsHTML;
+    });
+</script>
 {% endblock %}

@@ -54,67 +54,83 @@ def dashboard():
 
 @app.route('/insights')
 def insights():
-    # 1. Fetch data
     all_n = NeighborhoodHealth.query.all()
-    
-    # Safety Check
     if not all_n:
         return render_template('insights.html', total_population="0")
 
-    # 2. Calculate "At a Glance" Statistics
     total_population = sum(n.total_population for n in all_n)
     
-    # Diabetes Stats
     diabetes_rates = [n.diabetes_rate for n in all_n]
     avg_diabetes = sum(diabetes_rates) / len(diabetes_rates)
     min_diabetes = min(diabetes_rates)
     max_diabetes = max(diabetes_rates)
 
-    # Income Stats
     incomes = [n.median_income for n in all_n]
     avg_income = sum(incomes) / len(incomes)
     min_income = min(incomes)
     max_income = max(incomes)
 
-    # Poverty Stats
     poverty_rates = [n.poverty_rate for n in all_n]
     avg_poverty = sum(poverty_rates) / len(poverty_rates)
     min_poverty = min(poverty_rates)
     max_poverty = max(poverty_rates)
 
-    # 3. Identify Specific Neighborhoods for "Stories"
-    # Find neighborhood with Highest Income
     highest_income_n = max(all_n, key=lambda x: x.median_income)
-    
-    # Find neighborhood with Highest Poverty
     highest_poverty_n = max(all_n, key=lambda x: x.poverty_rate)
 
     return render_template('insights.html',
                            total_population=f"{total_population:,}",
                            neighborhood_count=len(all_n),
-                           # Diabetes
                            avg_diabetes=f"{avg_diabetes:.1f}",
                            min_diabetes=min_diabetes,
                            max_diabetes=max_diabetes,
-                           # Income
                            avg_income=f"{avg_income:,.0f}",
                            min_income=f"{min_income:,.0f}",
                            max_income=f"{max_income:,.0f}",
-                           # Poverty
                            avg_poverty=f"{avg_poverty:.1f}",
                            min_poverty=min_poverty,
                            max_poverty=max_poverty,
-                           # Dynamic Stories
                            highest_income_n=highest_income_n,
                            highest_poverty_n=highest_poverty_n)
 
 @app.route('/neighborhoods')
 def neighborhoods():
-    return render_template('neighborhoods.html')
+    # Fetch all data
+    all_n = NeighborhoodHealth.query.all()
+    
+    # Serialize data for the JS frontend
+    neighborhood_data = []
+    for n in all_n:
+        neighborhood_data.append({
+            'id': n.id,
+            'name': n.name,
+            'population': n.total_population,
+            'income': n.median_income,
+            'poverty': n.poverty_rate,
+            'diabetes': n.diabetes_rate,
+            # We calculate simple equity status based on income for now
+            'equity_status': 'High Priority' if n.median_income < 30000 else 'Stable' if n.median_income > 50000 else 'Vulnerable'
+        })
+    
+    return render_template('neighborhoods.html', neighborhood_data=neighborhood_data)
 
 @app.route('/rankings')
 def rankings():
-    return render_template('rankings.html')
+    # Fetch all data
+    all_n = NeighborhoodHealth.query.all()
+    
+    # Serialize data for the JS frontend
+    rankings_data = []
+    for n in all_n:
+        rankings_data.append({
+            'name': n.name,
+            'population': n.total_population,
+            'income': n.median_income,
+            'poverty': n.poverty_rate,
+            'diabetes': n.diabetes_rate
+        })
+        
+    return render_template('rankings.html', rankings_data=rankings_data)
 
 @app.route('/policy')
 def policy():
