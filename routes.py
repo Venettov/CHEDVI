@@ -38,13 +38,9 @@ def resources():
     newsletter_form = NewsletterForm()
     
     if request.method == 'POST':
-        print(f"🚀 POST RECEIVED! Form Data Keys: {list(request.form.keys())}")
-        
-        # SMART CHECK 1: It is the CONTACT FORM if it has an 'organization' field
+        # Smart detection: Check if it's the Contact Form (has 'organization' field)
         if 'contact_submit' in request.form or 'organization' in request.form:
-            print("👀 Detected Contact Form Data")
             if contact_form.validate_on_submit():
-                print("✅ Contact Form Valid! Saving...")
                 contact = Contact(
                     name=contact_form.name.data,
                     email=contact_form.email.data,
@@ -56,11 +52,11 @@ def resources():
                 flash('Your message has been sent successfully!', 'success')
                 return redirect(url_for('resources'))
             else:
-                print(f"❌ CONTACT FORM FAILED ERRORS: {contact_form.errors}")
+                # Log errors silently to server logs just in case
+                print(f"Contact Form Error: {contact_form.errors}")
         
-        # SMART CHECK 2: It is the RESOURCE FORM if it has a 'zip_code' field
+        # Smart detection: Check if it's the Resource Request Form (has 'zip_code' field)
         elif 'resource_submit' in request.form or 'zip_code' in request.form:
-            print("👀 Detected Resource Form Data")
             if resource_form.validate_on_submit():
                 resource_request = ResourceRequest(
                     name=resource_form.name.data,
@@ -74,9 +70,9 @@ def resources():
                 flash('Your resource request has been submitted successfully!', 'success')
                 return redirect(url_for('resources'))
             else:
-                print(f"❌ RESOURCE FORM FAILED: {resource_form.errors}")
+                print(f"Resource Form Error: {resource_form.errors}")
         
-        # SMART CHECK 3: Newsletter (Fallback)
+        # Smart detection: Newsletter Subscription
         elif 'newsletter_submit' in request.form:
             if newsletter_form.validate_on_submit():
                 existing_subscriber = Newsletter.query.filter_by(email=newsletter_form.email.data).first()
@@ -88,12 +84,7 @@ def resources():
                 else:
                     flash('You are already subscribed to our newsletter.', 'info')
                 return redirect(url_for('resources'))
-            else:
-                print(f"❌ NEWSLETTER FAILED: {newsletter_form.errors}")
-        
-        else:
-            print("⚠️ Still could not identify form type.")
-
+    
     return render_template('resources.html', 
                          contact_form=contact_form,
                          resource_form=resource_form,
@@ -101,11 +92,19 @@ def resources():
 
 @app.route('/api/neighborhoods')
 def api_neighborhoods():
-    return jsonify({'error': 'No data', 'message': 'Placeholder'})
+    """API endpoint for neighborhood data (placeholder)"""
+    return jsonify({
+        'error': 'No data available yet',
+        'message': 'This endpoint will be populated with real neighborhood data'
+    })
 
 @app.route('/api/health-metrics')
 def api_health_metrics():
-    return jsonify({'error': 'No data', 'message': 'Placeholder'})
+    """API endpoint for health metrics data (placeholder)"""
+    return jsonify({
+        'error': 'No data available yet',
+        'message': 'This endpoint will be populated with real health metrics data'
+    })
 
 @app.errorhandler(404)
 def not_found_error(error):
