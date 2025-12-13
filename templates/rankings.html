@@ -16,14 +16,11 @@
             <div class="col-md-8">
                 <h1 class="display-5 fw-bold mb-2">Comprehensive Health Rankings</h1>
                 <p class="lead text-muted">
-                    Compare Camden's 19 neighborhoods across extensive health outcomes, healthcare access, and social determinants
-                </p>
-                <p class="text-muted small">
-                    <i class="fas fa-database me-2"></i>Data from 2022 US Census Bureau and CDC PLACES
+                    Compare Camden's neighborhoods across health outcomes, healthcare access, and social determinants.
                 </p>
                 <div class="row text-center mt-3">
                     <div class="col-3">
-                        <div class="small fw-bold text-primary">19</div>
+                        <div class="small fw-bold text-primary">{{ rankings_data|length }}</div>
                         <div class="small text-muted">Neighborhoods</div>
                     </div>
                     <div class="col-3">
@@ -42,8 +39,11 @@
             </div>
             <div class="col-md-4">
                 <div class="d-flex flex-column gap-2">
-                    <button class="btn btn-outline-primary" onclick="alert('Export feature coming soon!')">
+                    <button class="btn btn-outline-primary" onclick="exportToCSV()">
                         <i class="fas fa-download me-2"></i>Export Data
+                    </button>
+                    <button class="btn btn-outline-secondary">
+                        <i class="fas fa-universal-access me-2"></i>Accessibility
                     </button>
                 </div>
             </div>
@@ -78,10 +78,12 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-bold"><i class="fas fa-filter me-2"></i>Status</label>
-                <div class="alert alert-light border py-2 text-center mb-0">
-                    <small class="text-success fw-bold">● Live Data Active</small>
-                </div>
+                <label class="form-label fw-bold"><i class="fas fa-filter me-2"></i>Category Filter</label>
+                <select class="form-select form-select-lg" id="categoryFilter" disabled>
+                    <option value="all">All Categories</option>
+                    <option value="Health Outcomes">Health Outcomes</option>
+                    <option value="Economic Factors">Economic Factors</option>
+                </select>
             </div>
         </div>
     </div>
@@ -136,6 +138,11 @@
                             <i class="fas fa-trophy me-2"></i>Camden Neighborhood Rankings
                         </h5>
                     </div>
+                    <div class="col-auto">
+                        <button class="btn btn-sm btn-outline-light" onclick="exportToCSV()">
+                            <i class="fas fa-file-csv me-1"></i> Download CSV
+                        </button>
+                    </div>
                 </div>
             </div>
             <div class="card-body p-0">
@@ -152,6 +159,16 @@
                         <tbody id="rankingsBody">
                             </tbody>
                     </table>
+                </div>
+            </div>
+            <div class="card-footer bg-light">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Data sources: US Census Bureau, CDC PLACES
+                        </small>
+                    </div>
                 </div>
             </div>
         </div>
@@ -184,13 +201,14 @@
                     </div>
                     <div class="card-body">
                         <div id="rankingDetails">
-                            <div class="alert alert-info">
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-chart-line fa-2x mb-3"></i>
+                                <p>Select a ranking metric to view details</p>
+                            </div>
+                            <div class="alert alert-info mt-3">
                                 <h6 class="alert-heading fw-bold">Understanding the Data</h6>
                                 <p class="mb-0 small">This chart visualizes the disparities between neighborhoods for the selected metric. A wider range indicates higher inequality.</p>
                             </div>
-                            <hr>
-                            <div id="selectedMetricStats">
-                                </div>
                         </div>
                     </div>
                 </div>
@@ -214,17 +232,19 @@
                             <div class="col-md-6">
                                 <h6>Data Sources</h6>
                                 <ul class="list-unstyled">
-                                    <li><i class="fas fa-check text-success me-2"></i>US Census Bureau (2022)</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>US Census Bureau</li>
                                     <li><i class="fas fa-check text-success me-2"></i>NJ Department of Health</li>
-                                    <li><i class="fas fa-check text-success me-2"></i>CDC PLACES Data</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>Camden County Health Department</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>EPA Environmental Data</li>
                                 </ul>
                             </div>
                             <div class="col-md-6">
                                 <h6>Ranking Criteria</h6>
                                 <ul class="list-unstyled">
                                     <li><i class="fas fa-info text-primary me-2"></i>Population-weighted averages</li>
-                                    <li><i class="fas fa-info text-primary me-2"></i>Real-time database queries</li>
-                                    <li><i class="fas fa-info text-primary me-2"></i>Dynamic sorting and filtering</li>
+                                    <li><i class="fas fa-info text-primary me-2"></i>Age-adjusted health outcomes</li>
+                                    <li><i class="fas fa-info text-primary me-2"></i>Composite index scoring</li>
+                                    <li><i class="fas fa-info text-primary me-2"></i>Statistical significance testing</li>
                                 </ul>
                             </div>
                         </div>
@@ -235,10 +255,10 @@
     </div>
 </section>
 
-<div class="container pb-5">
-    <div class="alert alert-success" role="alert">
-        <i class="fas fa-check-circle me-2"></i>
-        <strong>Live Data:</strong> These rankings are generated in real-time from your <code>neighborhood_data.csv</code> database on Render.
+<div class="container mt-4 mb-5">
+    <div class="alert alert-info" role="alert">
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Data Status:</strong> Rankings are currently being calculated based on available data sources. This section will display comprehensive neighborhood rankings once all data integration is complete.
     </div>
 </div>
 {% endblock %}
@@ -288,7 +308,6 @@
             let badgeClass = 'bg-secondary';
             let badgeText = 'Neutral';
             
-            // Logic for "Good" vs "Bad" depends on metric
             if (metric === 'income') {
                 if (rawValue > 50000) { badgeClass = 'bg-success'; badgeText = 'High'; }
                 else if (rawValue < 25000) { badgeClass = 'bg-danger'; badgeText = 'Critical'; }
@@ -318,7 +337,6 @@
     function renderChart(metric, label) {
         const ctx = document.getElementById('rankingsChart').getContext('2d');
         
-        // Take top 10 from current sorted data
         const top10 = rankingsData.slice(0, 10);
         const labels = top10.map(d => d.name);
         const data = top10.map(d => d[metric]);
@@ -349,7 +367,36 @@
         });
     }
 
-    // 4. EVENT LISTENERS
+    // 4. NEW EXPORT FUNCTION
+    function exportToCSV() {
+        if (!rankingsData || rankingsData.length === 0) {
+            alert("No data to export");
+            return;
+        }
+
+        // Create CSV Headers
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Neighborhood,Population,Median Income,Diabetes Rate,Poverty Rate\n";
+
+        // Add Rows
+        rankingsData.forEach(function(row) {
+            let rowString = `"${row.name}",${row.population},${row.income},${row.diabetes},${row.poverty}`;
+            csvContent += rowString + "\n";
+        });
+
+        // Encode and Create Download Link
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "Camden_Health_Rankings.csv");
+        document.body.appendChild(link);
+        
+        // Trigger Download
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // 5. EVENT LISTENERS
     document.getElementById('metricSelector').addEventListener('change', renderPage);
     document.getElementById('sortOrder').addEventListener('change', renderPage);
 
