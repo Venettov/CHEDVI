@@ -1,6 +1,5 @@
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from app import app, db
-# ADDED NeighborhoodHealth to the imports below
 from models import Contact, ResourceRequest, Newsletter, NeighborhoodHealth
 from forms import ContactForm, ResourceRequestForm, NewsletterForm
 
@@ -14,42 +13,32 @@ def about():
 
 @app.route('/dashboard')
 def dashboard():
-    # 1. Fetch all neighborhood data from the database
     all_neighborhoods = NeighborhoodHealth.query.all()
     
-    # Safety check: If database is empty, return placeholder data to prevent crash
     if not all_neighborhoods:
         return render_template('dashboard.html', 
-                               total_population="0",
-                               neighborhood_count=0,
+                               total_population="0", neighborhood_count=0,
                                min_diabetes=0, max_diabetes=0, diabetes_gap=0,
                                min_income=0, max_income=0, income_ratio=0,
                                min_poverty=0, max_poverty=0, poverty_gap=0)
 
-    # 2. Calculate "Total Population"
     total_population = sum(n.total_population for n in all_neighborhoods)
     
-    # 3. Calculate "Diabetes Range"
     diabetes_rates = [n.diabetes_rate for n in all_neighborhoods]
     min_diabetes = min(diabetes_rates)
     max_diabetes = max(diabetes_rates)
     diabetes_gap = round(max_diabetes - min_diabetes, 1)
 
-    # 4. Calculate "Income Range"
     incomes = [n.median_income for n in all_neighborhoods]
     min_income = min(incomes)
     max_income = max(incomes)
-    # Calculate inequality ratio (Max divided by Min)
     income_ratio = round(max_income / min_income, 1) if min_income > 0 else 0
 
-    # 5. Calculate "Poverty Range"
     poverty_rates = [n.poverty_rate for n in all_neighborhoods]
     min_poverty = min(poverty_rates)
     max_poverty = max(poverty_rates)
     poverty_gap = round(max_poverty - min_poverty, 1)
 
-    # 6. Pass variables to the template
-    # We format numbers here (e.g. 12000 -> 12k) to make HTML cleaner
     return render_template('dashboard.html', 
                            total_population=f"{total_population:,}", 
                            neighborhood_count=len(all_neighborhoods),
@@ -63,6 +52,62 @@ def dashboard():
                            max_poverty=max_poverty,
                            poverty_gap=poverty_gap)
 
+@app.route('/insights')
+def insights():
+    # 1. Fetch data
+    all_n = NeighborhoodHealth.query.all()
+    
+    # Safety Check
+    if not all_n:
+        return render_template('insights.html', total_population="0")
+
+    # 2. Calculate "At a Glance" Statistics
+    total_population = sum(n.total_population for n in all_n)
+    
+    # Diabetes Stats
+    diabetes_rates = [n.diabetes_rate for n in all_n]
+    avg_diabetes = sum(diabetes_rates) / len(diabetes_rates)
+    min_diabetes = min(diabetes_rates)
+    max_diabetes = max(diabetes_rates)
+
+    # Income Stats
+    incomes = [n.median_income for n in all_n]
+    avg_income = sum(incomes) / len(incomes)
+    min_income = min(incomes)
+    max_income = max(incomes)
+
+    # Poverty Stats
+    poverty_rates = [n.poverty_rate for n in all_n]
+    avg_poverty = sum(poverty_rates) / len(poverty_rates)
+    min_poverty = min(poverty_rates)
+    max_poverty = max(poverty_rates)
+
+    # 3. Identify Specific Neighborhoods for "Stories"
+    # Find neighborhood with Highest Income
+    highest_income_n = max(all_n, key=lambda x: x.median_income)
+    
+    # Find neighborhood with Highest Poverty
+    highest_poverty_n = max(all_n, key=lambda x: x.poverty_rate)
+
+    return render_template('insights.html',
+                           total_population=f"{total_population:,}",
+                           neighborhood_count=len(all_n),
+                           # Diabetes
+                           avg_diabetes=f"{avg_diabetes:.1f}",
+                           min_diabetes=min_diabetes,
+                           max_diabetes=max_diabetes,
+                           # Income
+                           avg_income=f"{avg_income:,.0f}",
+                           min_income=f"{min_income:,.0f}",
+                           max_income=f"{max_income:,.0f}",
+                           # Poverty
+                           avg_poverty=f"{avg_poverty:.1f}",
+                           min_poverty=min_poverty,
+                           max_poverty=max_poverty,
+                           # Dynamic Stories
+                           highest_income_n=highest_income_n,
+                           highest_poverty_n=highest_poverty_n)
+
 @app.route('/neighborhoods')
 def neighborhoods():
     return render_template('neighborhoods.html')
@@ -75,10 +120,6 @@ def rankings():
 def policy():
     return render_template('policy.html')
 
-@app.route('/insights')
-def insights():
-    return render_template('insights.html')
-
 @app.route('/resources', methods=['GET', 'POST'])
 def resources():
     contact_form = ContactForm()
@@ -86,7 +127,6 @@ def resources():
     newsletter_form = NewsletterForm()
     
     if request.method == 'POST':
-        # Smart detection: Check if it's the Contact Form (has 'organization' field)
         if 'contact_submit' in request.form or 'organization' in request.form:
             if contact_form.validate_on_submit():
                 contact = Contact(
@@ -99,11 +139,7 @@ def resources():
                 db.session.commit()
                 flash('Your message has been sent successfully!', 'success')
                 return redirect(url_for('resources'))
-            else:
-                # Log errors silently to server logs just in case
-                print(f"Contact Form Error: {contact_form.errors}")
         
-        # Smart detection: Check if it's the Resource Request Form (has 'zip_code' field)
         elif 'resource_submit' in request.form or 'zip_code' in request.form:
             if resource_form.validate_on_submit():
                 resource_request = ResourceRequest(
@@ -117,10 +153,7 @@ def resources():
                 db.session.commit()
                 flash('Your resource request has been submitted successfully!', 'success')
                 return redirect(url_for('resources'))
-            else:
-                print(f"Resource Form Error: {resource_form.errors}")
         
-        # Smart detection: Newsletter Subscription
         elif 'newsletter_submit' in request.form:
             if newsletter_form.validate_on_submit():
                 existing_subscriber = Newsletter.query.filter_by(email=newsletter_form.email.data).first()
@@ -140,19 +173,11 @@ def resources():
 
 @app.route('/api/neighborhoods')
 def api_neighborhoods():
-    """API endpoint for neighborhood data (placeholder)"""
-    return jsonify({
-        'error': 'No data available yet',
-        'message': 'This endpoint will be populated with real neighborhood data'
-    })
+    return jsonify({'error': 'No data available yet', 'message': 'Placeholder'})
 
 @app.route('/api/health-metrics')
 def api_health_metrics():
-    """API endpoint for health metrics data (placeholder)"""
-    return jsonify({
-        'error': 'No data available yet',
-        'message': 'This endpoint will be populated with real health metrics data'
-    })
+    return jsonify({'error': 'No data available yet', 'message': 'Placeholder'})
 
 @app.errorhandler(404)
 def not_found_error(error):
