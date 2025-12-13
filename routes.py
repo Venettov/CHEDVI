@@ -39,42 +39,55 @@ def resources():
     
     if request.method == 'POST':
         # Handle contact form submission
-        if contact_form.validate_on_submit() and 'contact_submit' in request.form:
-            contact = Contact(
-                name=contact_form.name.data,
-                email=contact_form.email.data,
-                organization=contact_form.organization.data,
-                message=contact_form.message.data
-            )
-            db.session.add(contact)
-            db.session.commit()
-            flash('Your message has been sent successfully!', 'success')
-            return redirect(url_for('resources'))
+        if 'contact_submit' in request.form:
+            if contact_form.validate_on_submit():
+                contact = Contact(
+                    name=contact_form.name.data,
+                    email=contact_form.email.data,
+                    organization=contact_form.organization.data,
+                    message=contact_form.message.data
+                )
+                db.session.add(contact)
+                db.session.commit()
+                flash('Your message has been sent successfully!', 'success')
+                return redirect(url_for('resources'))
+            else:
+                # DEBUG: Print errors to Render logs
+                print(f"❌ CONTACT FORM FAILED: {contact_form.errors}")
         
         # Handle resource request form submission
-        elif resource_form.validate_on_submit() and 'resource_submit' in request.form:
-            resource_request = ResourceRequest(
-                name=resource_form.name.data,
-                email=resource_form.email.data,
-                zip_code=resource_form.zip_code.data,
-                resource_type=resource_form.resource_type.data,
-                needs_description=resource_form.needs_description.data
-            )
-            db.session.add(resource_request)
-            db.session.commit()
-            flash('Your resource request has been submitted successfully!', 'success')
-            return redirect(url_for('resources'))
+        elif 'resource_submit' in request.form:
+            if resource_form.validate_on_submit():
+                resource_request = ResourceRequest(
+                    name=resource_form.name.data,
+                    email=resource_form.email.data,
+                    zip_code=resource_form.zip_code.data,
+                    resource_type=resource_form.resource_type.data,
+                    needs_description=resource_form.needs_description.data
+                )
+                db.session.add(resource_request)
+                db.session.commit()
+                flash('Your resource request has been submitted successfully!', 'success')
+                return redirect(url_for('resources'))
+            else:
+                # DEBUG: Print errors to Render logs
+                print(f"❌ RESOURCE FORM FAILED: {resource_form.errors}")
         
         # Handle newsletter subscription
-        elif newsletter_form.validate_on_submit() and 'newsletter_submit' in request.form:
-            existing_subscriber = Newsletter.query.filter_by(email=newsletter_form.email.data).first()
-            if not existing_subscriber:
-                newsletter = Newsletter(email=newsletter_form.email.data)
-                db.session.add(newsletter)
-                db.session.commit()
-                flash('Successfully subscribed to our newsletter!', 'success')
+        elif 'newsletter_submit' in request.form:
+            if newsletter_form.validate_on_submit():
+                existing_subscriber = Newsletter.query.filter_by(email=newsletter_form.email.data).first()
+                if not existing_subscriber:
+                    newsletter = Newsletter(email=newsletter_form.email.data)
+                    db.session.add(newsletter)
+                    db.session.commit()
+                    flash('Successfully subscribed to our newsletter!', 'success')
+                else:
+                    flash('You are already subscribed to our newsletter.', 'info')
+                return redirect(url_for('resources'))
             else:
-                flash('You are already subscribed to our newsletter.', 'info')
+                # DEBUG: Print errors to Render logs
+                print(f"❌ NEWSLETTER FAILED: {newsletter_form.errors}")
             return redirect(url_for('resources'))
     
     return render_template('resources.html', 
