@@ -5,7 +5,7 @@ from models import NeighborhoodHealth
 
 # --- CONFIGURATION ---
 # We use the exact filename you have in your folder
-CSV_FILENAME = 'final_merged_data (1)_1752002400233.csv' 
+CSV_FILENAME = 'neighborhood_data.csv' 
 # ---------------------
 
 def seed_database():
