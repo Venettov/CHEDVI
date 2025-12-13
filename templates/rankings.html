@@ -16,17 +16,35 @@
             <div class="col-md-8">
                 <h1 class="display-5 fw-bold mb-2">Comprehensive Health Rankings</h1>
                 <p class="lead text-muted">
-                    Compare Camden's neighborhoods across health outcomes, healthcare access, and social determinants.
+                    Compare Camden's 19 neighborhoods across extensive health outcomes, healthcare access, and social determinants
+                </p>
+                <p class="text-muted small">
+                    <i class="fas fa-database me-2"></i>Data from 2022 US Census Bureau and CDC PLACES
                 </p>
                 <div class="row text-center mt-3">
                     <div class="col-3">
-                        <div class="small fw-bold text-primary">{{ rankings_data|length }}</div>
+                        <div class="small fw-bold text-primary">19</div>
                         <div class="small text-muted">Neighborhoods</div>
                     </div>
                     <div class="col-3">
                         <div class="small fw-bold text-primary">Live</div>
                         <div class="small text-muted">Database Connection</div>
                     </div>
+                    <div class="col-3">
+                        <div class="small fw-bold text-primary">6</div>
+                        <div class="small text-muted">Categories</div>
+                    </div>
+                    <div class="col-3">
+                        <div class="small fw-bold text-primary">Real</div>
+                        <div class="small text-muted">Census Data</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex flex-column gap-2">
+                    <button class="btn btn-outline-primary" onclick="alert('Export feature coming soon!')">
+                        <i class="fas fa-download me-2"></i>Export Data
+                    </button>
                 </div>
             </div>
         </div>
@@ -37,20 +55,72 @@
     <div class="container">
         <div class="row">
             <div class="col-md-6">
-                <label for="metricSelector" class="form-label fw-bold">Select Metric</label>
+                <label for="metricSelector" class="form-label fw-bold">
+                    <i class="fas fa-chart-bar me-2"></i>Select Health Metric
+                </label>
                 <select class="form-select form-select-lg" id="metricSelector">
                     <option value="diabetes">Diabetes Rate (%)</option>
                     <option value="income">Median Income ($)</option>
                     <option value="poverty">Poverty Rate (%)</option>
                     <option value="population">Population</option>
                 </select>
+                <div class="form-text">
+                    Choose from health outcomes and social determinant metrics
+                </div>
             </div>
-            <div class="col-md-6">
-                <label for="sortOrder" class="form-label fw-bold">Sort Order</label>
+            <div class="col-md-3">
+                <label for="sortOrder" class="form-label fw-bold">
+                    <i class="fas fa-sort me-2"></i>Sort Order
+                </label>
                 <select class="form-select form-select-lg" id="sortOrder">
-                    <option value="desc">Highest to Lowest</option>
-                    <option value="asc">Lowest to Highest</option>
+                    <option value="asc">Low to High (Best to Worst)</option>
+                    <option value="desc">High to Low (Worst to Best)</option>
                 </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold"><i class="fas fa-filter me-2"></i>Status</label>
+                <div class="alert alert-light border py-2 text-center mb-0">
+                    <small class="text-success fw-bold">● Live Data Active</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-3 bg-light border-top border-bottom">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="card border-0 bg-transparent">
+                    <div class="card-body py-2">
+                        <h6 class="card-title text-primary fw-bold mb-1">Health Outcomes</h6>
+                        <p class="card-text small text-muted mb-0">Diabetes, Obesity, Mental Health</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 bg-transparent">
+                    <div class="card-body py-2">
+                        <h6 class="card-title text-primary fw-bold mb-1">Healthcare Access</h6>
+                        <p class="card-text small text-muted mb-0">Insurance Coverage, Primary Care</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 bg-transparent">
+                    <div class="card-body py-2">
+                        <h6 class="card-title text-primary fw-bold mb-1">Social Determinants</h6>
+                        <p class="card-text small text-muted mb-0">Income, Poverty, Employment</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 bg-transparent">
+                    <div class="card-body py-2">
+                        <h6 class="card-title text-primary fw-bold mb-1">Demographics</h6>
+                        <p class="card-text small text-muted mb-0">Population, Geographic Distribution</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -60,16 +130,20 @@
     <div class="container">
         <div class="card shadow">
             <div class="card-header bg-primary text-white">
-                <h5 class="card-title mb-0">
-                    <i class="fas fa-list-ol me-2"></i>Rankings Table
-                </h5>
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-trophy me-2"></i>Camden Neighborhood Rankings
+                        </h5>
+                    </div>
+                </div>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-hover table-striped mb-0" id="rankingsTable">
                         <thead class="table-light">
                             <tr>
-                                <th>Rank</th>
+                                <th class="ps-4">Rank</th>
                                 <th>Neighborhood</th>
                                 <th id="valueHeader">Value</th>
                                 <th>Status</th>
@@ -84,32 +158,113 @@
     </div>
 </section>
 
-<div class="container mt-4">
+<section class="py-4">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Visual Rankings (Top 10)
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div style="height: 400px;">
+                            <canvas id="rankingsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-info-circle me-2"></i>Ranking Details
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="rankingDetails">
+                            <div class="alert alert-info">
+                                <h6 class="alert-heading fw-bold">Understanding the Data</h6>
+                                <p class="mb-0 small">This chart visualizes the disparities between neighborhoods for the selected metric. A wider range indicates higher inequality.</p>
+                            </div>
+                            <hr>
+                            <div id="selectedMetricStats">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-4 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-calculator me-2"></i>Ranking Methodology
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Data Sources</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-check text-success me-2"></i>US Census Bureau (2022)</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>NJ Department of Health</li>
+                                    <li><i class="fas fa-check text-success me-2"></i>CDC PLACES Data</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Ranking Criteria</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-info text-primary me-2"></i>Population-weighted averages</li>
+                                    <li><i class="fas fa-info text-primary me-2"></i>Real-time database queries</li>
+                                    <li><i class="fas fa-info text-primary me-2"></i>Dynamic sorting and filtering</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container pb-5">
     <div class="alert alert-success" role="alert">
         <i class="fas fa-check-circle me-2"></i>
-        <strong>Live Data:</strong> These rankings are generated in real-time from your <code>neighborhood_data.csv</code> database.
+        <strong>Live Data:</strong> These rankings are generated in real-time from your <code>neighborhood_data.csv</code> database on Render.
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // DYNAMIC DATA FROM SERVER
+    // 1. GET DATA FROM SERVER
     const rankingsData = {{ rankings_data | tojson | safe }};
+    let myChart = null;
 
-    function renderTable() {
+    // 2. FUNCTION TO RENDER TABLE
+    function renderPage() {
         const metric = document.getElementById('metricSelector').value;
         const order = document.getElementById('sortOrder').value;
         const tbody = document.getElementById('rankingsBody');
         
-        // Update Header
+        // Update Header Text
         const headerMap = {
             'diabetes': 'Diabetes Rate (%)',
             'income': 'Median Income ($)',
             'poverty': 'Poverty Rate (%)',
             'population': 'Total Population'
         };
-        document.getElementById('valueHeader').innerText = headerMap[metric];
+        const label = headerMap[metric];
+        document.getElementById('valueHeader').innerText = label;
 
         // Sort Data
         rankingsData.sort((a, b) => {
@@ -118,47 +273,87 @@
             return order === 'asc' ? valA - valB : valB - valA;
         });
 
-        // Clear Table
+        // --- RENDER TABLE ---
         tbody.innerHTML = '';
-
-        // Populate Table
         rankingsData.forEach((item, index) => {
             let valueDisplay = item[metric];
+            let rawValue = valueDisplay; 
             
-            // Format numbers
+            // Formatting
             if(metric === 'income') valueDisplay = '$' + valueDisplay.toLocaleString();
-            if(metric === 'population') valueDisplay = valueDisplay.toLocaleString();
-            if(metric === 'diabetes' || metric === 'poverty') valueDisplay = valueDisplay + '%';
+            else if(metric === 'population') valueDisplay = valueDisplay.toLocaleString();
+            else valueDisplay = valueDisplay + '%';
 
-            // Determine Row Color/Status
-            let statusBadge = '<span class="badge bg-secondary">Neutral</span>';
+            // Badge Logic
+            let badgeClass = 'bg-secondary';
+            let badgeText = 'Neutral';
+            
+            // Logic for "Good" vs "Bad" depends on metric
             if (metric === 'income') {
-                if (item[metric] > 50000) statusBadge = '<span class="badge bg-success">High</span>';
-                else if (item[metric] < 25000) statusBadge = '<span class="badge bg-danger">Critical</span>';
-                else statusBadge = '<span class="badge bg-warning text-dark">Medium</span>';
-            } else if (metric === 'diabetes') {
-                if (item[metric] > 20) statusBadge = '<span class="badge bg-danger">High Risk</span>';
-                else if (item[metric] < 15) statusBadge = '<span class="badge bg-success">Lower Risk</span>';
-                else statusBadge = '<span class="badge bg-warning text-dark">Moderate</span>';
+                if (rawValue > 50000) { badgeClass = 'bg-success'; badgeText = 'High'; }
+                else if (rawValue < 25000) { badgeClass = 'bg-danger'; badgeText = 'Critical'; }
+                else { badgeClass = 'bg-warning text-dark'; badgeText = 'Medium'; }
+            } else if (metric === 'diabetes' || metric === 'poverty') {
+                if (rawValue > 20) { badgeClass = 'bg-danger'; badgeText = 'High Risk'; }
+                else if (rawValue < 15) { badgeClass = 'bg-success'; badgeText = 'Low Risk'; }
+                else { badgeClass = 'bg-warning text-dark'; badgeText = 'Moderate'; }
             }
 
             const row = `
                 <tr>
-                    <td><strong>#${index + 1}</strong></td>
+                    <td class="ps-4"><strong>#${index + 1}</strong></td>
                     <td>${item.name}</td>
                     <td><strong>${valueDisplay}</strong></td>
-                    <td>${statusBadge}</td>
+                    <td><span class="badge ${badgeClass}">${badgeText}</span></td>
                 </tr>
             `;
             tbody.innerHTML += row;
         });
+
+        // --- RENDER CHART ---
+        renderChart(metric, label);
     }
 
-    // Attach Listeners
-    document.getElementById('metricSelector').addEventListener('change', renderTable);
-    document.getElementById('sortOrder').addEventListener('change', renderTable);
+    // 3. FUNCTION TO RENDER CHART
+    function renderChart(metric, label) {
+        const ctx = document.getElementById('rankingsChart').getContext('2d');
+        
+        // Take top 10 from current sorted data
+        const top10 = rankingsData.slice(0, 10);
+        const labels = top10.map(d => d.name);
+        const data = top10.map(d => d[metric]);
 
-    // Initial Render
-    renderTable();
+        if (myChart) {
+            myChart.destroy();
+        }
+
+        myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: label,
+                    data: data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    // 4. EVENT LISTENERS
+    document.getElementById('metricSelector').addEventListener('change', renderPage);
+    document.getElementById('sortOrder').addEventListener('change', renderPage);
+
+    // Initial Load
+    renderPage();
 </script>
 {% endblock %}
