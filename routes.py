@@ -3,6 +3,8 @@ from app import app, db
 from models import Contact, ResourceRequest, Newsletter
 from forms import ContactForm, ResourceRequestForm, NewsletterForm
 
+# FORCE UPDATE: Debugging Session 1
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -37,10 +39,15 @@ def resources():
     resource_form = ResourceRequestForm()
     newsletter_form = NewsletterForm()
     
+    # NUCLEAR DEBUG: Print everything happening on this page
     if request.method == 'POST':
-        # Handle contact form submission
+        print(f"🚀 POST RECEIVED! Form Data Keys: {list(request.form.keys())}")
+        
+        # Check Contact Form
         if 'contact_submit' in request.form:
+            print("👀 Checking Contact Form...")
             if contact_form.validate_on_submit():
+                print("✅ Contact Form Valid! Saving...")
                 contact = Contact(
                     name=contact_form.name.data,
                     email=contact_form.email.data,
@@ -52,10 +59,9 @@ def resources():
                 flash('Your message has been sent successfully!', 'success')
                 return redirect(url_for('resources'))
             else:
-                # DEBUG: Print errors to Render logs
-                print(f"❌ CONTACT FORM FAILED: {contact_form.errors}")
+                print(f"❌ CONTACT FORM FAILED ERRORS: {contact_form.errors}")
         
-        # Handle resource request form submission
+        # Check Resource Form
         elif 'resource_submit' in request.form:
             if resource_form.validate_on_submit():
                 resource_request = ResourceRequest(
@@ -70,10 +76,9 @@ def resources():
                 flash('Your resource request has been submitted successfully!', 'success')
                 return redirect(url_for('resources'))
             else:
-                # DEBUG: Print errors to Render logs
                 print(f"❌ RESOURCE FORM FAILED: {resource_form.errors}")
         
-        # Handle newsletter subscription
+        # Check Newsletter
         elif 'newsletter_submit' in request.form:
             if newsletter_form.validate_on_submit():
                 existing_subscriber = Newsletter.query.filter_by(email=newsletter_form.email.data).first()
@@ -86,10 +91,11 @@ def resources():
                     flash('You are already subscribed to our newsletter.', 'info')
                 return redirect(url_for('resources'))
             else:
-                # DEBUG: Print errors to Render logs
                 print(f"❌ NEWSLETTER FAILED: {newsletter_form.errors}")
-            return redirect(url_for('resources'))
-    
+        
+        else:
+            print("⚠️ POST received but NO known button was clicked (Enter key issue?)")
+
     return render_template('resources.html', 
                          contact_form=contact_form,
                          resource_form=resource_form,
@@ -97,19 +103,11 @@ def resources():
 
 @app.route('/api/neighborhoods')
 def api_neighborhoods():
-    """API endpoint for neighborhood data (placeholder for future implementation)"""
-    return jsonify({
-        'error': 'No data available yet',
-        'message': 'This endpoint will be populated with real neighborhood data'
-    })
+    return jsonify({'error': 'No data', 'message': 'Placeholder'})
 
 @app.route('/api/health-metrics')
 def api_health_metrics():
-    """API endpoint for health metrics data (placeholder for future implementation)"""
-    return jsonify({
-        'error': 'No data available yet',
-        'message': 'This endpoint will be populated with real health metrics data'
-    })
+    return jsonify({'error': 'No data', 'message': 'Placeholder'})
 
 @app.errorhandler(404)
 def not_found_error(error):
