@@ -1,15 +1,24 @@
 import os
 import shutil
 import pandas as pd
+from werkzeug.security import generate_password_hash, check_password_hash
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from app import app, db
-from models import Contact, ResourceRequest, Newsletter, NeighborhoodHealth
+from models import Contact, ResourceRequest, Newsletter, NeighborhoodHealth, Admin
 from forms import ContactForm, ResourceRequestForm, NewsletterForm
 
 # Configuration
 DATA_FILE = 'neighborhood_data.csv'
 BACKUP_FILE = 'neighborhood_data.bak'
-ADMIN_PIN = "9955"  # Change this to a secure PIN of your choice
+
+# --- HELPER FUNCTIONS ---
+
+def verify_admin(username, password):
+    """Securely checks if username exists and password matches the hash."""
+    user = Admin.query.filter_by(username=username).first()
+    if user and check_password_hash(user.password_hash, password):
+        return True
+    return False
 
 def reload_database_from_csv():
     """Helper function to clear DB and reload from the current CSV file."""
@@ -20,12 +29,11 @@ def reload_database_from_csv():
         # Read CSV
         df = pd.read_csv(DATA_FILE)
         
-        # Clear existing data
+        # Clear existing Neighborhood data (NOT Admins!)
         db.session.query(NeighborhoodHealth).delete()
         
         # Insert new data
         for _, row in df.iterrows():
-            # Safely get values, defaulting to 0 or None if column is missing
             neighborhood = NeighborhoodHealth(
                 name=row.get('name', 'Unknown'),
                 total_population=row.get('total_population', 0),
@@ -57,11 +65,35 @@ def about():
 def admin():
     return render_template('admin.html')
 
+@app.route('/admin/setup/<username>/<password>')
+def admin_setup(username, password):
+    """
+    Temporary route to create your first admin. 
+    Usage: Visit /admin/setup/myname/mypassword in your browser ONCE.
+    """
+    try:
+        # Check if admin already exists
+        existing = Admin.query.filter_by(username=username).first()
+        if existing:
+            return f"Admin '{username}' already exists!"
+        
+        # Create new admin with HASHED password
+        hashed_pw = generate_password_hash(password)
+        new_admin = Admin(username=username, password_hash=hashed_pw)
+        db.session.add(new_admin)
+        db.session.commit()
+        return f"Success! Created admin '{username}'. You can now use these credentials on the Admin page."
+    except Exception as e:
+        return f"Error: {str(e)}"
+
 @app.route('/admin/upload', methods=['POST'])
 def admin_upload():
-    # 1. Security Check
-    if request.form.get('admin_pin') != ADMIN_PIN:
-        flash('Invalid PIN. Access Denied.', 'danger')
+    # 1. Secure Database Check
+    username = request.form.get('username')
+    password = request.form.get('password')
+    
+    if not verify_admin(username, password):
+        flash('Invalid Username or Password. Access Denied.', 'danger')
         return redirect(url_for('admin'))
 
     file = request.files.get('file')
@@ -70,38 +102,27 @@ def admin_upload():
         return redirect(url_for('admin'))
 
     try:
-        # 2. Create Backup of current data
+        # 2. Create Backup
         if os.path.exists(DATA_FILE):
             shutil.copy(DATA_FILE, BACKUP_FILE)
 
-        # 3. Handle Data Merging
+        # 3. Handle Data
         new_data = pd.read_csv(file)
-        
-        # Clean column names (strip whitespace, lowercase)
         new_data.columns = new_data.columns.str.strip().str.lower().str.replace(' ', '_')
 
         if request.form.get('replace_all'):
-            # Option A: Wipe everything and use new file
             new_data.to_csv(DATA_FILE, index=False)
             flash('Full replacement mode: Old data overwritten.', 'info')
         else:
-            # Option B: Smart Merge (Partial Update)
             if os.path.exists(DATA_FILE):
                 current_data = pd.read_csv(DATA_FILE)
-                
-                # Ensure 'name' exists for merging
                 if 'name' not in new_data.columns or 'name' not in current_data.columns:
                     flash('Error: CSV must contain a "name" column for merging.', 'danger')
                     return redirect(url_for('admin'))
 
-                # Merge logic: Update current_data with values from new_data where names match
-                # set_index('name') allows us to align rows easily
                 current_data.set_index('name', inplace=True)
                 new_data.set_index('name', inplace=True)
-                
-                # combine_first updates nulls/existing values with new ones
                 merged_data = new_data.combine_first(current_data).reset_index()
-                
                 merged_data.to_csv(DATA_FILE, index=False)
                 flash('Smart Merge: New data integrated with existing records.', 'info')
             else:
@@ -121,16 +142,17 @@ def admin_upload():
 
 @app.route('/admin/rollback', methods=['POST'])
 def admin_rollback():
-    if request.form.get('admin_pin') != ADMIN_PIN:
-        flash('Invalid PIN.', 'danger')
+    # 1. Secure Database Check
+    username = request.form.get('username')
+    password = request.form.get('password')
+    
+    if not verify_admin(username, password):
+        flash('Invalid Username or Password.', 'danger')
         return redirect(url_for('admin'))
 
     try:
         if os.path.exists(BACKUP_FILE):
-            # Restore backup
             shutil.copy(BACKUP_FILE, DATA_FILE)
-            
-            # Reload DB
             success, msg = reload_database_from_csv()
             if success:
                 flash('System rolled back to previous version successfully.', 'success')
@@ -143,7 +165,7 @@ def admin_rollback():
 
     return redirect(url_for('admin'))
 
-# --- END ADMIN ROUTES ---
+# --- DASHBOARD & OTHER ROUTES ---
 
 @app.route('/dashboard')
 def dashboard():

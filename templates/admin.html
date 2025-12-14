@@ -32,10 +32,17 @@
                                 and it will merge with existing data intelligently.
                             </p>
                             <form action="{{ url_for('admin_upload') }}" method="POST" enctype="multipart/form-data" class="border p-4 rounded bg-white">
-                                <div class="mb-3">
-                                    <label for="admin_pin" class="form-label fw-bold">Admin PIN</label>
-                                    <input type="password" class="form-control" name="admin_pin" placeholder="Enter PIN to authorize" required>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="username" class="form-label fw-bold">Admin Username</label>
+                                        <input type="text" class="form-control" name="username" placeholder="Username" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="password" class="form-label fw-bold">Password / PIN</label>
+                                        <input type="password" class="form-control" name="password" placeholder="Password" required>
+                                    </div>
                                 </div>
+
                                 <div class="mb-3">
                                     <label for="file" class="form-label fw-bold">Select CSV File</label>
                                     <input class="form-control" type="file" name="file" accept=".csv" required>
@@ -75,9 +82,15 @@
                                 Something look wrong? Click below to immediately undo the last upload and restore the previous dataset.
                             </p>
                             <form action="{{ url_for('admin_rollback') }}" method="POST" class="border p-4 rounded bg-light border-danger">
-                                <div class="mb-3">
-                                    <label for="admin_pin_rollback" class="form-label fw-bold">Admin PIN</label>
-                                    <input type="password" class="form-control" name="admin_pin" placeholder="Enter PIN to authorize" required>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <label for="username_rb" class="form-label fw-bold">Admin Username</label>
+                                        <input type="text" class="form-control" name="username" placeholder="Username" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="password_rb" class="form-label fw-bold">Password / PIN</label>
+                                        <input type="password" class="form-control" name="password" placeholder="Password" required>
+                                    </div>
                                 </div>
                                 <button type="submit" class="btn btn-danger w-100">
                                     <i class="fas fa-undo me-2"></i>Revert to Previous Version
