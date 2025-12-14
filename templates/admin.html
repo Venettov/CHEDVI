@@ -40,12 +40,20 @@
                                     <label for="file" class="form-label fw-bold">Select CSV File</label>
                                     <input class="form-control" type="file" name="file" accept=".csv" required>
                                 </div>
+                                
                                 <div class="form-check mb-3">
                                     <input class="form-check-input" type="checkbox" name="replace_all" id="replaceAll">
                                     <label class="form-check-label" for="replaceAll">
                                         Wait! Replace <strong>everything</strong>? (Uncheck to merge/update only)
                                     </label>
+                                    <a tabindex="0" class="text-primary ms-1" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Data Handling Options" 
+                                       data-bs-content="CHECKED (Replace Everything): Deletes every single existing row in your database and replaces it entirely with the new CSV file. Use this for a fresh start. 
+                                       
+                                       UNCHECKED (Smart Merge): Keeps your existing data intact. It matches rows by Neighborhood Name and only updates the specific columns you uploaded (e.g., updating 'Diabetes Rate' but keeping 'Income' safe).">
+                                        <i class="fas fa-question-circle"></i>
+                                    </a>
                                 </div>
+
                                 <button type="submit" class="btn btn-primary w-100">
                                     <i class="fas fa-cloud-upload-alt me-2"></i>Upload and Update
                                 </button>
@@ -55,7 +63,14 @@
                         <hr>
 
                         <div class="mt-4">
-                            <h5><i class="fas fa-history text-danger me-2"></i>Emergency Rollback</h5>
+                            <div class="d-flex align-items-center mb-2">
+                                <h5 class="mb-0"><i class="fas fa-history text-danger me-2"></i>Emergency Rollback</h5>
+                                <a tabindex="0" class="text-danger ms-2" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Emergency Rollback" 
+                                   data-bs-content="This safety feature immediately undoes your last upload. It restores the database to the exact state it was in before you clicked 'Upload'. Use this if your new data looks wrong or broke a chart.">
+                                    <i class="fas fa-question-circle"></i>
+                                </a>
+                            </div>
+                            
                             <p class="text-muted small">
                                 Something look wrong? Click below to immediately undo the last upload and restore the previous dataset.
                             </p>
@@ -76,4 +91,14 @@
         </div>
     </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize Bootstrap Popovers
+    var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+    var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+      return new bootstrap.Popover(popoverTriggerEl)
+    })
+</script>
 {% endblock %}
