@@ -8,10 +8,19 @@
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="card shadow">
+                    
                     <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                         <h4 class="mb-0"><i class="fas fa-cogs me-2"></i>Data Management Console</h4>
-                        <span class="badge bg-warning text-dark">Admin Access Only</span>
+                        {% if session.get('admin_logged_in') %}
+                            <div class="d-flex align-items-center">
+                                <small class="me-3 text-light">Welcome, {{ session.get('admin_user') }}</small>
+                                <a href="{{ url_for('admin_logout') }}" class="btn btn-sm btn-outline-danger">Logout</a>
+                            </div>
+                        {% else %}
+                            <span class="badge bg-warning text-dark">Login Required</span>
+                        {% endif %}
                     </div>
+
                     <div class="card-body p-4">
                         
                         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -25,78 +34,80 @@
                             {% endif %}
                         {% endwith %}
 
-                        <div class="mb-5">
-                            <h5><i class="fas fa-file-upload text-primary me-2"></i>Update Dataset</h5>
-                            <p class="text-muted small">
-                                Upload a CSV file to update the database. You can upload partial data (e.g., just "Name" and "Diabetes Rate"), 
-                                and it will merge with existing data intelligently.
-                            </p>
-                            <form action="{{ url_for('admin_upload') }}" method="POST" enctype="multipart/form-data" class="border p-4 rounded bg-white">
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="username" class="form-label fw-bold">Admin Username</label>
-                                        <input type="text" class="form-control" name="username" placeholder="Username" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="password" class="form-label fw-bold">Password / PIN</label>
-                                        <input type="password" class="form-control" name="password" placeholder="Password" required>
-                                    </div>
-                                </div>
-
+                        {% if not session.get('admin_logged_in') %}
+                            
+                            <div class="text-center mb-4">
+                                <i class="fas fa-lock fa-3x text-secondary mb-3"></i>
+                                <h5>Secure Access Area</h5>
+                                <p class="text-muted">Please log in to manage database records.</p>
+                            </div>
+                            
+                            <form action="{{ url_for('admin_login') }}" method="POST" class="border p-4 rounded bg-white">
                                 <div class="mb-3">
-                                    <label for="file" class="form-label fw-bold">Select CSV File</label>
-                                    <input class="form-control" type="file" name="file" accept=".csv" required>
+                                    <label for="username" class="form-label fw-bold">Username</label>
+                                    <input type="text" class="form-control" name="username" required autofocus>
                                 </div>
-                                
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" name="replace_all" id="replaceAll">
-                                    <label class="form-check-label" for="replaceAll">
-                                        Wait! Replace <strong>everything</strong>? (Uncheck to merge/update only)
-                                    </label>
-                                    <a tabindex="0" class="text-primary ms-1" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Data Handling Options" 
-                                       data-bs-content="CHECKED (Replace Everything): Deletes every single existing row in your database and replaces it entirely with the new CSV file. Use this for a fresh start. 
-                                       
-                                       UNCHECKED (Smart Merge): Keeps your existing data intact. It matches rows by Neighborhood Name and only updates the specific columns you uploaded (e.g., updating 'Diabetes Rate' but keeping 'Income' safe).">
+                                <div class="mb-4">
+                                    <label for="password" class="form-label fw-bold">Password</label>
+                                    <input type="password" class="form-control" name="password" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Login
+                                </button>
+                            </form>
+
+                        {% else %}
+
+                            <div class="mb-5">
+                                <h5><i class="fas fa-file-upload text-primary me-2"></i>Update Dataset</h5>
+                                <p class="text-muted small">
+                                    Upload a CSV file to update the database. You can upload partial data, and it will merge intelligently.
+                                </p>
+                                <form action="{{ url_for('admin_upload') }}" method="POST" enctype="multipart/form-data" class="border p-4 rounded bg-white">
+                                    <div class="mb-3">
+                                        <label for="file" class="form-label fw-bold">Select CSV File</label>
+                                        <input class="form-control" type="file" name="file" accept=".csv" required>
+                                    </div>
+                                    
+                                    <div class="form-check mb-3">
+                                        <input class="form-check-input" type="checkbox" name="replace_all" id="replaceAll">
+                                        <label class="form-check-label" for="replaceAll">
+                                            Wait! Replace <strong>everything</strong>? (Uncheck to merge/update only)
+                                        </label>
+                                        <a tabindex="0" class="text-primary ms-1" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Data Handling Options" 
+                                           data-bs-content="CHECKED: Deletes all data. UNCHECKED: Only updates specific columns for matching neighborhoods.">
+                                            <i class="fas fa-question-circle"></i>
+                                        </a>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-cloud-upload-alt me-2"></i>Upload and Update
+                                    </button>
+                                </form>
+                            </div>
+
+                            <hr>
+
+                            <div class="mt-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <h5 class="mb-0"><i class="fas fa-history text-danger me-2"></i>Emergency Rollback</h5>
+                                    <a tabindex="0" class="text-danger ms-2" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Emergency Rollback" 
+                                       data-bs-content="Restores the database to the exact state it was in before the last upload.">
                                         <i class="fas fa-question-circle"></i>
                                     </a>
                                 </div>
-
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="fas fa-cloud-upload-alt me-2"></i>Upload and Update
-                                </button>
-                            </form>
-                        </div>
-
-                        <hr>
-
-                        <div class="mt-4">
-                            <div class="d-flex align-items-center mb-2">
-                                <h5 class="mb-0"><i class="fas fa-history text-danger me-2"></i>Emergency Rollback</h5>
-                                <a tabindex="0" class="text-danger ms-2" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Emergency Rollback" 
-                                   data-bs-content="This safety feature immediately undoes your last upload. It restores the database to the exact state it was in before you clicked 'Upload'. Use this if your new data looks wrong or broke a chart.">
-                                    <i class="fas fa-question-circle"></i>
-                                </a>
+                                
+                                <p class="text-muted small">
+                                    Something look wrong? Click below to immediately undo the last upload.
+                                </p>
+                                <form action="{{ url_for('admin_rollback') }}" method="POST" class="border p-4 rounded bg-light border-danger">
+                                    <button type="submit" class="btn btn-danger w-100">
+                                        <i class="fas fa-undo me-2"></i>Revert to Previous Version
+                                    </button>
+                                </form>
                             </div>
-                            
-                            <p class="text-muted small">
-                                Something look wrong? Click below to immediately undo the last upload and restore the previous dataset.
-                            </p>
-                            <form action="{{ url_for('admin_rollback') }}" method="POST" class="border p-4 rounded bg-light border-danger">
-                                <div class="row mb-3">
-                                    <div class="col-md-6">
-                                        <label for="username_rb" class="form-label fw-bold">Admin Username</label>
-                                        <input type="text" class="form-control" name="username" placeholder="Username" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="password_rb" class="form-label fw-bold">Password / PIN</label>
-                                        <input type="password" class="form-control" name="password" placeholder="Password" required>
-                                    </div>
-                                </div>
-                                <button type="submit" class="btn btn-danger w-100">
-                                    <i class="fas fa-undo me-2"></i>Revert to Previous Version
-                                </button>
-                            </form>
-                        </div>
+
+                        {% endif %}
 
                     </div>
                 </div>

@@ -2,7 +2,7 @@ import os
 import shutil
 import pandas as pd
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask import render_template, request, redirect, url_for, flash, jsonify
+from flask import render_template, request, redirect, url_for, flash, jsonify, session
 from app import app, db
 from models import Contact, ResourceRequest, Newsletter, NeighborhoodHealth, Admin
 from forms import ContactForm, ResourceRequestForm, NewsletterForm
@@ -10,6 +10,10 @@ from forms import ContactForm, ResourceRequestForm, NewsletterForm
 # Configuration
 DATA_FILE = 'neighborhood_data.csv'
 BACKUP_FILE = 'neighborhood_data.bak'
+
+# SECURITY: Secret key is required for sessions to work.
+# In production, this should be set in your environment variables.
+app.secret_key = os.environ.get('SECRET_KEY', 'replace-this-with-a-secure-key')
 
 # --- HELPER FUNCTIONS ---
 
@@ -26,13 +30,10 @@ def reload_database_from_csv():
         if not os.path.exists(DATA_FILE):
             return False, "Data file not found."
 
-        # Read CSV
         df = pd.read_csv(DATA_FILE)
         
-        # Clear existing data
         db.session.query(NeighborhoodHealth).delete()
         
-        # Insert new data
         for _, row in df.iterrows():
             neighborhood = NeighborhoodHealth(
                 name=row.get('name', 'Unknown'),
@@ -41,7 +42,6 @@ def reload_database_from_csv():
                 poverty_rate=row.get('poverty_rate', 0.0),
                 diabetes_rate=row.get('diabetes_rate', 0.0),
                 obesity_rate=row.get('obesity_rate', 0.0),
-                # Add other fields as needed based on your model
             )
             db.session.add(neighborhood)
         
@@ -65,14 +65,35 @@ def about():
 def admin():
     return render_template('admin.html')
 
-# --- DB FIX ROUTE (RUN ONCE) ---
+@app.route('/admin/login', methods=['POST'])
+def admin_login():
+    """Handles the login form submission."""
+    username = request.form.get('username')
+    password = request.form.get('password')
+    
+    if verify_admin(username, password):
+        session['admin_logged_in'] = True
+        session['admin_user'] = username
+        flash('Successfully logged in.', 'success')
+    else:
+        flash('Invalid Username or Password.', 'danger')
+        
+    return redirect(url_for('admin'))
+
+@app.route('/admin/logout')
+def admin_logout():
+    """Logs the user out."""
+    session.pop('admin_logged_in', None)
+    session.pop('admin_user', None)
+    flash('Logged out successfully.', 'info')
+    return redirect(url_for('admin'))
+
 @app.route('/admin/db-fix')
 def admin_db_fix():
-    """Drops the Admin table and recreates it to apply the new 256 char limit."""
     try:
         Admin.__table__.drop(db.engine)
         db.create_all()
-        return "Database Admin table reset successfully. You can now try creating your admin again."
+        return "Database Admin table reset successfully."
     except Exception as e:
         return f"Error resetting table: {str(e)}"
 
@@ -93,12 +114,9 @@ def admin_setup(username, password):
 
 @app.route('/admin/upload', methods=['POST'])
 def admin_upload():
-    # 1. Secure Database Check
-    username = request.form.get('username')
-    password = request.form.get('password')
-    
-    if not verify_admin(username, password):
-        flash('Invalid Username or Password. Access Denied.', 'danger')
+    # 1. CHECK SESSION (Not form inputs)
+    if not session.get('admin_logged_in'):
+        flash('Please log in first.', 'danger')
         return redirect(url_for('admin'))
 
     file = request.files.get('file')
@@ -107,11 +125,9 @@ def admin_upload():
         return redirect(url_for('admin'))
 
     try:
-        # 2. Create Backup
         if os.path.exists(DATA_FILE):
             shutil.copy(DATA_FILE, BACKUP_FILE)
 
-        # 3. Handle Data
         new_data = pd.read_csv(file)
         new_data.columns = new_data.columns.str.strip().str.lower().str.replace(' ', '_')
 
@@ -133,7 +149,6 @@ def admin_upload():
             else:
                 new_data.to_csv(DATA_FILE, index=False)
 
-        # 4. Reload Database
         success, msg = reload_database_from_csv()
         if success:
             flash(f'Success! {msg}', 'success')
@@ -147,12 +162,9 @@ def admin_upload():
 
 @app.route('/admin/rollback', methods=['POST'])
 def admin_rollback():
-    # 1. Secure Database Check
-    username = request.form.get('username')
-    password = request.form.get('password')
-    
-    if not verify_admin(username, password):
-        flash('Invalid Username or Password.', 'danger')
+    # 1. CHECK SESSION
+    if not session.get('admin_logged_in'):
+        flash('Please log in first.', 'danger')
         return redirect(url_for('admin'))
 
     try:
