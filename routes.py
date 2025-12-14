@@ -241,9 +241,12 @@ def dashboard():
 @app.route('/insights')
 def insights():
     all_n = NeighborhoodHealth.query.all()
+    
+    # Defaults if DB is empty
     if not all_n:
-        return render_template('insights.html', total_population="0")
+        return render_template('insights.html', total_population="0", insights_data=[])
 
+    # 1. Calculate Aggregates (Keep your existing logic)
     total_population = sum(n.total_population for n in all_n)
     
     diabetes_rates = [n.diabetes_rate for n in all_n]
@@ -264,6 +267,22 @@ def insights():
     highest_income_n = max(all_n, key=lambda x: x.median_income) if all_n else None
     highest_poverty_n = max(all_n, key=lambda x: x.poverty_rate) if all_n else None
 
+    # 2. NEW: Prepare Data for the Interactive Chart
+    # We map your DB models to simple JSON keys that the Javascript can read
+    insights_data = []
+    for n in all_n:
+        insights_data.append({
+            'name': n.name,
+            'income': n.median_income,
+            'poverty': n.poverty_rate,
+            'diabetes': n.diabetes_rate,
+            'obesity': getattr(n, 'obesity_rate', 0),
+            'asthma': getattr(n, 'asthma_rate', 0),
+            'mentalDistress': getattr(n, 'mental_distress_rate', 0),
+            'foodAccess': getattr(n, 'food_access_score', 0),
+            'insurance': getattr(n, 'lack_health_insurance', 0)
+        })
+
     return render_template('insights.html',
                            total_population=f"{total_population:,}",
                            neighborhood_count=len(all_n),
@@ -277,7 +296,8 @@ def insights():
                            min_poverty=min_poverty,
                            max_poverty=max_poverty,
                            highest_income_n=highest_income_n,
-                           highest_poverty_n=highest_poverty_n)
+                           highest_poverty_n=highest_poverty_n,
+                           insights_data=insights_data) # <--- PASSING THE DATA HERE
 
 @app.route('/neighborhoods')
 def neighborhoods():
