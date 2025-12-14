@@ -61,10 +61,11 @@ class NeighborhoodHealth(db.Model):
             'population': self.total_population
         }
 
+# --- NEW ADMIN MODEL (Fixed Size) ---
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    # INCREASED SIZE FROM 128 TO 256 TO FIX ERROR
+    # INCREASED TO 256 TO PREVENT ERROR
     password_hash = db.Column(db.String(256), nullable=False)
 
     def __repr__(self):
