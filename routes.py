@@ -13,15 +13,19 @@ def about():
 
 @app.route('/dashboard')
 def dashboard():
+    # 1. Fetch all data from the database
     all_neighborhoods = NeighborhoodHealth.query.all()
     
+    # Safety check: If database is empty, return placeholder data
     if not all_neighborhoods:
         return render_template('dashboard.html', 
                                total_population="0", neighborhood_count=0,
                                min_diabetes=0, max_diabetes=0, diabetes_gap=0,
                                min_income=0, max_income=0, income_ratio=0,
-                               min_poverty=0, max_poverty=0, poverty_gap=0)
+                               min_poverty=0, max_poverty=0, poverty_gap=0,
+                               dashboard_data=[])
 
+    # 2. Calculate "Key Metrics" Statistics
     total_population = sum(n.total_population for n in all_neighborhoods)
     
     diabetes_rates = [n.diabetes_rate for n in all_neighborhoods]
@@ -39,6 +43,21 @@ def dashboard():
     max_poverty = max(poverty_rates)
     poverty_gap = round(max_poverty - min_poverty, 1)
 
+    # 3. PREPARE DATA FOR EXPORT (New Addition)
+    # We create a clean list of dictionaries that JS can easily convert to CSV/PDF
+    dashboard_data = []
+    for n in all_neighborhoods:
+        dashboard_data.append({
+            'name': n.name,
+            'population': n.total_population,
+            'income': n.median_income,
+            'diabetes': n.diabetes_rate,
+            'poverty': n.poverty_rate,
+            # Safely handle obesity if it exists in your model, otherwise default to 0
+            'obesity': getattr(n, 'obesity_rate', 0) 
+        })
+
+    # 4. Pass variables to the template
     return render_template('dashboard.html', 
                            total_population=f"{total_population:,}", 
                            neighborhood_count=len(all_neighborhoods),
@@ -50,11 +69,13 @@ def dashboard():
                            income_ratio=income_ratio,
                            min_poverty=min_poverty,
                            max_poverty=max_poverty,
-                           poverty_gap=poverty_gap)
+                           poverty_gap=poverty_gap,
+                           dashboard_data=dashboard_data) # <--- Passed here for export
 
 @app.route('/insights')
 def insights():
     all_n = NeighborhoodHealth.query.all()
+    
     if not all_n:
         return render_template('insights.html', total_population="0")
 
@@ -95,10 +116,8 @@ def insights():
 
 @app.route('/neighborhoods')
 def neighborhoods():
-    # Fetch all data
     all_n = NeighborhoodHealth.query.all()
     
-    # Serialize data for the JS frontend
     neighborhood_data = []
     for n in all_n:
         neighborhood_data.append({
@@ -108,7 +127,6 @@ def neighborhoods():
             'income': n.median_income,
             'poverty': n.poverty_rate,
             'diabetes': n.diabetes_rate,
-            # We calculate simple equity status based on income for now
             'equity_status': 'High Priority' if n.median_income < 30000 else 'Stable' if n.median_income > 50000 else 'Vulnerable'
         })
     
@@ -116,10 +134,8 @@ def neighborhoods():
 
 @app.route('/rankings')
 def rankings():
-    # Fetch all data
     all_n = NeighborhoodHealth.query.all()
     
-    # Serialize data for the JS frontend
     rankings_data = []
     for n in all_n:
         rankings_data.append({
@@ -189,11 +205,19 @@ def resources():
 
 @app.route('/api/neighborhoods')
 def api_neighborhoods():
-    return jsonify({'error': 'No data available yet', 'message': 'Placeholder'})
+    """API endpoint for neighborhood data (placeholder)"""
+    return jsonify({
+        'error': 'No data available yet',
+        'message': 'This endpoint will be populated with real neighborhood data'
+    })
 
 @app.route('/api/health-metrics')
 def api_health_metrics():
-    return jsonify({'error': 'No data available yet', 'message': 'Placeholder'})
+    """API endpoint for health metrics data (placeholder)"""
+    return jsonify({
+        'error': 'No data available yet',
+        'message': 'This endpoint will be populated with real health metrics data'
+    })
 
 @app.errorhandler(404)
 def not_found_error(error):

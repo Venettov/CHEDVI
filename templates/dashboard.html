@@ -94,7 +94,7 @@
     </div>
 </section>
 
-<section class="py-4">
+<section class="py-4" id="dashboard-content">
     <div class="container-fluid">
         <div class="row mb-4">
             <div class="col-12 text-center">
@@ -460,4 +460,68 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/dashboard-fixed.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<script>
+    // Access data passed from Flask
+    const dashboardData = {{ dashboard_data | tojson | safe }};
+
+    function exportData(type) {
+        if (type === 'csv') {
+            exportToCSV();
+        } else if (type === 'pdf') {
+            exportToPDF();
+        } else if (type === 'image') {
+            exportToImage();
+        }
+    }
+
+    function exportToCSV() {
+        if (!dashboardData || dashboardData.length === 0) {
+            alert("No data available to export.");
+            return;
+        }
+        
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Neighborhood,Population,Median Income,Diabetes Rate,Poverty Rate\n";
+
+        dashboardData.forEach(function(row) {
+            let rowString = `"${row.name}",${row.population},${row.income},${row.diabetes},${row.poverty}`;
+            csvContent += rowString + "\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "Camden_Dashboard_Data.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function exportToPDF() {
+        // We select the main content container to export
+        const element = document.body; 
+        const opt = {
+            margin: 0,
+            filename: 'Camden_Health_Dashboard.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+        // Simple call to html2pdf library
+        html2pdf().set(opt).from(element).save();
+    }
+
+    function exportToImage() {
+        // Capture the entire body or a specific section
+        html2canvas(document.body).then(canvas => {
+            const link = document.createElement('a');
+            link.download = 'Camden_Health_Dashboard.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }
+</script>
 {% endblock %}
