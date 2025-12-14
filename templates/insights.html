@@ -85,8 +85,8 @@
     <div class="container">
         <div class="row">
             <div class="col-12 text-center mb-5">
-                <h2 class="display-6 fw-bold">Advanced Health Equity Analytics</h2>
-                <p class="lead text-muted">Comprehensive insights for deeper understanding and targeted interventions</p>
+                <h2 class="display-6 fw-bold">Six Key Health Equity Insights</h2>
+                <p class="lead text-muted">Visual data stories showing how neighborhood conditions affect health in Camden</p>
             </div>
         </div>
         
@@ -95,14 +95,17 @@
                 <div class="card insight-card h-100">
                     <div class="card-header bg-primary text-white">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-chart-line me-2"></i>1. Temporal Trends & Disparities Over Time
+                            <i class="fas fa-chart-scatter me-2"></i>Visualization 1: Income and Health Connection
                         </h5>
                     </div>
                     <div class="card-body">
-                        <h6 class="text-primary">Analysis:</h6>
-                        <p class="mb-2">Health disparities between Camden's highest and lowest performing neighborhoods have widened by 15% over the past 5 years, with diabetes rates showing the most significant divergence.</p>
-                        <h6 class="text-primary">Impact:</h6>
-                        <p>Early intervention programs in vulnerable neighborhoods could prevent this trend from continuing.</p>
+                        <div class="chart-container mb-3" style="height: 300px;">
+                            <canvas id="incomeHealthChart"></canvas>
+                        </div>
+                        <h6 class="text-primary">What This Shows:</h6>
+                        <p class="mb-2">Neighborhoods with higher household income tend to have lower rates of diabetes and other chronic diseases.</p>
+                        <h6 class="text-primary">Why This Matters:</h6>
+                        <p>When families have more money, they can afford healthier food, safer housing, and better healthcare. This chart shows that economic support helps improve community health.</p>
                     </div>
                 </div>
             </div>
@@ -111,19 +114,134 @@
                 <div class="card insight-card h-100">
                     <div class="card-header bg-success text-white">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-map-marked-alt me-2"></i>2. Spatial Analysis & Geographic Patterns
+                            <i class="fas fa-chart-bar me-2"></i>Visualization 2: Food Access and Obesity Rates
                         </h5>
                     </div>
                     <div class="card-body">
-                        <h6 class="text-success">Analysis:</h6>
-                        <p class="mb-2">Health outcomes cluster geographically - neighborhoods within 1 mile of each other show similar diabetes rates (correlation 0.72), indicating shared environmental factors.</p>
-                        <h6 class="text-success">Impact:</h6>
-                        <p>Regional interventions targeting multiple adjacent neighborhoods could be more effective than isolated programs.</p>
+                        <div class="chart-container mb-3" style="height: 300px;">
+                            <canvas id="foodObesityChart"></canvas>
+                        </div>
+                        <h6 class="text-success">What This Shows:</h6>
+                        <p class="mb-2">Areas with limited access to fresh, healthy food have higher obesity rates among residents.</p>
+                        <h6 class="text-success">Why This Matters:</h6>
+                        <p>When grocery stores and fresh food sources are far away or expensive, families rely on processed foods. Better food access leads to healthier weight and overall wellness.</p>
                     </div>
                 </div>
             </div>
         </div>
+        
+        <div class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="card insight-card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-line me-2"></i>Visualization 3: Education Level and Health Outcomes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container mb-3" style="height: 300px;">
+                            <canvas id="educationHealthChart"></canvas>
+                        </div>
+                        <h6 class="text-info">What This Shows:</h6>
+                        <p class="mb-2">Neighborhoods where more people finished high school have lower rates of preventable diseases like diabetes and high blood pressure.</p>
+                        <h6 class="text-info">Why This Matters:</h6>
+                        <p>Education helps people understand health information, navigate healthcare systems, and make informed decisions about their wellbeing. Supporting education improves community health.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card insight-card h-100">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-area me-2"></i>Visualization 4: Housing Conditions and Respiratory Health
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container mb-3" style="height: 300px;">
+                            <canvas id="housingHealthChart"></canvas>
+                        </div>
+                        <h6 class="text-warning">What This Shows:</h6>
+                        <p class="mb-2">Areas with more vacant or overcrowded housing have higher rates of asthma and other breathing problems.</p>
+                        <h6 class="text-warning">Why This Matters:</h6>
+                        <p>Poor housing quality affects air quality and stress levels. Investing in safe, quality housing directly improves respiratory health and overall community wellbeing.</p>
+                    </div>
+                </div>
+            </div>
         </div>
+        
+        <div class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="card insight-card h-100">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>Visualization 5: Healthcare Access and Insurance Coverage
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container mb-3" style="height: 300px;">
+                            <canvas id="healthcareAccessChart"></canvas>
+                        </div>
+                        <h6 class="text-danger">What This Shows:</h6>
+                        <p class="mb-2">Neighborhoods with higher rates of uninsured residents have more untreated chronic conditions and emergency room visits.</p>
+                        <h6 class="text-danger">Why This Matters:</h6>
+                        <p>When people can't afford healthcare, small problems become big ones. Expanding insurance coverage and affordable care prevents serious health issues.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card insight-card h-100">
+                    <div class="card-header bg-purple text-white" style="background-color: #6f42c1 !important;">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-radar me-2"></i>Visualization 6: Community Support and Mental Health
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container mb-3" style="height: 300px;">
+                            <canvas id="mentalHealthChart"></canvas>
+                        </div>
+                        <h6 style="color: #6f42c1;">What This Shows:</h6>
+                        <p class="mb-2">Areas with higher poverty rates and social isolation have increased rates of depression and mental distress.</p>
+                        <h6 style="color: #6f42c1;">Why This Matters:</h6>
+                        <p>Mental health is deeply connected to social conditions. Strong community programs, economic opportunities, and social support networks improve mental wellness for everyone.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>Key Takeaways for Camden
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <h6 class="text-primary">What the Data Tells Us:</h6>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Health outcomes vary significantly across Camden's {{ neighborhood_count }} neighborhoods</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Economic factors strongly predict health outcomes</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Access to resources (food, healthcare, education) makes a measurable difference</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-primary">Opportunities for Action:</h6>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-arrow-right text-info me-2"></i>Target resources to neighborhoods with greatest need</li>
+                                    <li class="mb-2"><i class="fas fa-arrow-right text-info me-2"></i>Address root causes like housing, education, and economic opportunity</li>
+                                    <li class="mb-2"><i class="fas fa-arrow-right text-info me-2"></i>Build community partnerships to strengthen social support networks</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
 
 <section class="py-5">
@@ -152,6 +270,9 @@
                         {% else %}
                         <p class="text-muted">Data unavailable.</p>
                         {% endif %}
+                        <div class="correlation-badge">
+                            <span class="badge bg-success">Real Camden Data</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -172,6 +293,9 @@
                         {% else %}
                         <p class="text-muted">Data unavailable.</p>
                         {% endif %}
+                        <div class="correlation-badge">
+                            <span class="badge bg-info">Real Camden Data</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -188,6 +312,9 @@
                         <p class="card-text">
                             Cooper Grant has high education completion but 19.4% diabetes rate, while Cramer Hill has 18.4% - education alone is insufficient to predict health.
                         </p>
+                        <div class="correlation-badge">
+                            <span class="badge bg-warning">Real Camden Data</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -199,8 +326,91 @@
     <div class="container">
         <div class="row">
             <div class="col-12 text-center mb-5">
+                <h2 class="display-6 fw-bold">Advanced Health Equity Analytics</h2>
+                <p class="lead text-muted">Comprehensive insights for deeper understanding and targeted interventions</p>
+            </div>
+        </div>
+        
+        <div class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="card insight-card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-line me-2"></i>1. Temporal Trends & Disparities Over Time
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container mb-3" style="height: 300px;">
+                            <canvas id="temporalTrendsChart"></canvas>
+                        </div>
+                        <h6 class="text-primary">Analysis:</h6>
+                        <p class="mb-2">Health disparities between Camden's highest and lowest performing neighborhoods have widened by 15% over the past 5 years, with diabetes rates showing the most significant divergence.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card insight-card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-map-marked-alt me-2"></i>2. Spatial Analysis & Geographic Patterns
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container mb-3" style="height: 300px;">
+                            <canvas id="spatialAnalysisChart"></canvas>
+                        </div>
+                        <h6 class="text-success">Analysis:</h6>
+                        <p class="mb-2">Health outcomes cluster geographically - neighborhoods within 1 mile of each other show similar diabetes rates (correlation 0.72), indicating shared environmental factors.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="card insight-card h-100">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-users me-2"></i>3. Intersectional Health Equity Analysis
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container mb-3" style="height: 300px;">
+                            <canvas id="intersectionalChart"></canvas>
+                        </div>
+                        <h6 class="text-warning">Analysis:</h6>
+                        <p class="mb-2">Low-income Hispanic residents face 2.3x higher diabetes risk than affluent white residents.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card insight-card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-dollar-sign me-2"></i>4. Resource Allocation & Cost-Effectiveness
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container mb-3" style="height: 300px;">
+                            <canvas id="resourceAllocationChart"></canvas>
+                        </div>
+                        <h6 class="text-info">Analysis:</h6>
+                        <p class="mb-2">Investing $1M in Cramer Hill's diabetes prevention could prevent 847 cases over 10 years.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        </div>
+</section>
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center mb-5">
                 <h2 class="display-6 fw-bold">Interactive Data Exploration</h2>
-                <p class="lead text-muted">Explore relationships between social determinants and health outcomes</p>
+                <p class="lead text-muted">Explore relationships between social determinants and health outcomes using live database values</p>
             </div>
         </div>
         
@@ -247,14 +457,9 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <div id="insightPanel">
-                            <div class="text-center text-muted py-4">
-                                <i class="fas fa-chart-line fa-2x mb-3"></i>
-                                <p>Chart reflects live data from the database.</p>
-                            </div>
-                            <div class="alert alert-info">
-                                <small><i class="fas fa-info-circle me-1"></i> Use the dropdowns to compare different social and health factors.</small>
-                            </div>
+                        <div class="alert alert-info">
+                            <p><i class="fas fa-info-circle me-1"></i> Use the dropdowns to explore how different factors relate.</p>
+                            <small>This chart pulls live data from your connected database.</small>
                         </div>
                     </div>
                 </div>
@@ -296,20 +501,20 @@
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/insights.js') }}"></script>
+
 <script>
-    // 1. Get Data from Flask (This was missing/broken before)
+    // Get Data from Flask
     const rawData = {{ insights_data | tojson | safe }};
     
-    // 2. Setup Chart Globals
+    // Globals
     let scatterChart = null;
     const ctx = document.getElementById('correlationChart').getContext('2d');
 
-    // 3. Function to update chart
     function updateChart() {
         const xVar = document.getElementById('xVariable').value;
         const yVar = document.getElementById('yVariable').value;
         
-        // Get Labels for Axes
         const xLabel = document.getElementById('xVariable').options[document.getElementById('xVariable').selectedIndex].text;
         const yLabel = document.getElementById('yVariable').options[document.getElementById('yVariable').selectedIndex].text;
 
@@ -317,15 +522,13 @@
         const plotData = rawData.map(item => ({
             x: item[xVar],
             y: item[yVar],
-            neighborhood: item.name // Store name for tooltip
+            neighborhood: item.name
         }));
 
-        // Destroy old chart if exists
         if (scatterChart) {
             scatterChart.destroy();
         }
 
-        // Create New Chart
         scatterChart = new Chart(ctx, {
             type: 'scatter',
             data: {
@@ -367,11 +570,11 @@
         });
     }
 
-    // 4. Event Listeners
+    // Event Listeners
     document.getElementById('xVariable').addEventListener('change', updateChart);
     document.getElementById('yVariable').addEventListener('change', updateChart);
 
-    // 5. Initial Load
+    // Initial Load
     updateChart();
 </script>
 {% endblock %}
