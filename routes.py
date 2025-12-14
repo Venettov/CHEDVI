@@ -32,7 +32,7 @@ def clean_dataframe_columns(df):
     # 1. Basic formatting
     df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
     
-    # 2. Alias Check (The Fix for your issue)
+    # 2. Alias Check (Fixes your CSV upload issue)
     if 'neighborhood' in df.columns:
         df.rename(columns={'neighborhood': 'name'}, inplace=True)
         
@@ -45,7 +45,7 @@ def reload_database_from_csv():
             return False, "Data file not found."
 
         df = pd.read_csv(DATA_FILE)
-        df = clean_dataframe_columns(df) # Ensure columns are clean before reading
+        df = clean_dataframe_columns(df) 
         
         db.session.query(NeighborhoodHealth).delete()
         
@@ -70,6 +70,8 @@ def reload_database_from_csv():
     except Exception as e:
         db.session.rollback()
         return False, str(e)
+
+# --- PUBLIC ROUTES ---
 
 @app.route('/')
 def index():
@@ -106,12 +108,16 @@ def admin_logout():
     flash('Logged out successfully.', 'info')
     return redirect(url_for('admin'))
 
+# --- CRITICAL FIX ROUTE ---
 @app.route('/admin/db-fix')
 def admin_db_fix():
+    """Run this ONCE to fix the StringTruncation error."""
     try:
+        # Drop the old table that is too small
         Admin.__table__.drop(db.engine)
+        # Create the new table with 256 char limit
         db.create_all()
-        return "Database Admin table reset successfully."
+        return "SUCCESS: Database Admin table reset. You can now use the Setup link."
     except Exception as e:
         return f"Error resetting table: {str(e)}"
 
@@ -126,7 +132,7 @@ def admin_setup(username, password):
         new_admin = Admin(username=username, password_hash=hashed_pw)
         db.session.add(new_admin)
         db.session.commit()
-        return f"Success! Created admin '{username}'. You can now use these credentials on the Admin page."
+        return f"Success! Created admin '{username}'. You can now go to /admin to login."
     except Exception as e:
         return f"Error: {str(e)}"
 
@@ -146,8 +152,6 @@ def admin_upload():
             shutil.copy(DATA_FILE, BACKUP_FILE)
 
         new_data = pd.read_csv(file)
-        
-        # --- ROBUST CLEANING (Handles 'Neighborhood' vs 'Name') ---
         new_data = clean_dataframe_columns(new_data)
 
         if request.form.get('replace_all'):
@@ -156,15 +160,14 @@ def admin_upload():
         else:
             if os.path.exists(DATA_FILE):
                 current_data = pd.read_csv(DATA_FILE)
-                # Clean existing data too, just in case
                 current_data = clean_dataframe_columns(current_data)
                 
                 if 'name' not in new_data.columns:
-                    flash(f'Error: CSV missing "Name" or "Neighborhood" column. Found: {list(new_data.columns)}', 'danger')
+                    flash(f'Error: CSV missing "Name" column. Found: {list(new_data.columns)}', 'danger')
                     return redirect(url_for('admin'))
                 
                 if 'name' not in current_data.columns:
-                    # Fallback: if existing data is corrupt, force a replace
+                     # Fallback: if existing data is corrupt, force a replace
                     new_data.to_csv(DATA_FILE, index=False)
                     flash('Warning: Existing data was corrupt (missing Name). Performed full replacement instead.', 'warning')
                 else:
@@ -208,9 +211,7 @@ def admin_rollback():
 
     return redirect(url_for('admin'))
 
-# --- DASHBOARD & OTHER ROUTES ---
-# (Keep the rest of your routes exactly as they were in the previous step)
-# I will include them here for completeness to ensure you can copy-paste the whole file.
+# --- DASHBOARD & ANALYTICS ROUTES ---
 
 @app.route('/dashboard')
 def dashboard():
@@ -292,6 +293,7 @@ def insights():
     highest_income_n = max(all_n, key=lambda x: x.median_income) if all_n else None
     highest_poverty_n = max(all_n, key=lambda x: x.poverty_rate) if all_n else None
 
+    # Prepare Data for Interactive Chart
     insights_data = []
     for n in all_n:
         insights_data.append({
