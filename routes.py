@@ -11,7 +11,7 @@ from forms import ContactForm, ResourceRequestForm, NewsletterForm
 DATA_FILE = 'neighborhood_data.csv'
 BACKUP_FILE = 'neighborhood_data.bak'
 
-# SECURITY: Secret key is required for sessions to work.
+# SECURITY: Secret key is required for sessions.
 app.secret_key = os.environ.get('SECRET_KEY', 'replace-this-with-a-secure-key')
 
 # --- HELPER FUNCTIONS ---
@@ -23,6 +23,21 @@ def verify_admin(username, password):
         return True
     return False
 
+def clean_dataframe_columns(df):
+    """
+    Helper to standardize column names.
+    1. Lowercase, strip spaces, replace spaces with underscores.
+    2. Rename 'neighborhood' -> 'name' if found.
+    """
+    # 1. Basic formatting
+    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+    
+    # 2. Alias Check (The Fix for your issue)
+    if 'neighborhood' in df.columns:
+        df.rename(columns={'neighborhood': 'name'}, inplace=True)
+        
+    return df
+
 def reload_database_from_csv():
     """Helper function to clear DB and reload from the current CSV file."""
     try:
@@ -30,8 +45,7 @@ def reload_database_from_csv():
             return False, "Data file not found."
 
         df = pd.read_csv(DATA_FILE)
-        # Normalize columns just to be safe before insertion
-        df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+        df = clean_dataframe_columns(df) # Ensure columns are clean before reading
         
         db.session.query(NeighborhoodHealth).delete()
         
@@ -46,7 +60,7 @@ def reload_database_from_csv():
                 asthma_rate=row.get('asthma_rate', 0.0),
                 mental_distress_rate=row.get('mental_distress_rate', 0.0),
                 high_blood_pressure=row.get('high_blood_pressure', 0.0),
-                food_access_score=row.get('low_food_access_score', 0.0), # Note: adjusting to common CSV name
+                food_access_score=row.get('food_access_score', 0.0),
                 lack_health_insurance=row.get('lack_health_insurance', 0.0)
             )
             db.session.add(neighborhood)
@@ -132,8 +146,9 @@ def admin_upload():
             shutil.copy(DATA_FILE, BACKUP_FILE)
 
         new_data = pd.read_csv(file)
-        # Normalize new data columns immediately
-        new_data.columns = new_data.columns.str.strip().str.lower().str.replace(' ', '_')
+        
+        # --- ROBUST CLEANING (Handles 'Neighborhood' vs 'Name') ---
+        new_data = clean_dataframe_columns(new_data)
 
         if request.form.get('replace_all'):
             new_data.to_csv(DATA_FILE, index=False)
@@ -141,22 +156,23 @@ def admin_upload():
         else:
             if os.path.exists(DATA_FILE):
                 current_data = pd.read_csv(DATA_FILE)
+                # Clean existing data too, just in case
+                current_data = clean_dataframe_columns(current_data)
                 
-                # --- BUG FIX: Normalize EXISTING data columns too ---
-                current_data.columns = current_data.columns.str.strip().str.lower().str.replace(' ', '_')
-                
-                if 'name' not in new_data.columns or 'name' not in current_data.columns:
-                    flash('Error: CSV must contain a "name" column for merging.', 'danger')
+                if 'name' not in new_data.columns:
+                    flash(f'Error: CSV missing "Name" or "Neighborhood" column. Found: {list(new_data.columns)}', 'danger')
                     return redirect(url_for('admin'))
-
-                current_data.set_index('name', inplace=True)
-                new_data.set_index('name', inplace=True)
                 
-                # Combine: Update existing with new, keep existing where new is missing
-                merged_data = new_data.combine_first(current_data).reset_index()
-                
-                merged_data.to_csv(DATA_FILE, index=False)
-                flash('Smart Merge: New data integrated with existing records.', 'info')
+                if 'name' not in current_data.columns:
+                    # Fallback: if existing data is corrupt, force a replace
+                    new_data.to_csv(DATA_FILE, index=False)
+                    flash('Warning: Existing data was corrupt (missing Name). Performed full replacement instead.', 'warning')
+                else:
+                    current_data.set_index('name', inplace=True)
+                    new_data.set_index('name', inplace=True)
+                    merged_data = new_data.combine_first(current_data).reset_index()
+                    merged_data.to_csv(DATA_FILE, index=False)
+                    flash('Smart Merge: New data integrated with existing records.', 'info')
             else:
                 new_data.to_csv(DATA_FILE, index=False)
 
@@ -193,6 +209,8 @@ def admin_rollback():
     return redirect(url_for('admin'))
 
 # --- DASHBOARD & OTHER ROUTES ---
+# (Keep the rest of your routes exactly as they were in the previous step)
+# I will include them here for completeness to ensure you can copy-paste the whole file.
 
 @app.route('/dashboard')
 def dashboard():
@@ -251,7 +269,6 @@ def dashboard():
 @app.route('/insights')
 def insights():
     all_n = NeighborhoodHealth.query.all()
-    
     if not all_n:
         return render_template('insights.html', total_population="0", insights_data=[])
 
