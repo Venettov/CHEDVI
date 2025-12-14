@@ -12,7 +12,6 @@ DATA_FILE = 'neighborhood_data.csv'
 BACKUP_FILE = 'neighborhood_data.bak'
 
 # SECURITY: Secret key is required for sessions to work.
-# In production, this should be set in your environment variables.
 app.secret_key = os.environ.get('SECRET_KEY', 'replace-this-with-a-secure-key')
 
 # --- HELPER FUNCTIONS ---
@@ -31,6 +30,8 @@ def reload_database_from_csv():
             return False, "Data file not found."
 
         df = pd.read_csv(DATA_FILE)
+        # Normalize columns just to be safe before insertion
+        df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
         
         db.session.query(NeighborhoodHealth).delete()
         
@@ -42,6 +43,11 @@ def reload_database_from_csv():
                 poverty_rate=row.get('poverty_rate', 0.0),
                 diabetes_rate=row.get('diabetes_rate', 0.0),
                 obesity_rate=row.get('obesity_rate', 0.0),
+                asthma_rate=row.get('asthma_rate', 0.0),
+                mental_distress_rate=row.get('mental_distress_rate', 0.0),
+                high_blood_pressure=row.get('high_blood_pressure', 0.0),
+                food_access_score=row.get('low_food_access_score', 0.0), # Note: adjusting to common CSV name
+                lack_health_insurance=row.get('lack_health_insurance', 0.0)
             )
             db.session.add(neighborhood)
         
@@ -67,7 +73,6 @@ def admin():
 
 @app.route('/admin/login', methods=['POST'])
 def admin_login():
-    """Handles the login form submission."""
     username = request.form.get('username')
     password = request.form.get('password')
     
@@ -82,7 +87,6 @@ def admin_login():
 
 @app.route('/admin/logout')
 def admin_logout():
-    """Logs the user out."""
     session.pop('admin_logged_in', None)
     session.pop('admin_user', None)
     flash('Logged out successfully.', 'info')
@@ -114,7 +118,6 @@ def admin_setup(username, password):
 
 @app.route('/admin/upload', methods=['POST'])
 def admin_upload():
-    # 1. CHECK SESSION (Not form inputs)
     if not session.get('admin_logged_in'):
         flash('Please log in first.', 'danger')
         return redirect(url_for('admin'))
@@ -129,6 +132,7 @@ def admin_upload():
             shutil.copy(DATA_FILE, BACKUP_FILE)
 
         new_data = pd.read_csv(file)
+        # Normalize new data columns immediately
         new_data.columns = new_data.columns.str.strip().str.lower().str.replace(' ', '_')
 
         if request.form.get('replace_all'):
@@ -137,13 +141,20 @@ def admin_upload():
         else:
             if os.path.exists(DATA_FILE):
                 current_data = pd.read_csv(DATA_FILE)
+                
+                # --- BUG FIX: Normalize EXISTING data columns too ---
+                current_data.columns = current_data.columns.str.strip().str.lower().str.replace(' ', '_')
+                
                 if 'name' not in new_data.columns or 'name' not in current_data.columns:
                     flash('Error: CSV must contain a "name" column for merging.', 'danger')
                     return redirect(url_for('admin'))
 
                 current_data.set_index('name', inplace=True)
                 new_data.set_index('name', inplace=True)
+                
+                # Combine: Update existing with new, keep existing where new is missing
                 merged_data = new_data.combine_first(current_data).reset_index()
+                
                 merged_data.to_csv(DATA_FILE, index=False)
                 flash('Smart Merge: New data integrated with existing records.', 'info')
             else:
@@ -162,7 +173,6 @@ def admin_upload():
 
 @app.route('/admin/rollback', methods=['POST'])
 def admin_rollback():
-    # 1. CHECK SESSION
     if not session.get('admin_logged_in'):
         flash('Please log in first.', 'danger')
         return redirect(url_for('admin'))
@@ -242,11 +252,9 @@ def dashboard():
 def insights():
     all_n = NeighborhoodHealth.query.all()
     
-    # Defaults if DB is empty
     if not all_n:
         return render_template('insights.html', total_population="0", insights_data=[])
 
-    # 1. Calculate Aggregates (Keep your existing logic)
     total_population = sum(n.total_population for n in all_n)
     
     diabetes_rates = [n.diabetes_rate for n in all_n]
@@ -267,8 +275,6 @@ def insights():
     highest_income_n = max(all_n, key=lambda x: x.median_income) if all_n else None
     highest_poverty_n = max(all_n, key=lambda x: x.poverty_rate) if all_n else None
 
-    # 2. NEW: Prepare Data for the Interactive Chart
-    # We map your DB models to simple JSON keys that the Javascript can read
     insights_data = []
     for n in all_n:
         insights_data.append({
@@ -297,7 +303,7 @@ def insights():
                            max_poverty=max_poverty,
                            highest_income_n=highest_income_n,
                            highest_poverty_n=highest_poverty_n,
-                           insights_data=insights_data) # <--- PASSING THE DATA HERE
+                           insights_data=insights_data)
 
 @app.route('/neighborhoods')
 def neighborhoods():
