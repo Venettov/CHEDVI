@@ -3,7 +3,7 @@
 {% block title %}Dashboard - Camden Health Equity Data Visualization Initiative{% endblock %}
 
 {% block content %}
-<div id="export-container">
+<div id="export-container" class="bg-white">
     
     <section class="py-4 bg-light">
         <div class="container">
@@ -117,7 +117,7 @@
                         </div>
                     </div>
                     
-                    <div class="user-onboarding" id="onboardingTour" style="display: none;">
+                    <div class="user-onboarding" id="onboardingTour" style="display: none;" data-html2canvas-ignore="true">
                         <div class="alert alert-info alert-dismissible fade show" role="alert">
                             <strong>Welcome to Camden Health Equity Dashboard!</strong> 
                             Take a quick tour to learn how to use the interactive features.
@@ -398,7 +398,7 @@
         </div>
     </section>
 </div>
-<div class="modal fade" id="neighborhoodModal" tabindex="-1" aria-labelledby="neighborhoodModalLabel" aria-hidden="true">
+<div class="modal fade" id="neighborhoodModal" tabindex="-1" aria-labelledby="neighborhoodModalLabel" aria-hidden="true" data-html2canvas-ignore="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
@@ -439,21 +439,9 @@
                         <p><strong>High Blood Pressure:</strong> <span id="modalHighBP">--</span>%</p>
                     </div>
                 </div>
-                
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <h6 class="fw-bold text-primary mb-3">Health Equity Summary</h6>
-                        <div class="alert alert-info" role="alert">
-                            <div id="modalEquitySummary">
-                                Select a neighborhood to see detailed health equity analysis.
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="viewNeighborhoodProfile()">View Full Profile</button>
             </div>
         </div>
     </div>
@@ -498,52 +486,75 @@
         document.body.removeChild(link);
     }
 
+    // IMPROVED PDF EXPORT
     function exportToPDF() {
-        const element = document.getElementById('export-container'); 
+        const element = document.getElementById('export-container');
         
-        // Settings to improve capture quality and avoid cutoff
-        const opt = {
-            margin: 0.2,
-            filename: 'Camden_Health_Dashboard.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { 
-                scale: 2, 
-                useCORS: true, 
-                scrollY: 0,
-                windowWidth: document.body.scrollWidth,
-                windowHeight: document.body.scrollHeight 
-            },
-            jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-        };
-
-        // Scroll to top temporarily to ensure maps render correctly for screenshot
+        // Temporarily scroll to top to ensure capture works from the start
+        const originalScroll = window.scrollY;
         window.scrollTo(0, 0);
-        
-        html2pdf().set(opt).from(element).save().catch(function(err) {
-            console.error(err);
-            alert("Error generating PDF. Please ensure maps are fully loaded before exporting.");
-        });
+
+        // Wait slightly for any lazy-loaded elements (maps/charts) to refresh at top position
+        setTimeout(() => {
+            const opt = {
+                margin: 0.2,
+                filename: 'Camden_Health_Dashboard.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 1.5, // Reduced scale slightly for better performance on large pages
+                    useCORS: true, 
+                    scrollY: 0,
+                    windowHeight: element.scrollHeight, // Force full height capture
+                    allowTaint: true
+                },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(element).save().then(function() {
+                // Restore scroll position
+                window.scrollTo(0, originalScroll);
+            }).catch(function(err) {
+                console.error("PDF Export Error:", err);
+                alert("Could not generate PDF. Please try the 'Print' option in your browser for best results with maps.");
+                window.scrollTo(0, originalScroll);
+            });
+        }, 500); // 500ms delay to allow re-render
     }
 
+    // IMPROVED IMAGE EXPORT
     function exportToImage() {
         const element = document.getElementById('export-container');
         
-        // Scroll to top to prevent "cutting off" parts of the image
+        // Capture specific dimensions to avoid cut-off
+        const fullHeight = element.scrollHeight;
+        const fullWidth = element.scrollWidth;
+
+        // Scroll top fix
+        const originalScroll = window.scrollY;
         window.scrollTo(0,0);
 
-        html2canvas(element, {
-            useCORS: true,
-            allowTaint: true,
-            scrollY: -window.scrollY // Critical fix for scroll offset
-        }).then(canvas => {
-            const link = document.createElement('a');
-            link.download = 'Camden_Health_Dashboard.png';
-            link.href = canvas.toDataURL();
-            link.click();
-        }).catch(function(err) {
-            console.error(err);
-            alert("Error generating image.");
-        });
+        setTimeout(() => {
+            html2canvas(element, {
+                useCORS: true,
+                allowTaint: true,
+                height: fullHeight,
+                width: fullWidth,
+                scrollY: 0, // Force capture from top
+                windowHeight: fullHeight // Ensure viewport matches content
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Camden_Health_Dashboard.png';
+                link.href = canvas.toDataURL();
+                link.click();
+                
+                // Restore scroll
+                window.scrollTo(0, originalScroll);
+            }).catch(function(err) {
+                console.error(err);
+                alert("Error generating image.");
+                window.scrollTo(0, originalScroll);
+            });
+        }, 500);
     }
 </script>
 {% endblock %}
