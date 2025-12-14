@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Console - CHEDVI{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><i class="fas fa-cogs me-2"></i>Data Management Console</h4>
+                        <span class="badge bg-warning text-dark">Admin Access Only</span>
+                    </div>
+                    <div class="card-body p-4">
+                        
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <div class="mb-5">
+                            <h5><i class="fas fa-file-upload text-primary me-2"></i>Update Dataset</h5>
+                            <p class="text-muted small">
+                                Upload a CSV file to update the database. You can upload partial data (e.g., just "Name" and "Diabetes Rate"), 
+                                and it will merge with existing data intelligently.
+                            </p>
+                            <form action="{{ url_for('admin_upload') }}" method="POST" enctype="multipart/form-data" class="border p-4 rounded bg-white">
+                                <div class="mb-3">
+                                    <label for="admin_pin" class="form-label fw-bold">Admin PIN</label>
+                                    <input type="password" class="form-control" name="admin_pin" placeholder="Enter PIN to authorize" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="file" class="form-label fw-bold">Select CSV File</label>
+                                    <input class="form-control" type="file" name="file" accept=".csv" required>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" name="replace_all" id="replaceAll">
+                                    <label class="form-check-label" for="replaceAll">
+                                        Wait! Replace <strong>everything</strong>? (Uncheck to merge/update only)
+                                    </label>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-cloud-upload-alt me-2"></i>Upload and Update
+                                </button>
+                            </form>
+                        </div>
+
+                        <hr>
+
+                        <div class="mt-4">
+                            <h5><i class="fas fa-history text-danger me-2"></i>Emergency Rollback</h5>
+                            <p class="text-muted small">
+                                Something look wrong? Click below to immediately undo the last upload and restore the previous dataset.
+                            </p>
+                            <form action="{{ url_for('admin_rollback') }}" method="POST" class="border p-4 rounded bg-light border-danger">
+                                <div class="mb-3">
+                                    <label for="admin_pin_rollback" class="form-label fw-bold">Admin PIN</label>
+                                    <input type="password" class="form-control" name="admin_pin" placeholder="Enter PIN to authorize" required>
+                                </div>
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="fas fa-undo me-2"></i>Revert to Previous Version
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

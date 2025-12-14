@@ -1,7 +1,47 @@
+import os
+import shutil
+import pandas as pd
 from flask import render_template, request, redirect, url_for, flash, jsonify
 from app import app, db
 from models import Contact, ResourceRequest, Newsletter, NeighborhoodHealth
 from forms import ContactForm, ResourceRequestForm, NewsletterForm
+
+# Configuration
+DATA_FILE = 'neighborhood_data.csv'
+BACKUP_FILE = 'neighborhood_data.bak'
+ADMIN_PIN = "9955"  # Change this to a secure PIN of your choice
+
+def reload_database_from_csv():
+    """Helper function to clear DB and reload from the current CSV file."""
+    try:
+        if not os.path.exists(DATA_FILE):
+            return False, "Data file not found."
+
+        # Read CSV
+        df = pd.read_csv(DATA_FILE)
+        
+        # Clear existing data
+        db.session.query(NeighborhoodHealth).delete()
+        
+        # Insert new data
+        for _, row in df.iterrows():
+            # Safely get values, defaulting to 0 or None if column is missing
+            neighborhood = NeighborhoodHealth(
+                name=row.get('name', 'Unknown'),
+                total_population=row.get('total_population', 0),
+                median_income=row.get('median_income', 0),
+                poverty_rate=row.get('poverty_rate', 0.0),
+                diabetes_rate=row.get('diabetes_rate', 0.0),
+                obesity_rate=row.get('obesity_rate', 0.0),
+                # Add other fields as needed based on your model
+            )
+            db.session.add(neighborhood)
+        
+        db.session.commit()
+        return True, "Database successfully updated."
+    except Exception as e:
+        db.session.rollback()
+        return False, str(e)
 
 @app.route('/')
 def index():
@@ -11,12 +51,104 @@ def index():
 def about():
     return render_template('about.html')
 
+# --- ADMIN ROUTES ---
+
+@app.route('/admin', methods=['GET'])
+def admin():
+    return render_template('admin.html')
+
+@app.route('/admin/upload', methods=['POST'])
+def admin_upload():
+    # 1. Security Check
+    if request.form.get('admin_pin') != ADMIN_PIN:
+        flash('Invalid PIN. Access Denied.', 'danger')
+        return redirect(url_for('admin'))
+
+    file = request.files.get('file')
+    if not file or not file.filename.endswith('.csv'):
+        flash('Please upload a valid CSV file.', 'warning')
+        return redirect(url_for('admin'))
+
+    try:
+        # 2. Create Backup of current data
+        if os.path.exists(DATA_FILE):
+            shutil.copy(DATA_FILE, BACKUP_FILE)
+
+        # 3. Handle Data Merging
+        new_data = pd.read_csv(file)
+        
+        # Clean column names (strip whitespace, lowercase)
+        new_data.columns = new_data.columns.str.strip().str.lower().str.replace(' ', '_')
+
+        if request.form.get('replace_all'):
+            # Option A: Wipe everything and use new file
+            new_data.to_csv(DATA_FILE, index=False)
+            flash('Full replacement mode: Old data overwritten.', 'info')
+        else:
+            # Option B: Smart Merge (Partial Update)
+            if os.path.exists(DATA_FILE):
+                current_data = pd.read_csv(DATA_FILE)
+                
+                # Ensure 'name' exists for merging
+                if 'name' not in new_data.columns or 'name' not in current_data.columns:
+                    flash('Error: CSV must contain a "name" column for merging.', 'danger')
+                    return redirect(url_for('admin'))
+
+                # Merge logic: Update current_data with values from new_data where names match
+                # set_index('name') allows us to align rows easily
+                current_data.set_index('name', inplace=True)
+                new_data.set_index('name', inplace=True)
+                
+                # combine_first updates nulls/existing values with new ones
+                merged_data = new_data.combine_first(current_data).reset_index()
+                
+                merged_data.to_csv(DATA_FILE, index=False)
+                flash('Smart Merge: New data integrated with existing records.', 'info')
+            else:
+                new_data.to_csv(DATA_FILE, index=False)
+
+        # 4. Reload Database
+        success, msg = reload_database_from_csv()
+        if success:
+            flash(f'Success! {msg}', 'success')
+        else:
+            flash(f'Error updating database: {msg}', 'danger')
+
+    except Exception as e:
+        flash(f'Critical Error: {str(e)}', 'danger')
+
+    return redirect(url_for('admin'))
+
+@app.route('/admin/rollback', methods=['POST'])
+def admin_rollback():
+    if request.form.get('admin_pin') != ADMIN_PIN:
+        flash('Invalid PIN.', 'danger')
+        return redirect(url_for('admin'))
+
+    try:
+        if os.path.exists(BACKUP_FILE):
+            # Restore backup
+            shutil.copy(BACKUP_FILE, DATA_FILE)
+            
+            # Reload DB
+            success, msg = reload_database_from_csv()
+            if success:
+                flash('System rolled back to previous version successfully.', 'success')
+            else:
+                flash(f'File restored but DB update failed: {msg}', 'warning')
+        else:
+            flash('No backup file found to restore.', 'warning')
+    except Exception as e:
+        flash(f'Rollback failed: {str(e)}', 'danger')
+
+    return redirect(url_for('admin'))
+
+# --- END ADMIN ROUTES ---
+
 @app.route('/dashboard')
 def dashboard():
-    # 1. Fetch all data from the database
     all_neighborhoods = NeighborhoodHealth.query.all()
     
-    # Safety check: If database is empty, return placeholder data
     if not all_neighborhoods:
         return render_template('dashboard.html', 
                                total_population="0", neighborhood_count=0,
@@ -25,26 +157,23 @@ def dashboard():
                                min_poverty=0, max_poverty=0, poverty_gap=0,
                                dashboard_data=[])
 
-    # 2. Calculate "Key Metrics" Statistics
     total_population = sum(n.total_population for n in all_neighborhoods)
     
     diabetes_rates = [n.diabetes_rate for n in all_neighborhoods]
-    min_diabetes = min(diabetes_rates)
-    max_diabetes = max(diabetes_rates)
+    min_diabetes = min(diabetes_rates) if diabetes_rates else 0
+    max_diabetes = max(diabetes_rates) if diabetes_rates else 0
     diabetes_gap = round(max_diabetes - min_diabetes, 1)
 
     incomes = [n.median_income for n in all_neighborhoods]
-    min_income = min(incomes)
-    max_income = max(incomes)
+    min_income = min(incomes) if incomes else 0
+    max_income = max(incomes) if incomes else 0
     income_ratio = round(max_income / min_income, 1) if min_income > 0 else 0
 
     poverty_rates = [n.poverty_rate for n in all_neighborhoods]
-    min_poverty = min(poverty_rates)
-    max_poverty = max(poverty_rates)
+    min_poverty = min(poverty_rates) if poverty_rates else 0
+    max_poverty = max(poverty_rates) if poverty_rates else 0
     poverty_gap = round(max_poverty - min_poverty, 1)
 
-    # 3. PREPARE DATA FOR EXPORT (New Addition)
-    # We create a clean list of dictionaries that JS can easily convert to CSV/PDF
     dashboard_data = []
     for n in all_neighborhoods:
         dashboard_data.append({
@@ -53,11 +182,9 @@ def dashboard():
             'income': n.median_income,
             'diabetes': n.diabetes_rate,
             'poverty': n.poverty_rate,
-            # Safely handle obesity if it exists in your model, otherwise default to 0
-            'obesity': getattr(n, 'obesity_rate', 0) 
+            'obesity': getattr(n, 'obesity_rate', 0)
         })
 
-    # 4. Pass variables to the template
     return render_template('dashboard.html', 
                            total_population=f"{total_population:,}", 
                            neighborhood_count=len(all_neighborhoods),
@@ -70,34 +197,33 @@ def dashboard():
                            min_poverty=min_poverty,
                            max_poverty=max_poverty,
                            poverty_gap=poverty_gap,
-                           dashboard_data=dashboard_data) # <--- Passed here for export
+                           dashboard_data=dashboard_data)
 
 @app.route('/insights')
 def insights():
     all_n = NeighborhoodHealth.query.all()
-    
     if not all_n:
         return render_template('insights.html', total_population="0")
 
     total_population = sum(n.total_population for n in all_n)
     
     diabetes_rates = [n.diabetes_rate for n in all_n]
-    avg_diabetes = sum(diabetes_rates) / len(diabetes_rates)
-    min_diabetes = min(diabetes_rates)
-    max_diabetes = max(diabetes_rates)
+    avg_diabetes = sum(diabetes_rates) / len(diabetes_rates) if diabetes_rates else 0
+    min_diabetes = min(diabetes_rates) if diabetes_rates else 0
+    max_diabetes = max(diabetes_rates) if diabetes_rates else 0
 
     incomes = [n.median_income for n in all_n]
-    avg_income = sum(incomes) / len(incomes)
-    min_income = min(incomes)
-    max_income = max(incomes)
+    avg_income = sum(incomes) / len(incomes) if incomes else 0
+    min_income = min(incomes) if incomes else 0
+    max_income = max(incomes) if incomes else 0
 
     poverty_rates = [n.poverty_rate for n in all_n]
-    avg_poverty = sum(poverty_rates) / len(poverty_rates)
-    min_poverty = min(poverty_rates)
-    max_poverty = max(poverty_rates)
+    avg_poverty = sum(poverty_rates) / len(poverty_rates) if poverty_rates else 0
+    min_poverty = min(poverty_rates) if poverty_rates else 0
+    max_poverty = max(poverty_rates) if poverty_rates else 0
 
-    highest_income_n = max(all_n, key=lambda x: x.median_income)
-    highest_poverty_n = max(all_n, key=lambda x: x.poverty_rate)
+    highest_income_n = max(all_n, key=lambda x: x.median_income) if all_n else None
+    highest_poverty_n = max(all_n, key=lambda x: x.poverty_rate) if all_n else None
 
     return render_template('insights.html',
                            total_population=f"{total_population:,}",
@@ -205,19 +331,11 @@ def resources():
 
 @app.route('/api/neighborhoods')
 def api_neighborhoods():
-    """API endpoint for neighborhood data (placeholder)"""
-    return jsonify({
-        'error': 'No data available yet',
-        'message': 'This endpoint will be populated with real neighborhood data'
-    })
+    return jsonify({'error': 'No data available yet', 'message': 'Placeholder'})
 
 @app.route('/api/health-metrics')
 def api_health_metrics():
-    """API endpoint for health metrics data (placeholder)"""
-    return jsonify({
-        'error': 'No data available yet',
-        'message': 'This endpoint will be populated with real health metrics data'
-    })
+    return jsonify({'error': 'No data available yet', 'message': 'Placeholder'})
 
 @app.errorhandler(404)
 def not_found_error(error):
