@@ -244,22 +244,70 @@ def admin_rollback():
 @app.route('/dashboard')
 def dashboard():
     all_neighborhoods = NeighborhoodHealth.query.all()
-    if not all_neighborhoods: return render_template('dashboard.html', total_population="0", neighborhood_count=0, min_diabetes=0, max_diabetes=0, diabetes_gap=0, min_income=0, max_income=0, income_ratio=0, min_poverty=0, max_poverty=0, poverty_gap=0, dashboard_data=[])
+    
+    # Handle case where database is empty
+    if not all_neighborhoods:
+        return render_template('dashboard.html', 
+                               total_population="0", neighborhood_count=0,
+                               min_diabetes=0, max_diabetes=0, diabetes_gap=0,
+                               min_income=0, max_income=0, income_ratio=0,
+                               min_poverty=0, max_poverty=0, poverty_gap=0,
+                               dashboard_data=[])
+
     total_population = sum(n.total_population for n in all_neighborhoods)
+    
+    # 1. Calculate Diabetes Stats
+    diabetes_rates = [n.diabetes_rate for n in all_neighborhoods]
+    min_diabetes = min(diabetes_rates) if diabetes_rates else 0
+    max_diabetes = max(diabetes_rates) if diabetes_rates else 0
+    diabetes_gap = round(max_diabetes - min_diabetes, 1)
+
+    # 2. Calculate Income Stats
+    incomes = [n.median_income for n in all_neighborhoods]
+    min_income = min(incomes) if incomes else 0
+    max_income = max(incomes) if incomes else 0
+    # Avoid division by zero
+    income_ratio = round(max_income / min_income, 1) if min_income > 0 else 0
+
+    # 3. Calculate Poverty Stats
+    poverty_rates = [n.poverty_rate for n in all_neighborhoods]
+    min_poverty = min(poverty_rates) if poverty_rates else 0
+    max_poverty = max(poverty_rates) if poverty_rates else 0
+    poverty_gap = round(max_poverty - min_poverty, 1)
+
+    # Prepare list for the table
     dashboard_data = []
     for n in all_neighborhoods:
         dashboard_data.append({
-            'name': n.name, 'population': n.total_population, 'income': n.median_income, 'diabetes': n.diabetes_rate, 'poverty': n.poverty_rate, 'obesity': getattr(n, 'obesity_rate', 0)
+            'name': n.name,
+            'population': n.total_population,
+            'income': n.median_income,
+            'diabetes': n.diabetes_rate,
+            'poverty': n.poverty_rate,
+            'obesity': getattr(n, 'obesity_rate', 0)
         })
-    return render_template('dashboard.html', total_population=f"{total_population:,}", neighborhood_count=len(all_neighborhoods), min_diabetes=0, max_diabetes=0, diabetes_gap=0, min_income=0, max_income=0, income_ratio=0, min_poverty=0, max_poverty=0, poverty_gap=0, dashboard_data=dashboard_data)
 
+    return render_template('dashboard.html', 
+                           total_population=f"{total_population:,}", 
+                           neighborhood_count=len(all_neighborhoods),
+                           min_diabetes=min_diabetes,
+                           max_diabetes=max_diabetes,
+                           diabetes_gap=diabetes_gap,
+                           min_income=f"{min_income/1000:.0f}k", 
+                           max_income=f"{max_income/1000:.0f}k",
+                           income_ratio=income_ratio,
+                           min_poverty=min_poverty,
+                           max_poverty=max_poverty,
+                           poverty_gap=poverty_gap,
+                           dashboard_data=dashboard_data)
 @app.route('/insights')
 def insights():
     all_n = NeighborhoodHealth.query.all()
     if not all_n: return render_template('insights.html', total_population="0", insights_data=[])
+
     total_population = sum(n.total_population for n in all_n)
     
-    # Aggregates
+    # Aggregates for stat cards
     diabetes_rates = [n.diabetes_rate for n in all_n]
     avg_diabetes = sum(diabetes_rates) / len(diabetes_rates) if diabetes_rates else 0
     incomes = [n.median_income for n in all_n]
@@ -270,11 +318,19 @@ def insights():
     highest_income_n = max(all_n, key=lambda x: x.median_income) if all_n else None
     highest_poverty_n = max(all_n, key=lambda x: x.poverty_rate) if all_n else None
 
-    # Full data for interactive chart
+    # CRITICAL CHANGE: Prepare Data for the Interactive Chart
     insights_data = []
     for n in all_n:
         insights_data.append({
-            'name': n.name, 'income': n.median_income, 'poverty': n.poverty_rate, 'diabetes': n.diabetes_rate, 'obesity': getattr(n, 'obesity_rate', 0), 'asthma': getattr(n, 'asthma_rate', 0), 'mentalDistress': getattr(n, 'mental_distress_rate', 0), 'foodAccess': getattr(n, 'food_access_score', 0), 'insurance': getattr(n, 'lack_health_insurance', 0)
+            'name': n.name, 
+            'income': n.median_income, 
+            'poverty': n.poverty_rate, 
+            'diabetes': n.diabetes_rate, 
+            'obesity': getattr(n, 'obesity_rate', 0), 
+            'asthma': getattr(n, 'asthma_rate', 0), 
+            'mentalDistress': getattr(n, 'mental_distress_rate', 0), 
+            'foodAccess': getattr(n, 'food_access_score', 0), 
+            'insurance': getattr(n, 'lack_health_insurance', 0)
         })
 
     return render_template('insights.html',
@@ -291,7 +347,7 @@ def insights():
                            max_poverty=max(poverty_rates) if poverty_rates else 0,
                            highest_income_n=highest_income_n,
                            highest_poverty_n=highest_poverty_n,
-                           insights_data=insights_data)
+                           insights_data=insights_data) # <--- This is the key payload for the chart
 
 @app.route('/neighborhoods')
 def neighborhoods():
