@@ -24,19 +24,31 @@ def verify_admin(username, password):
     return False
 
 def clean_dataframe_columns(df):
-    """
-    Helper to standardize column names.
-    1. Lowercase, strip spaces, replace spaces with underscores.
-    2. Rename 'neighborhood' -> 'name' if found.
-    """
-    # 1. Basic formatting
+    """Standardizes column names to be lowercase and underscore_separated."""
+    # 1. Lowercase and replace spaces
     df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
     
-    # 2. Alias Check (Fixes your CSV upload issue)
+    # 2. Handle common aliases (e.g., 'neighborhood' -> 'name')
     if 'neighborhood' in df.columns:
         df.rename(columns={'neighborhood': 'name'}, inplace=True)
         
     return df
+
+def clean_numeric(value):
+    """
+    Robust cleaning: Removes commas, dollar signs, and % symbols.
+    Converts "$55,000" -> 55000.0
+    """
+    if isinstance(value, str):
+        # Strip common formatting characters
+        clean_str = value.replace(',', '').replace('$', '').replace('%', '').strip()
+        try:
+            if '.' in clean_str:
+                return float(clean_str)
+            return int(clean_str)
+        except ValueError:
+            return 0  # Default to 0 if data is bad
+    return value
 
 def reload_database_from_csv():
     """Helper function to clear DB and reload from the current CSV file."""
@@ -47,21 +59,23 @@ def reload_database_from_csv():
         df = pd.read_csv(DATA_FILE)
         df = clean_dataframe_columns(df) 
         
+        # Clear existing data
         db.session.query(NeighborhoodHealth).delete()
         
         for _, row in df.iterrows():
+            # Apply clean_numeric to ALL number fields to prevent crashes
             neighborhood = NeighborhoodHealth(
                 name=row.get('name', 'Unknown'),
-                total_population=row.get('total_population', 0),
-                median_income=row.get('median_income', 0),
-                poverty_rate=row.get('poverty_rate', 0.0),
-                diabetes_rate=row.get('diabetes_rate', 0.0),
-                obesity_rate=row.get('obesity_rate', 0.0),
-                asthma_rate=row.get('asthma_rate', 0.0),
-                mental_distress_rate=row.get('mental_distress_rate', 0.0),
-                high_blood_pressure=row.get('high_blood_pressure', 0.0),
-                food_access_score=row.get('food_access_score', 0.0),
-                lack_health_insurance=row.get('lack_health_insurance', 0.0)
+                total_population=clean_numeric(row.get('total_population', 0)),
+                median_income=clean_numeric(row.get('median_income', 0)),
+                poverty_rate=clean_numeric(row.get('poverty_rate', 0.0)),
+                diabetes_rate=clean_numeric(row.get('diabetes_rate', 0.0)),
+                obesity_rate=clean_numeric(row.get('obesity_rate', 0.0)),
+                asthma_rate=clean_numeric(row.get('asthma_rate', 0.0)),
+                mental_distress_rate=clean_numeric(row.get('mental_distress_rate', 0.0)),
+                high_blood_pressure=clean_numeric(row.get('high_blood_pressure', 0.0)),
+                food_access_score=clean_numeric(row.get('food_access_score', 0.0)),
+                lack_health_insurance=clean_numeric(row.get('lack_health_insurance', 0.0))
             )
             db.session.add(neighborhood)
         
@@ -108,7 +122,7 @@ def admin_logout():
     flash('Logged out successfully.', 'info')
     return redirect(url_for('admin'))
 
-# --- CRITICAL FIX ROUTE ---
+# --- CRITICAL REPAIR ROUTE ---
 @app.route('/admin/db-fix')
 def admin_db_fix():
     """Run this ONCE to fix the StringTruncation error."""
@@ -117,7 +131,7 @@ def admin_db_fix():
         Admin.__table__.drop(db.engine)
         # Create the new table with 256 char limit
         db.create_all()
-        return "SUCCESS: Database Admin table reset. You can now use the Setup link."
+        return "SUCCESS: Database Admin table reset. Go create your admin user now."
     except Exception as e:
         return f"Error resetting table: {str(e)}"
 
@@ -152,6 +166,7 @@ def admin_upload():
             shutil.copy(DATA_FILE, BACKUP_FILE)
 
         new_data = pd.read_csv(file)
+        # Robust cleaning immediately after read
         new_data = clean_dataframe_columns(new_data)
 
         if request.form.get('replace_all'):
@@ -167,9 +182,9 @@ def admin_upload():
                     return redirect(url_for('admin'))
                 
                 if 'name' not in current_data.columns:
-                     # Fallback: if existing data is corrupt, force a replace
+                    # Fallback if existing data is corrupt
                     new_data.to_csv(DATA_FILE, index=False)
-                    flash('Warning: Existing data was corrupt (missing Name). Performed full replacement instead.', 'warning')
+                    flash('Warning: Existing data corrupted. Performed full replacement.', 'warning')
                 else:
                     current_data.set_index('name', inplace=True)
                     new_data.set_index('name', inplace=True)
