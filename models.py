@@ -28,9 +28,9 @@ class NeighborhoodHealth(db.Model):
     name = db.Column(db.String(100), nullable=False)
     census_tract = db.Column(db.String(50))
     
-    # Demographics
-    total_population = db.Column(db.Integer)
-    median_income = db.Column(db.Integer)
+    # Demographics - NOW FLOAT TO PREVENT NUMERIC OUT OF RANGE ERRORS
+    total_population = db.Column(db.Float) 
+    median_income = db.Column(db.Float)
     poverty_rate = db.Column(db.Float)
     unemployment_rate = db.Column(db.Float)
     
@@ -61,11 +61,9 @@ class NeighborhoodHealth(db.Model):
             'population': self.total_population
         }
 
-# --- NEW ADMIN MODEL (Fixed Size) ---
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    # INCREASED TO 256 TO PREVENT ERROR
     password_hash = db.Column(db.String(256), nullable=False)
 
     def __repr__(self):

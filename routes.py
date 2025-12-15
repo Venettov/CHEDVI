@@ -6,52 +6,70 @@ from flask import render_template, request, redirect, url_for, flash, jsonify, s
 from app import app, db
 from models import Contact, ResourceRequest, Newsletter, NeighborhoodHealth, Admin
 from forms import ContactForm, ResourceRequestForm, NewsletterForm
+from sqlalchemy.exc import SQLAlchemyError # Import to catch DB specific errors
 
 # Configuration
 DATA_FILE = 'neighborhood_data.csv'
 BACKUP_FILE = 'neighborhood_data.bak'
 
-# SECURITY: Secret key is required for sessions.
+# SECURITY
 app.secret_key = os.environ.get('SECRET_KEY', 'replace-this-with-a-secure-key')
 
 # --- HELPER FUNCTIONS ---
 
 def verify_admin(username, password):
-    """Securely checks if username exists and password matches the hash."""
     user = Admin.query.filter_by(username=username).first()
     if user and check_password_hash(user.password_hash, password):
         return True
     return False
 
 def clean_dataframe_columns(df):
-    """Standardizes column names to be lowercase and underscore_separated."""
-    # 1. Lowercase and replace spaces
-    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+    """
+    Standardizes column names and maps common variations to database keys.
+    """
+    # 1. Basic cleaning: lowercase, underscore, strip spaces, remove symbols
+    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.replace('%', '').str.replace('$', '')
     
-    # 2. Handle common aliases (e.g., 'neighborhood' -> 'name')
-    if 'neighborhood' in df.columns:
-        df.rename(columns={'neighborhood': 'name'}, inplace=True)
-        
+    # 2. FLEXIBLE MAPPING (The Translator)
+    column_map = {
+        'neighborhood': 'name',
+        'neighborhood_name': 'name',
+        'total_pop': 'total_population',
+        'population': 'total_population',
+        'income': 'median_income',
+        'median_household_income': 'median_income',
+        'poverty': 'poverty_rate',
+        'diabetes': 'diabetes_rate',
+        'obesity': 'obesity_rate',
+        'asthma': 'asthma_rate',
+        'mental_distress': 'mental_distress_rate',
+        'food_access': 'food_access_score',
+        'insurance': 'lack_health_insurance',
+        'uninsured': 'lack_health_insurance'
+    }
+    
+    # Rename columns if they match our map
+    df.rename(columns=column_map, inplace=True)
     return df
 
 def clean_numeric(value):
     """
-    Robust cleaning: Removes commas, dollar signs, and % symbols.
-    Converts "$55,000" -> 55000.0
+    Robust cleaning: Removes symbols, handles pandas NaN (Not a Number), and converts to float/int.
     """
+    if pd.isna(value) or value is None:
+        return 0 
+        
     if isinstance(value, str):
-        # Strip common formatting characters
-        clean_str = value.replace(',', '').replace('$', '').replace('%', '').strip()
+        clean = value.replace(',', '').replace('$', '').replace('%', '').strip()
         try:
-            if '.' in clean_str:
-                return float(clean_str)
-            return int(clean_str)
+            if '.' in clean:
+                return float(clean)
+            return int(clean)
         except ValueError:
-            return 0  # Default to 0 if data is bad
+            return 0 
     return value
 
 def reload_database_from_csv():
-    """Helper function to clear DB and reload from the current CSV file."""
     try:
         if not os.path.exists(DATA_FILE):
             return False, "Data file not found."
@@ -59,11 +77,12 @@ def reload_database_from_csv():
         df = pd.read_csv(DATA_FILE)
         df = clean_dataframe_columns(df) 
         
-        # Clear existing data
+        # FINAL SANITY CHECK: Replace any remaining NaNs across the whole DataFrame with 0
+        df = df.fillna(0) 
+
         db.session.query(NeighborhoodHealth).delete()
         
         for _, row in df.iterrows():
-            # Apply clean_numeric to ALL number fields to prevent crashes
             neighborhood = NeighborhoodHealth(
                 name=row.get('name', 'Unknown'),
                 total_population=clean_numeric(row.get('total_population', 0)),
@@ -81,38 +100,36 @@ def reload_database_from_csv():
         
         db.session.commit()
         return True, "Database successfully updated."
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        # Report the specific SQL error for better debugging
+        return False, f"Database Error: Could not insert data. {e.__cause__}"
     except Exception as e:
         db.session.rollback()
-        return False, str(e)
+        # Report a generic error
+        return False, f"Critical Python Error during reload: {str(e)}"
 
-# --- PUBLIC ROUTES ---
+# --- ROUTES ---
 
 @app.route('/')
-def index():
-    return render_template('index.html')
+def index(): return render_template('index.html')
 
 @app.route('/about')
-def about():
-    return render_template('about.html')
-
-# --- ADMIN ROUTES ---
+def about(): return render_template('about.html')
 
 @app.route('/admin', methods=['GET'])
-def admin():
-    return render_template('admin.html')
+def admin(): return render_template('admin.html')
 
 @app.route('/admin/login', methods=['POST'])
 def admin_login():
     username = request.form.get('username')
     password = request.form.get('password')
-    
     if verify_admin(username, password):
         session['admin_logged_in'] = True
         session['admin_user'] = username
         flash('Successfully logged in.', 'success')
     else:
         flash('Invalid Username or Password.', 'danger')
-        
     return redirect(url_for('admin'))
 
 @app.route('/admin/logout')
@@ -122,16 +139,14 @@ def admin_logout():
     flash('Logged out successfully.', 'info')
     return redirect(url_for('admin'))
 
-# --- CRITICAL REPAIR ROUTE ---
 @app.route('/admin/db-fix')
 def admin_db_fix():
-    """Run this ONCE to fix the StringTruncation error."""
+    """Run this ONCE to force the live database to adopt new column sizes."""
     try:
-        # Drop the old table that is too small
         Admin.__table__.drop(db.engine)
-        # Create the new table with 256 char limit
+        NeighborhoodHealth.__table__.drop(db.engine) # Also drop the Neighborhood table to fix column type
         db.create_all()
-        return "SUCCESS: Database Admin table reset. Go create your admin user now."
+        return "SUCCESS: All data tables reset and recreated with correct types. You must recreate your admin user now."
     except Exception as e:
         return f"Error resetting table: {str(e)}"
 
@@ -141,7 +156,6 @@ def admin_setup(username, password):
         existing = Admin.query.filter_by(username=username).first()
         if existing:
             return f"Admin '{username}' already exists!"
-        
         hashed_pw = generate_password_hash(password)
         new_admin = Admin(username=username, password_hash=hashed_pw)
         db.session.add(new_admin)
@@ -166,7 +180,6 @@ def admin_upload():
             shutil.copy(DATA_FILE, BACKUP_FILE)
 
         new_data = pd.read_csv(file)
-        # Robust cleaning immediately after read
         new_data = clean_dataframe_columns(new_data)
 
         if request.form.get('replace_all'):
@@ -178,11 +191,11 @@ def admin_upload():
                 current_data = clean_dataframe_columns(current_data)
                 
                 if 'name' not in new_data.columns:
-                    flash(f'Error: CSV missing "Name" column. Found: {list(new_data.columns)}', 'danger')
+                    found_cols = ", ".join(list(new_data.columns))
+                    flash(f'Error: CSV missing "Name" column. Found: {found_cols}', 'danger')
                     return redirect(url_for('admin'))
                 
                 if 'name' not in current_data.columns:
-                    # Fallback if existing data is corrupt
                     new_data.to_csv(DATA_FILE, index=False)
                     flash('Warning: Existing data corrupted. Performed full replacement.', 'warning')
                 else:
@@ -198,7 +211,7 @@ def admin_upload():
         if success:
             flash(f'Success! {msg}', 'success')
         else:
-            flash(f'Error updating database: {msg}', 'danger')
+            flash(f'Error during database update: {msg}', 'danger') 
 
     except Exception as e:
         flash(f'Critical Error: {str(e)}', 'danger')
@@ -216,11 +229,11 @@ def admin_rollback():
             shutil.copy(BACKUP_FILE, DATA_FILE)
             success, msg = reload_database_from_csv()
             if success:
-                flash('System rolled back to previous version successfully.', 'success')
+                flash('Rollback successful.', 'success')
             else:
-                flash(f'File restored but DB update failed: {msg}', 'warning')
+                flash(f'Restored file but DB update failed: {msg}', 'warning')
         else:
-            flash('No backup file found to restore.', 'warning')
+            flash('No backup file found.', 'warning')
     except Exception as e:
         flash(f'Rollback failed: {str(e)}', 'danger')
 
@@ -231,110 +244,51 @@ def admin_rollback():
 @app.route('/dashboard')
 def dashboard():
     all_neighborhoods = NeighborhoodHealth.query.all()
-    
-    if not all_neighborhoods:
-        return render_template('dashboard.html', 
-                               total_population="0", neighborhood_count=0,
-                               min_diabetes=0, max_diabetes=0, diabetes_gap=0,
-                               min_income=0, max_income=0, income_ratio=0,
-                               min_poverty=0, max_poverty=0, poverty_gap=0,
-                               dashboard_data=[])
-
+    if not all_neighborhoods: return render_template('dashboard.html', total_population="0", neighborhood_count=0, min_diabetes=0, max_diabetes=0, diabetes_gap=0, min_income=0, max_income=0, income_ratio=0, min_poverty=0, max_poverty=0, poverty_gap=0, dashboard_data=[])
     total_population = sum(n.total_population for n in all_neighborhoods)
-    
-    diabetes_rates = [n.diabetes_rate for n in all_neighborhoods]
-    min_diabetes = min(diabetes_rates) if diabetes_rates else 0
-    max_diabetes = max(diabetes_rates) if diabetes_rates else 0
-    diabetes_gap = round(max_diabetes - min_diabetes, 1)
-
-    incomes = [n.median_income for n in all_neighborhoods]
-    min_income = min(incomes) if incomes else 0
-    max_income = max(incomes) if incomes else 0
-    income_ratio = round(max_income / min_income, 1) if min_income > 0 else 0
-
-    poverty_rates = [n.poverty_rate for n in all_neighborhoods]
-    min_poverty = min(poverty_rates) if poverty_rates else 0
-    max_poverty = max(poverty_rates) if poverty_rates else 0
-    poverty_gap = round(max_poverty - min_poverty, 1)
-
     dashboard_data = []
     for n in all_neighborhoods:
         dashboard_data.append({
-            'name': n.name,
-            'population': n.total_population,
-            'income': n.median_income,
-            'diabetes': n.diabetes_rate,
-            'poverty': n.poverty_rate,
-            'obesity': getattr(n, 'obesity_rate', 0)
+            'name': n.name, 'population': n.total_population, 'income': n.median_income, 'diabetes': n.diabetes_rate, 'poverty': n.poverty_rate, 'obesity': getattr(n, 'obesity_rate', 0)
         })
-
-    return render_template('dashboard.html', 
-                           total_population=f"{total_population:,}", 
-                           neighborhood_count=len(all_neighborhoods),
-                           min_diabetes=min_diabetes,
-                           max_diabetes=max_diabetes,
-                           diabetes_gap=diabetes_gap,
-                           min_income=f"{min_income/1000:.0f}k", 
-                           max_income=f"{max_income/1000:.0f}k",
-                           income_ratio=income_ratio,
-                           min_poverty=min_poverty,
-                           max_poverty=max_poverty,
-                           poverty_gap=poverty_gap,
-                           dashboard_data=dashboard_data)
+    return render_template('dashboard.html', total_population=f"{total_population:,}", neighborhood_count=len(all_neighborhoods), min_diabetes=0, max_diabetes=0, diabetes_gap=0, min_income=0, max_income=0, income_ratio=0, min_poverty=0, max_poverty=0, poverty_gap=0, dashboard_data=dashboard_data)
 
 @app.route('/insights')
 def insights():
     all_n = NeighborhoodHealth.query.all()
-    if not all_n:
-        return render_template('insights.html', total_population="0", insights_data=[])
-
+    if not all_n: return render_template('insights.html', total_population="0", insights_data=[])
     total_population = sum(n.total_population for n in all_n)
     
+    # Aggregates
     diabetes_rates = [n.diabetes_rate for n in all_n]
     avg_diabetes = sum(diabetes_rates) / len(diabetes_rates) if diabetes_rates else 0
-    min_diabetes = min(diabetes_rates) if diabetes_rates else 0
-    max_diabetes = max(diabetes_rates) if diabetes_rates else 0
-
     incomes = [n.median_income for n in all_n]
     avg_income = sum(incomes) / len(incomes) if incomes else 0
-    min_income = min(incomes) if incomes else 0
-    max_income = max(incomes) if incomes else 0
-
     poverty_rates = [n.poverty_rate for n in all_n]
     avg_poverty = sum(poverty_rates) / len(poverty_rates) if poverty_rates else 0
-    min_poverty = min(poverty_rates) if poverty_rates else 0
-    max_poverty = max(poverty_rates) if poverty_rates else 0
-
+    
     highest_income_n = max(all_n, key=lambda x: x.median_income) if all_n else None
     highest_poverty_n = max(all_n, key=lambda x: x.poverty_rate) if all_n else None
 
-    # Prepare Data for Interactive Chart
+    # Full data for interactive chart
     insights_data = []
     for n in all_n:
         insights_data.append({
-            'name': n.name,
-            'income': n.median_income,
-            'poverty': n.poverty_rate,
-            'diabetes': n.diabetes_rate,
-            'obesity': getattr(n, 'obesity_rate', 0),
-            'asthma': getattr(n, 'asthma_rate', 0),
-            'mentalDistress': getattr(n, 'mental_distress_rate', 0),
-            'foodAccess': getattr(n, 'food_access_score', 0),
-            'insurance': getattr(n, 'lack_health_insurance', 0)
+            'name': n.name, 'income': n.median_income, 'poverty': n.poverty_rate, 'diabetes': n.diabetes_rate, 'obesity': getattr(n, 'obesity_rate', 0), 'asthma': getattr(n, 'asthma_rate', 0), 'mentalDistress': getattr(n, 'mental_distress_rate', 0), 'foodAccess': getattr(n, 'food_access_score', 0), 'insurance': getattr(n, 'lack_health_insurance', 0)
         })
 
     return render_template('insights.html',
                            total_population=f"{total_population:,}",
                            neighborhood_count=len(all_n),
                            avg_diabetes=f"{avg_diabetes:.1f}",
-                           min_diabetes=min_diabetes,
-                           max_diabetes=max_diabetes,
+                           min_diabetes=min(diabetes_rates) if diabetes_rates else 0,
+                           max_diabetes=max(diabetes_rates) if diabetes_rates else 0,
                            avg_income=f"{avg_income:,.0f}",
-                           min_income=f"{min_income:,.0f}",
-                           max_income=f"{max_income:,.0f}",
+                           min_income=min(incomes) if incomes else 0,
+                           max_income=max(incomes) if incomes else 0,
                            avg_poverty=f"{avg_poverty:.1f}",
-                           min_poverty=min_poverty,
-                           max_poverty=max_poverty,
+                           min_poverty=min(poverty_rates) if poverty_rates else 0,
+                           max_poverty=max(poverty_rates) if poverty_rates else 0,
                            highest_income_n=highest_income_n,
                            highest_poverty_n=highest_poverty_n,
                            insights_data=insights_data)
@@ -342,105 +296,53 @@ def insights():
 @app.route('/neighborhoods')
 def neighborhoods():
     all_n = NeighborhoodHealth.query.all()
-    
     neighborhood_data = []
-    for n in all_n:
-        neighborhood_data.append({
-            'id': n.id,
-            'name': n.name,
-            'population': n.total_population,
-            'income': n.median_income,
-            'poverty': n.poverty_rate,
-            'diabetes': n.diabetes_rate,
-            'equity_status': 'High Priority' if n.median_income < 30000 else 'Stable' if n.median_income > 50000 else 'Vulnerable'
-        })
-    
+    for n in all_n: neighborhood_data.append({'id': n.id, 'name': n.name, 'population': n.total_population, 'income': n.median_income, 'poverty': n.poverty_rate, 'diabetes': n.diabetes_rate, 'equity_status': 'High Priority' if n.median_income < 30000 else 'Stable' if n.median_income > 50000 else 'Vulnerable'})
     return render_template('neighborhoods.html', neighborhood_data=neighborhood_data)
 
 @app.route('/rankings')
 def rankings():
     all_n = NeighborhoodHealth.query.all()
-    
-    rankings_data = []
-    for n in all_n:
-        rankings_data.append({
-            'name': n.name,
-            'population': n.total_population,
-            'income': n.median_income,
-            'poverty': n.poverty_rate,
-            'diabetes': n.diabetes_rate
-        })
-        
+    rankings_data = [{'name': n.name, 'population': n.total_population, 'income': n.median_income, 'poverty': n.poverty_rate, 'diabetes': n.diabetes_rate} for n in all_n]
     return render_template('rankings.html', rankings_data=rankings_data)
 
 @app.route('/policy')
-def policy():
-    return render_template('policy.html')
+def policy(): return render_template('policy.html')
 
 @app.route('/resources', methods=['GET', 'POST'])
 def resources():
     contact_form = ContactForm()
     resource_form = ResourceRequestForm()
     newsletter_form = NewsletterForm()
-    
     if request.method == 'POST':
-        if 'contact_submit' in request.form or 'organization' in request.form:
+        if 'contact_submit' in request.form:
             if contact_form.validate_on_submit():
-                contact = Contact(
-                    name=contact_form.name.data,
-                    email=contact_form.email.data,
-                    organization=contact_form.organization.data,
-                    message=contact_form.message.data
-                )
-                db.session.add(contact)
+                db.session.add(Contact(name=contact_form.name.data, email=contact_form.email.data, organization=contact_form.organization.data, message=contact_form.message.data))
                 db.session.commit()
-                flash('Your message has been sent successfully!', 'success')
+                flash('Message sent!', 'success')
                 return redirect(url_for('resources'))
-        
-        elif 'resource_submit' in request.form or 'zip_code' in request.form:
+        elif 'resource_submit' in request.form:
             if resource_form.validate_on_submit():
-                resource_request = ResourceRequest(
-                    name=resource_form.name.data,
-                    email=resource_form.email.data,
-                    zip_code=resource_form.zip_code.data,
-                    resource_type=resource_form.resource_type.data,
-                    needs_description=resource_form.needs_description.data
-                )
-                db.session.add(resource_request)
+                db.session.add(ResourceRequest(name=resource_form.name.data, email=resource_form.email.data, zip_code=resource_form.zip_code.data, resource_type=resource_form.resource_type.data, needs_description=resource_form.needs_description.data))
                 db.session.commit()
-                flash('Your resource request has been submitted successfully!', 'success')
+                flash('Request submitted!', 'success')
                 return redirect(url_for('resources'))
-        
         elif 'newsletter_submit' in request.form:
             if newsletter_form.validate_on_submit():
-                existing_subscriber = Newsletter.query.filter_by(email=newsletter_form.email.data).first()
-                if not existing_subscriber:
-                    newsletter = Newsletter(email=newsletter_form.email.data)
-                    db.session.add(newsletter)
+                if not Newsletter.query.filter_by(email=newsletter_form.email.data).first():
+                    db.session.add(Newsletter(email=newsletter_form.email.data))
                     db.session.commit()
-                    flash('Successfully subscribed to our newsletter!', 'success')
+                    flash('Subscribed!', 'success')
                 else:
-                    flash('You are already subscribed to our newsletter.', 'info')
+                    flash('Already subscribed.', 'info')
                 return redirect(url_for('resources'))
-    
-    return render_template('resources.html', 
-                         contact_form=contact_form,
-                         resource_form=resource_form,
-                         newsletter_form=newsletter_form)
+    return render_template('resources.html', contact_form=contact_form, resource_form=resource_form, newsletter_form=newsletter_form)
 
 @app.route('/api/neighborhoods')
-def api_neighborhoods():
-    return jsonify({'error': 'No data available yet', 'message': 'Placeholder'})
-
+def api_neighborhoods(): return jsonify({'error': 'No data available yet', 'message': 'Placeholder'})
 @app.route('/api/health-metrics')
-def api_health_metrics():
-    return jsonify({'error': 'No data available yet', 'message': 'Placeholder'})
-
+def api_health_metrics(): return jsonify({'error': 'No data available yet', 'message': 'Placeholder'})
 @app.errorhandler(404)
-def not_found_error(error):
-    return render_template('404.html'), 404
-
+def not_found_error(error): return render_template('404.html'), 404
 @app.errorhandler(500)
-def internal_error(error):
-    db.session.rollback()
-    return render_template('500.html'), 500
+def internal_error(error): db.session.rollback(); return render_template('500.html'), 500
