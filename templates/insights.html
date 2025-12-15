@@ -841,4 +841,97 @@
 
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/insights.js') }}"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get Data from Flask
+        const rawData = {{ insights_data | tojson | safe }};
+        
+        // Debugging: Check if data is arriving
+        console.log("Insights Data Loaded:", rawData);
+
+        const ctxElement = document.getElementById('correlationChart');
+        if (!ctxElement) {
+            console.error("Chart canvas not found!");
+            return;
+        }
+        const ctx = ctxElement.getContext('2d');
+        let scatterChart = null;
+
+        function updateChart() {
+            const xSelect = document.getElementById('xVariable');
+            const ySelect = document.getElementById('yVariable');
+            
+            if (!xSelect || !ySelect) return;
+
+            const xVar = xSelect.value;
+            const yVar = ySelect.value;
+            
+            const xLabel = xSelect.options[xSelect.selectedIndex].text;
+            const yLabel = ySelect.options[ySelect.selectedIndex].text;
+
+            // Map Data safely
+            const plotData = rawData.map(item => ({
+                x: item[xVar] || 0, // Default to 0 if data missing
+                y: item[yVar] || 0,
+                neighborhood: item.name
+            }));
+
+            if (scatterChart) {
+                scatterChart.destroy();
+            }
+
+            scatterChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Neighborhoods',
+                        data: plotData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1,
+                        pointRadius: 6,
+                        pointHoverRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let point = context.raw;
+                                    return point.neighborhood + ': (' + point.x + ', ' + point.y + ')';
+                                }
+                            }
+                        },
+                        legend: { display: false }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            title: { display: true, text: xLabel, font: { weight: 'bold' } }
+                        },
+                        y: {
+                            title: { display: true, text: yLabel, font: { weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Event Listeners
+        const xDropdown = document.getElementById('xVariable');
+        const yDropdown = document.getElementById('yVariable');
+
+        if (xDropdown && yDropdown) {
+            xDropdown.addEventListener('change', updateChart);
+            yDropdown.addEventListener('change', updateChart);
+            // Initial Load
+            updateChart();
+        }
+    });
+</script>
 {% endblock %}
