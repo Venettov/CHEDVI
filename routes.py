@@ -395,10 +395,35 @@ def resources():
     return render_template('resources.html', contact_form=contact_form, resource_form=resource_form, newsletter_form=newsletter_form)
 
 @app.route('/api/neighborhoods')
-def api_neighborhoods(): return jsonify({'error': 'No data available yet', 'message': 'Placeholder'})
+def api_neighborhoods():
+    """Returns all neighborhood data as JSON (Useful for external apps/maps)"""
+    all_n = NeighborhoodHealth.query.all()
+    if not all_n:
+        return jsonify([])
+    # Uses the .to_dict() helper we defined in models.py
+    return jsonify([n.to_dict() for n in all_n])
+
 @app.route('/api/health-metrics')
-def api_health_metrics(): return jsonify({'error': 'No data available yet', 'message': 'Placeholder'})
+def api_health_metrics():
+    """Returns aggregate health stats as JSON"""
+    all_n = NeighborhoodHealth.query.all()
+    if not all_n:
+        return jsonify({'error': 'No data available'})
+        
+    total_pop = sum(n.total_population for n in all_n)
+    # Calculate averages, avoiding division by zero
+    avg_diabetes = sum(n.diabetes_rate for n in all_n) / len(all_n)
+    avg_income = sum(n.median_income for n in all_n) / len(all_n)
+    
+    return jsonify({
+        'total_population': total_pop,
+        'neighborhood_count': len(all_n),
+        'average_diabetes_rate': round(avg_diabetes, 1),
+        'average_income': round(avg_income, 0)
+    })
+
 @app.errorhandler(404)
 def not_found_error(error): return render_template('404.html'), 404
+
 @app.errorhandler(500)
 def internal_error(error): db.session.rollback(); return render_template('500.html'), 500
