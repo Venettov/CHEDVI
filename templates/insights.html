@@ -3,7 +3,6 @@
 {% block title %}Insights - Camden Health Equity Data Visualization Initiative{% endblock %}
 
 {% block content %}
-<!-- Header Section -->
 <section class="py-4 bg-light">
     <div class="container">
         <div class="row">
@@ -17,7 +16,6 @@
     </div>
 </section>
 
-<!-- Key Statistics Section -->
 <section class="py-5">
     <div class="container">
         <div class="row text-center mb-5">
@@ -83,7 +81,6 @@
     </div>
 </section>
 
-<!-- Health Disparities Section -->
 <section class="py-5 bg-light">
     <div class="container">
         <div class="row">
@@ -93,7 +90,6 @@
             </div>
         </div>
         
-        <!-- Visualization 1: Income vs Health Outcomes -->
         <div class="row g-4 mb-5">
             <div class="col-lg-6">
                 <div class="card insight-card h-100">
@@ -114,7 +110,6 @@
                 </div>
             </div>
             
-            <!-- Visualization 2: Food Access vs Obesity -->
             <div class="col-lg-6">
                 <div class="card insight-card h-100">
                     <div class="card-header bg-success text-white">
@@ -135,7 +130,6 @@
             </div>
         </div>
         
-        <!-- Visualization 3: Education vs Health -->
         <div class="row g-4 mb-5">
             <div class="col-lg-6">
                 <div class="card insight-card h-100">
@@ -156,7 +150,6 @@
                 </div>
             </div>
             
-            <!-- Visualization 4: Housing Quality vs Health -->
             <div class="col-lg-6">
                 <div class="card insight-card h-100">
                     <div class="card-header bg-warning text-dark">
@@ -177,7 +170,6 @@
             </div>
         </div>
         
-        <!-- Visualization 5: Healthcare Access vs Outcomes -->
         <div class="row g-4 mb-5">
             <div class="col-lg-6">
                 <div class="card insight-card h-100">
@@ -198,7 +190,6 @@
                 </div>
             </div>
             
-            <!-- Visualization 6: Mental Health vs Social Factors -->
             <div class="col-lg-6">
                 <div class="card insight-card h-100">
                     <div class="card-header bg-purple text-white" style="background-color: #6f42c1 !important;">
@@ -219,7 +210,6 @@
             </div>
         </div>
         
-        <!-- Key Findings Summary -->
         <div class="row">
             <div class="col-12">
                 <div class="card border-primary">
@@ -254,7 +244,6 @@
     </div>
 </section>
 
-<!-- Community Action Section -->
 <section class="py-5">
     <div class="container">
         <div class="row">
@@ -287,7 +276,6 @@
     </div>
 </section>
 
-<!-- Interactive Analysis Section -->
 <section class="py-5 bg-light">
     <div class="container">
         <div class="row">
@@ -312,8 +300,8 @@
                                 <select class="form-select" id="xVariable">
                                     <option value="income">Median Income</option>
                                     <option value="poverty">Poverty Rate</option>
-                                    <option value="education">High School Graduation</option>
-                                    <option value="housing">Housing Problems</option>
+                                    <option value="foodAccess">Food Access Score</option>
+                                    <option value="insurance">Uninsured Rate</option>
                                 </select>
                             </div>
                             <div class="col-md-6">
@@ -327,11 +315,11 @@
                             </div>
                         </div>
                         <div class="chart-container mb-3" style="height: 400px;">
-                            <canvas id="correlationChart"></canvas>
+                            <canvas id="interactiveCorrelationChart"></canvas>
                         </div>
                         <div id="correlationInsight" class="alert alert-info">
-                            <h6 class="alert-heading">Select variables above to see how they relate to each other across Camden neighborhoods.</h6>
-                            <p class="mb-0">This interactive tool helps you explore connections between social conditions and health outcomes.</p>
+                            <h6 class="alert-heading">Exploring Connections</h6>
+                            <p class="mb-0">Select variables above to see how social factors influence health outcomes in Camden.</p>
                         </div>
                     </div>
                 </div>
@@ -379,7 +367,6 @@
     </div>
 </section>
 
-<!-- Research Findings Section -->
 <section class="py-5">
     <div class="container">
         <div class="row">
@@ -453,7 +440,6 @@
     </div>
 </section>
 
-<!-- Advanced Insights Section -->
 <section class="py-5">
     <div class="container">
         <div class="row">
@@ -463,7 +449,6 @@
             </div>
         </div>
         
-        <!-- Insight 1: Temporal Trends -->
         <div class="row g-4 mb-5">
             <div class="col-lg-6">
                 <div class="card insight-card h-100">
@@ -504,7 +489,6 @@
             </div>
         </div>
         
-        <!-- Insight 3: Intersectional Analysis -->
         <div class="row g-4 mb-5">
             <div class="col-lg-6">
                 <div class="card insight-card h-100">
@@ -545,7 +529,6 @@
             </div>
         </div>
         
-        <!-- Insight 5: Community Resilience -->
         <div class="row g-4 mb-5">
             <div class="col-lg-6">
                 <div class="card insight-card h-100">
@@ -586,7 +569,6 @@
             </div>
         </div>
         
-        <!-- Insight 7: Healthcare System Performance -->
         <div class="row g-4 mb-5">
             <div class="col-lg-6">
                 <div class="card insight-card h-100">
@@ -627,7 +609,6 @@
             </div>
         </div>
         
-        <!-- Insight 9: Predictive Analytics -->
         <div class="row g-4 mb-5">
             <div class="col-lg-6">
                 <div class="card insight-card h-100">
@@ -668,7 +649,6 @@
             </div>
         </div>
         
-        <!-- Comprehensive Summary -->
         <div class="row">
             <div class="col-12">
                 <div class="card border-primary">
@@ -714,65 +694,6 @@
     </div>
 </section>
 
-<!-- Interactive Insights Section -->
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center mb-5">
-                <h2 class="display-6 fw-bold">Interactive Data Exploration</h2>
-                <p class="lead text-muted">Explore relationships between social determinants and health outcomes</p>
-            </div>
-        </div>
-        
-        <div class="row">
-            <div class="col-lg-8">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="row align-items-center">
-                            <div class="col">
-                                <h5 class="card-title mb-0">
-                                    <i class="fas fa-chart-scatter me-2"></i>Correlation Analysis
-                                </h5>
-                            </div>
-                            <div class="col-auto">
-                                <select class="form-select" id="correlationSelector">
-                                    <option value="">Select Variables</option>
-                                    <option value="income_health">Income vs. Health Outcomes</option>
-                                    <option value="food_diabetes">Food Access vs. Diabetes</option>
-                                    <option value="housing_asthma">Housing vs. Asthma</option>
-                                    <option value="education_life">Education vs. Life Expectancy</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="correlationChart" style="height: 400px;"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-lightbulb me-2"></i>Key Insights
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="insightPanel">
-                            <div class="text-center text-muted py-4">
-                                <i class="fas fa-chart-line fa-2x mb-3"></i>
-                                <p>Select variables to view correlation insights</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Data Sources Section -->
 <section class="py-5">
     <div class="container">
         <div class="row">
@@ -801,7 +722,6 @@
     </div>
 </section>
 
-<!-- Community Resources Section -->
 <section class="py-5 bg-light">
     <div class="container">
         <div class="row">
@@ -864,5 +784,107 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/insights.js') }}"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // 1. INJECT DATA FROM PYTHON
+    // This connects your Flask backend to the frontend JavaScript
+    const insightsData = {{ insights_data | tojson | safe }};
+    
+    // 2. CORRELATION CHART LOGIC
+    let correlationChart = null;
+
+    function renderCorrelationChart() {
+        const xVar = document.getElementById('xVariable').value;
+        const yVar = document.getElementById('yVariable').value;
+        const ctx = document.getElementById('interactiveCorrelationChart').getContext('2d');
+
+        // Create data points for Scatter Plot
+        const plotData = insightsData.map(item => ({
+            x: item[xVar],
+            y: item[yVar],
+            name: item.name // Store neighborhood name for tooltip
+        }));
+
+        // Labels for the axes
+        const labelsMap = {
+            'income': 'Median Income ($)',
+            'poverty': 'Poverty Rate (%)',
+            'foodAccess': 'Food Access Score',
+            'insurance': 'Uninsured Rate (%)',
+            'diabetes': 'Diabetes Rate (%)',
+            'obesity': 'Obesity Rate (%)',
+            'asthma': 'Asthma Rate (%)',
+            'mentalDistress': 'Mental Distress (%)'
+        };
+
+        if (correlationChart) {
+            correlationChart.destroy();
+        }
+
+        correlationChart = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: `${labelsMap[yVar]} vs ${labelsMap[xVar]}`,
+                    data: plotData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: { display: true, text: labelsMap[xVar] }
+                    },
+                    y: {
+                        title: { display: true, text: labelsMap[yVar] }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let point = context.raw;
+                                return `${point.name}: (${point.x}, ${point.y})`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Update the insight text box
+        updateInsightText(xVar, yVar);
+    }
+
+    function updateInsightText(x, y) {
+        const box = document.getElementById('correlationInsight');
+        let text = "Select variables to analyze.";
+        
+        if (x === 'income' && (y === 'diabetes' || y === 'obesity')) {
+            text = "<strong>Strong Negative Correlation:</strong> As income increases, disease rates tend to decrease significantly.";
+        } else if (x === 'poverty' && (y === 'mentalDistress' || y === 'asthma')) {
+             text = "<strong>Positive Correlation:</strong> Higher poverty rates are often associated with higher stress and health issues.";
+        } else {
+             text = `Analyzing the relationship between <strong>${x}</strong> and <strong>${y}</strong> across Camden neighborhoods.`;
+        }
+        
+        box.innerHTML = `<p class="mb-0">${text}</p>`;
+    }
+
+    // 3. EVENT LISTENERS
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('xVariable').addEventListener('change', renderCorrelationChart);
+        document.getElementById('yVariable').addEventListener('change', renderCorrelationChart);
+        
+        // Initial Render
+        renderCorrelationChart();
+    });
+</script>
 {% endblock %}
