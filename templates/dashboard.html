@@ -19,13 +19,12 @@
                 </div>
                 <div class="col-md-4 text-end">
                     <div class="dashboard-controls d-flex gap-2" data-html2canvas-ignore="true">
-                        <select class="form-select" id="metricSelector">
-                            <option value="">Select Health Metric</option>
-                            <option value="obesity">Obesity Rate</option>
+                        <select class="form-select" id="leftMapSelector">
                             <option value="diabetes">Diabetes Rate</option>
+                            <option value="obesity">Obesity Rate</option>
                             <option value="asthma">Asthma Rate</option>
-                            <option value="air_quality">Air Quality Index</option>
-                            <option value="mental_health">Mental Distress</option>
+                            <option value="mental_distress">Mental Distress</option>
+                            <option value="lack_health_insurance">Uninsured Rate</option>
                         </select>
                         <button class="btn btn-outline-primary" onclick="exportToImage()">
                             <i class="fas fa-download"></i> Export
@@ -43,10 +42,10 @@
                     <div class="card h-100 shadow-sm">
                         <div class="card-header bg-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0 text-primary"><i class="fas fa-heartbeat me-2"></i>Health Metric Distribution</h5>
-                            <span class="badge bg-primary" id="map1-label">Select Metric</span>
+                            <span class="badge bg-primary" id="map1-label">Selected Metric</span>
                         </div>
                         <div class="card-body p-0">
-                            <div id="map1" style="height: 500px; width: 100%;"></div>
+                            <div id="leftMap" style="height: 500px; width: 100%;"></div>
                         </div>
                         <div class="card-footer bg-light">
                             <div class="d-flex justify-content-between small text-muted">
@@ -62,15 +61,15 @@
                     <div class="card h-100 shadow-sm">
                         <div class="card-header bg-white d-flex justify-content-between align-items-center">
                             <h5 class="mb-0 text-success"><i class="fas fa-users me-2"></i>Social Determinants</h5>
-                            <select class="form-select form-select-sm w-auto" id="socialMetricSelector">
+                            <select class="form-select form-select-sm w-auto" id="rightMapSelector">
                                 <option value="income">Median Income</option>
-                                <option value="poverty">Poverty Rate</option>
+                                <option value="poverty_rate">Poverty Rate</option>
                                 <option value="education">Education Level</option>
                                 <option value="unemployment">Unemployment Rate</option>
                             </select>
                         </div>
                         <div class="card-body p-0">
-                            <div id="map2" style="height: 500px; width: 100%;"></div>
+                            <div id="rightMap" style="height: 500px; width: 100%;"></div>
                         </div>
                         <div class="card-footer bg-light">
                             <div class="d-flex justify-content-between small text-muted">
@@ -218,7 +217,7 @@
                                                 <p class="mb-3">Self-reported frequent mental distress rates.</p>
                                                 <hr>
                                                 <h6 class="fw-bold small">Why Monitor This?</h6>
-                                                <p class="small mb-0">Mental health is deeply connected to social stability. High rates of distress may indicate a need for greater community support.</p>
+                                                <p class="small mb-0">Mental health is deeply connected to social stability. High rates of distress may indicate a need for greater community support services.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -226,6 +225,58 @@
 
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-5 bg-white border-top">
+        <div class="container">
+            <div class="row mb-5 text-center">
+                <div class="col-lg-8 mx-auto">
+                    <h2 class="fw-bold display-6 mb-3">Understanding Camden's Health Disparities</h2>
+                    <p class="lead text-muted">How social determinants shape health outcomes in our community</p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-wallet fa-3x text-primary"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Economic Stability</h4>
+                        <p class="text-muted">
+                            Neighborhoods with lower median incomes show significantly higher rates of chronic conditions. 
+                            Economic stability is a primary predictor of health, affecting access to nutrition and care.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="text-center p-4 border-start border-end">
+                        <div class="mb-3">
+                            <i class="fas fa-apple-alt fa-3x text-success"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Food Access</h4>
+                        <p class="text-muted">
+                            Areas classified as "food deserts" in Camden correlate with obesity rates exceeding 45%. 
+                            Access to affordable, fresh produce is critical for preventative health management.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-graduation-cap fa-3x text-info"></i>
+                        </div>
+                        <h4 class="fw-bold mb-3">Education Impact</h4>
+                        <p class="text-muted">
+                            Higher educational attainment links to better health literacy and lower disease prevalence. 
+                            Supporting education initiatives is a long-term investment in community health.
+                        </p>
                     </div>
                 </div>
             </div>
