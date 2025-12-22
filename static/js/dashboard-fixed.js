@@ -407,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load initial data
     loadInitialData();
     
-    // Initialize charts (UPDATED to match Tab IDs)
+    // Initialize charts
     initializeAllCharts();
 });
 
@@ -464,6 +464,8 @@ function loadInitialData() {
 function updateLeftMap(metric) {
     if (!leftMap) return;
     
+    console.log('Updating left map with metric:', metric);
+    
     // Clear existing polygons
     leftPolygons.forEach(polygon => leftMap.removeLayer(polygon));
     leftPolygons = [];
@@ -492,11 +494,15 @@ function updateLeftMap(metric) {
         
         leftPolygons.push(polygon);
     });
+    
+    console.log(`Added ${leftPolygons.length} polygons to left map`);
 }
 
 // Update right map
 function updateRightMap(metric) {
     if (!rightMap) return;
+    
+    console.log('Updating right map with metric:', metric);
     
     // Clear existing polygons
     rightPolygons.forEach(polygon => rightMap.removeLayer(polygon));
@@ -526,6 +532,8 @@ function updateRightMap(metric) {
         
         rightPolygons.push(polygon);
     });
+    
+    console.log(`Added ${rightPolygons.length} polygons to right map`);
 }
 
 // Get color for value
@@ -535,12 +543,14 @@ function getColorForValue(value, metric) {
     const max = Math.max(...values);
     const normalized = (value - min) / (max - min);
     
+    // Health metrics: red = bad, green = good
     if (['diabetes', 'obesity', 'asthma', 'mental_distress', 'high_blood_pressure', 'poverty_rate', 'unemployment', 'lack_health_insurance'].includes(metric)) {
         const red = Math.floor(255 * normalized);
         const green = Math.floor(255 * (1 - normalized));
         return `rgb(${red}, ${green}, 0)`;
     }
     
+    // Good metrics: green = good, red = bad
     const green = Math.floor(255 * normalized);
     const red = Math.floor(255 * (1 - normalized));
     return `rgb(${red}, ${green}, 0)`;
@@ -584,16 +594,23 @@ function updateMetrics() {
     
     if (leftValues.length === 0 || rightValues.length === 0) return;
     
+    // Calculate disparity index
     const leftMean = leftValues.reduce((a, b) => a + b) / leftValues.length;
     const leftStd = Math.sqrt(leftValues.reduce((sum, val) => sum + Math.pow(val - leftMean, 2), 0) / leftValues.length);
     const disparityIndex = leftMean === 0 ? 0 : (leftStd / leftMean * 100);
     
+    // Calculate correlation
     const correlation = calculateCorrelation(leftValues, rightValues);
+    
+    // Calculate equity gap
     const equityGap = Math.max(...leftValues) - Math.min(...leftValues);
     
+    // Update display
     updateElement('disparityScore', disparityIndex.toFixed(1));
     updateElement('correlationScore', correlation.toFixed(2));
     updateElement('equityScore', equityGap.toFixed(1));
+    
+    console.log('Metrics updated:', {disparityIndex, correlation, equityGap});
 }
 
 // Calculate correlation
@@ -611,6 +628,7 @@ function calculateCorrelation(x, y) {
     return denominator === 0 ? 0 : numerator / denominator;
 }
 
+// Update element safely
 function updateElement(id, value) {
     const element = document.getElementById(id);
     if (element) {
@@ -618,57 +636,190 @@ function updateElement(id, value) {
     }
 }
 
-// --- NEW CHART INITIALIZATION FOR TABS ---
+// Initialize all charts
 function initializeAllCharts() {
-    console.log('Initializing Tabbed Charts...');
+    console.log('Initializing charts...');
     
-    // Helper to create a sorted bar chart
-    function createTabChart(canvasId, metricKey, label, color) {
-        const canvas = document.getElementById(canvasId);
-        if (!canvas) {
-            console.warn(`Canvas ID '${canvasId}' not found.`);
-            return;
-        }
+    // Neighborhood chart - Show top 10 neighborhoods by diabetes rate
+    const neighborhoodCanvas = document.getElementById('neighborhoodChart');
+    if (neighborhoodCanvas) {
+        const ctx = neighborhoodCanvas.getContext('2d');
+        const sortedNeighborhoods = [...camdenNeighborhoods]
+            .sort((a, b) => b.data.diabetes - a.data.diabetes)
+            .slice(0, 10);
         
-        // Sort neighborhoods by the specific metric
-        const sorted = [...camdenNeighborhoods].sort((a, b) => b.data[metricKey] - a.data[metricKey]);
-        
-        new Chart(canvas.getContext('2d'), {
+        new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: sorted.map(n => n.name),
+                labels: sortedNeighborhoods.map(n => n.name),
                 datasets: [{
-                    label: label,
-                    data: sorted.map(n => n.data[metricKey]),
-                    backgroundColor: color,
-                    borderColor: color.replace('0.7', '1.0'),
+                    label: 'Diabetes Rate (%)',
+                    data: sortedNeighborhoods.map(n => n.data.diabetes),
+                    backgroundColor: sortedNeighborhoods.map(n => {
+                        const rate = n.data.diabetes;
+                        if (rate > 20) return 'rgba(220, 53, 69, 0.8)';
+                        if (rate > 17) return 'rgba(255, 193, 7, 0.8)';
+                        return 'rgba(25, 135, 84, 0.8)';
+                    }),
+                    borderColor: 'rgba(108, 117, 125, 1)',
                     borderWidth: 1
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Top 10 Neighborhoods by Diabetes Rate (2022 Data)'
+                    }
+                },
                 scales: {
-                    y: { beginAtZero: true },
-                    x: { ticks: { maxRotation: 90, minRotation: 45 } }
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Diabetes Rate (%)'
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    }
                 }
             }
         });
     }
-
-    // 1. Diabetes Chart
-    createTabChart('diabetesChart', 'diabetes', 'Diabetes Rate (%)', 'rgba(220, 53, 69, 0.7)');
-
-    // 2. Obesity Chart
-    createTabChart('obesityChart', 'obesity', 'Obesity Rate (%)', 'rgba(255, 193, 7, 0.7)');
-
-    // 3. Asthma Chart
-    createTabChart('asthmaChart', 'asthma', 'Asthma Rate (%)', 'rgba(13, 202, 240, 0.7)');
-
-    // 4. Mental Health Chart
-    createTabChart('mentalHealthChart', 'mental_distress', 'Mental Distress (%)', 'rgba(111, 66, 193, 0.7)');
     
-    console.log('All tabbed charts initialized.');
+    // Demographics chart - Income distribution
+    const demographicsCanvas = document.getElementById('demographicsChart');
+    if (demographicsCanvas) {
+        const ctx = demographicsCanvas.getContext('2d');
+        const incomeRanges = [
+            { range: 'Under $25K', neighborhoods: camdenNeighborhoods.filter(n => n.data.income < 25000) },
+            { range: '$25K - $35K', neighborhoods: camdenNeighborhoods.filter(n => n.data.income >= 25000 && n.data.income < 35000) },
+            { range: '$35K - $45K', neighborhoods: camdenNeighborhoods.filter(n => n.data.income >= 35000 && n.data.income < 45000) },
+            { range: '$45K - $55K', neighborhoods: camdenNeighborhoods.filter(n => n.data.income >= 45000 && n.data.income < 55000) },
+            { range: '$55K+', neighborhoods: camdenNeighborhoods.filter(n => n.data.income >= 55000) }
+        ];
+        
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: incomeRanges.map(r => r.range),
+                datasets: [{
+                    data: incomeRanges.map(r => r.neighborhoods.length),
+                    backgroundColor: [
+                        'rgba(220, 53, 69, 0.8)',
+                        'rgba(255, 193, 7, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(25, 135, 84, 0.8)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Camden Neighborhoods by Income Range (2022)'
+                    },
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+    }
+    
+    // Trend chart - Health vs Income correlation
+    const trendCanvas = document.getElementById('trendChart');
+    if (trendCanvas) {
+        const ctx = trendCanvas.getContext('2d');
+        new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Diabetes vs Income',
+                    data: camdenNeighborhoods.map(n => ({
+                        x: n.data.income / 1000,
+                        y: n.data.diabetes
+                    })),
+                    backgroundColor: 'rgba(220, 53, 69, 0.6)',
+                    borderColor: 'rgba(220, 53, 69, 1)',
+                    pointRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Health vs Income Correlation (2022 Data)'
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Median Income ($1000s)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Diabetes Rate (%)'
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // SDOH chart - Social determinants comparison
+    const sdohCanvas = document.getElementById('sdohChart');
+    if (sdohCanvas) {
+        const ctx = sdohCanvas.getContext('2d');
+        const avgData = {
+            poverty: camdenNeighborhoods.reduce((sum, n) => sum + n.data.poverty_rate, 0) / camdenNeighborhoods.length,
+            unemployment: camdenNeighborhoods.reduce((sum, n) => sum + n.data.unemployment, 0) / camdenNeighborhoods.length,
+            education: camdenNeighborhoods.reduce((sum, n) => sum + n.data.education, 0) / camdenNeighborhoods.length,
+            healthcare: camdenNeighborhoods.reduce((sum, n) => sum + n.data.healthcare_access, 0) / camdenNeighborhoods.length
+        };
+        
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Poverty Rate', 'Unemployment', 'Education Level', 'Healthcare Access'],
+                datasets: [{
+                    label: 'Camden Average',
+                    data: [avgData.poverty, avgData.unemployment, avgData.education, avgData.healthcare],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Social Determinants of Health - Camden Average'
+                    }
+                },
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+    }
+    
+    console.log('All charts initialized with authentic Camden data');
 }
 
 // Export functions for template
