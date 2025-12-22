@@ -130,7 +130,6 @@
                     
                     <div class="card-body p-4">
                         <div class="tab-content" id="insightTabsContent">
-                            
                             <div class="tab-pane fade show active" id="income" role="tabpanel">
                                 <div class="row align-items-center">
                                     <div class="col-lg-8">
@@ -244,7 +243,6 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -288,6 +286,267 @@
 <section class="py-5">
     <div class="container">
         <div class="row">
+            <div class="col-12 text-center mb-5">
+                <h2 class="display-6 fw-bold">Advanced Health Equity Analytics</h2>
+                <p class="lead text-muted">Comprehensive insights for deeper understanding and targeted interventions</p>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow">
+                    <div class="card-header bg-dark text-white p-0">
+                        <ul class="nav nav-tabs nav-fill card-header-tabs m-0 border-bottom-0" id="advancedTabs" role="tablist">
+                            <li class="nav-item"><button class="nav-link active text-white bg-transparent" data-bs-toggle="tab" data-bs-target="#trends">Trends</button></li>
+                            <li class="nav-item"><button class="nav-link text-white bg-transparent" data-bs-toggle="tab" data-bs-target="#spatial">Spatial</button></li>
+                            <li class="nav-item"><button class="nav-link text-white bg-transparent" data-bs-toggle="tab" data-bs-target="#intersection">Intersection</button></li>
+                            <li class="nav-item"><button class="nav-link text-white bg-transparent" data-bs-toggle="tab" data-bs-target="#resource">Resources</button></li>
+                            <li class="nav-item"><button class="nav-link text-white bg-transparent" data-bs-toggle="tab" data-bs-target="#resilience">Resilience</button></li>
+                            <li class="nav-item"><button class="nav-link text-white bg-transparent" data-bs-toggle="tab" data-bs-target="#environment">Environment</button></li>
+                            <li class="nav-item"><button class="nav-link text-white bg-transparent" data-bs-toggle="tab" data-bs-target="#system">Healthcare</button></li>
+                            <li class="nav-item"><button class="nav-link text-white bg-transparent" data-bs-toggle="tab" data-bs-target="#economic">Economic</button></li>
+                            <li class="nav-item"><button class="nav-link text-white bg-transparent" data-bs-toggle="tab" data-bs-target="#predictive">Predictive</button></li>
+                            <li class="nav-item"><button class="nav-link text-white bg-transparent" data-bs-toggle="tab" data-bs-target="#community">Voice</button></li>
+                        </ul>
+                    </div>
+
+                    <div class="card-body p-4">
+                        <div class="tab-content" id="advancedTabsContent">
+                            
+                            <div class="tab-pane fade show active" id="trends">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="temporalTrendsChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <h4 class="text-primary mb-3">Temporal Trends & Disparities</h4>
+                                        <h6 class="text-secondary">Analysis:</h6>
+                                        <p>Health disparities between Camden's highest and lowest performing neighborhoods have widened by 15% over the past 5 years.</p>
+                                        <h6 class="text-secondary">Impact:</h6>
+                                        <p>Early intervention programs in vulnerable neighborhoods could prevent this trend from continuing.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="spatial">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="spatialAnalysisChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <h4 class="text-success mb-3">Spatial Geographic Patterns</h4>
+                                        <h6 class="text-secondary">Analysis:</h6>
+                                        <p>Health outcomes cluster geographically. Neighborhoods within 1 mile of each other show a 0.72 correlation in diabetes rates.</p>
+                                        <h6 class="text-secondary">Impact:</h6>
+                                        <p>Regional interventions targeting multiple adjacent neighborhoods could be more effective than isolated programs.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="intersection">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="intersectionalChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <h4 class="text-warning mb-3">Intersectional Analysis</h4>
+                                        <h6 class="text-secondary">Analysis:</h6>
+                                        <p>Low-income Hispanic residents face 2.3x higher diabetes risk than affluent white residents. Combined race and income effects amplify health risks.</p>
+                                        <h6 class="text-secondary">Impact:</h6>
+                                        <p>Culturally responsive interventions addressing both economic and racial barriers are essential for equity.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="resource">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="resourceAllocationChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <h4 class="text-info mb-3">Resource Allocation</h4>
+                                        <h6 class="text-secondary">Analysis:</h6>
+                                        <p>Investing $1M in Cramer Hill could prevent 847 cases, compared to only 234 cases in Beideman.</p>
+                                        <h6 class="text-secondary">Impact:</h6>
+                                        <p>Resource allocation models can optimize health investment returns by targeting highest-need areas.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="resilience">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="resilienceChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <h4 class="text-secondary mb-3">Community Resilience</h4>
+                                        <h6 class="text-secondary">Analysis:</h6>
+                                        <p>Neighborhoods with strong community organizations show 23% better health outcomes despite similar economic conditions.</p>
+                                        <h6 class="text-secondary">Impact:</h6>
+                                        <p>Community-building investments can buffer against health risks from economic disadvantage.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="environment">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="environmentalChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <h4 class="text-danger mb-3">Environmental Justice</h4>
+                                        <h6 class="text-secondary">Analysis:</h6>
+                                        <p>Neighborhoods near industrial areas show 18% higher asthma rates. PM2.5 levels are 34% above safe thresholds in Waterfront South.</p>
+                                        <h6 class="text-secondary">Impact:</h6>
+                                        <p>Environmental justice interventions could significantly reduce respiratory health disparities.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="system">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="healthcareSystemChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <h4 class="mb-3" style="color: #6f42c1;">System Performance</h4>
+                                        <h6 class="text-secondary">Analysis:</h6>
+                                        <p>Emergency department utilization is 3x higher in areas with limited primary care access.</p>
+                                        <h6 class="text-secondary">Impact:</h6>
+                                        <p>Strategic primary care placement could reduce emergency costs and improve preventive care access.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="economic">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="economicImpactChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <h4 class="mb-3" style="color: #fd7e14;">Economic Impact</h4>
+                                        <h6 class="text-secondary">Analysis:</h6>
+                                        <p>Health disparities cost Camden $127M annually. Diabetes alone accounts for $23M in preventable costs.</p>
+                                        <h6 class="text-secondary">Impact:</h6>
+                                        <p>Health equity investments show 4:1 return on investment through reduced healthcare costs.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="predictive">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="predictiveChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <h4 class="mb-3" style="color: #20c997;">Predictive Analytics</h4>
+                                        <h6 class="text-secondary">Analysis:</h6>
+                                        <p>Models predict 73% of residents in Cramer Hill are at high risk for diabetes within 5 years.</p>
+                                        <h6 class="text-secondary">Impact:</h6>
+                                        <p>Proactive interventions for high-risk populations can prevent disease onset and reduce long-term costs.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="community">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="communityVoiceChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <h4 class="mb-3" style="color: #e83e8c;">Community Voice</h4>
+                                        <h6 class="text-secondary">Analysis:</h6>
+                                        <p>Residents prioritize mental health (67%) and food (61%) over clinical programs (23%).</p>
+                                        <h6 class="text-secondary">Impact:</h6>
+                                        <p>Community-driven interventions addressing resident priorities may achieve better engagement and outcomes.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row g-4 mt-3">
+            <div class="col-lg-4">
+                <div class="card finding-card h-100">
+                    <div class="card-body">
+                        <div class="finding-icon mb-3">
+                            <div class="icon-circle bg-success text-white">
+                                <i class="fas fa-arrow-up"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title">Income-Health Correlation</h5>
+                        <p class="card-text">
+                            Beideman (highest income $58,983) has lowest diabetes rate 13.4%, while lower-income 
+                            neighborhoods show higher disease rates.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card finding-card h-100">
+                    <div class="card-body">
+                        <div class="finding-icon mb-3">
+                            <div class="icon-circle bg-info text-white">
+                                <i class="fas fa-home"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title">Poverty-Health Impact</h5>
+                        <p class="card-text">
+                            Bergen Square shows 54.4% poverty rate but only 15.7% diabetes - complex relationship 
+                            between poverty and health outcomes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4">
+                <div class="card finding-card h-100">
+                    <div class="card-body">
+                        <div class="finding-icon mb-3">
+                            <div class="icon-circle bg-warning text-white">
+                                <i class="fas fa-graduation-cap"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title">Education Paradox</h5>
+                        <p class="card-text">
+                            Cooper Grant has 90.6% education completion but 19.4% diabetes rate, indicating 
+                            education alone is insufficient for health equity.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row">
             <div class="col-12 text-center mb-4">
                 <h2 class="display-6 fw-bold">Take Action in Your Community</h2>
                 <p class="lead text-muted">Connect data insights to available resources and support</p>
@@ -317,7 +576,7 @@
     </div>
 </section>
 
-<section class="py-5 bg-light">
+<section class="py-5">
     <div class="container">
         <div class="row">
             <div class="col-12 text-center mb-5">
@@ -408,334 +667,7 @@
     </div>
 </section>
 
-<section class="py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center mb-5">
-                <h2 class="display-6 fw-bold">Key Research Findings</h2>
-                <p class="lead text-muted">Evidence-based insights from CHEDVI analysis</p>
-            </div>
-        </div>
-        
-        <div class="row g-4">
-            <div class="col-lg-4">
-                <div class="card finding-card h-100">
-                    <div class="card-body">
-                        <div class="finding-icon mb-3">
-                            <div class="icon-circle bg-success text-white">
-                                <i class="fas fa-arrow-up"></i>
-                            </div>
-                        </div>
-                        <h5 class="card-title">Income-Health Correlation</h5>
-                        <p class="card-text">
-                            Beideman (highest income $58,983) has lowest diabetes rate 13.4%, while lower-income 
-                            neighborhoods show higher disease rates - real data confirms income-health link.
-                        </p>
-                        <div class="correlation-badge">
-                            <span class="badge bg-success">Real Camden Data</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-4">
-                <div class="card finding-card h-100">
-                    <div class="card-body">
-                        <div class="finding-icon mb-3">
-                            <div class="icon-circle bg-info text-white">
-                                <i class="fas fa-home"></i>
-                            </div>
-                        </div>
-                        <h5 class="card-title">Poverty-Health Impact</h5>
-                        <p class="card-text">
-                            Bergen Square shows 54.4% poverty rate but only 15.7% diabetes - complex relationship 
-                            between poverty and health outcomes requires targeted interventions.
-                        </p>
-                        <div class="correlation-badge">
-                            <span class="badge bg-info">Real Camden Data</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-4">
-                <div class="card finding-card h-100">
-                    <div class="card-body">
-                        <div class="finding-icon mb-3">
-                            <div class="icon-circle bg-warning text-white">
-                                <i class="fas fa-graduation-cap"></i>
-                            </div>
-                        </div>
-                        <h5 class="card-title">Education Paradox</h5>
-                        <p class="card-text">
-                            Cooper Grant has 90.6% education completion but 19.4% diabetes rate, while 
-                            Cramer Hill (25.5% education) has 18.4% diabetes - education alone insufficient.
-                        </p>
-                        <div class="correlation-badge">
-                            <span class="badge bg-warning">Real Camden Data</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-12 text-center mb-5">
-                <h2 class="display-6 fw-bold">Advanced Health Equity Analytics</h2>
-                <p class="lead text-muted">Comprehensive insights for deeper understanding and targeted interventions</p>
-            </div>
-        </div>
-        
-        <div class="row g-4 mb-5">
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-chart-line me-2"></i>1. Temporal Trends & Disparities Over Time
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container mb-3" style="height: 300px;">
-                            <canvas id="temporalTrendsChart"></canvas>
-                        </div>
-                        <h6 class="text-primary">Analysis:</h6>
-                        <p class="mb-2">Health disparities between Camden's highest and lowest performing neighborhoods have widened by 15% over the past 5 years, with diabetes rates showing the most significant divergence.</p>
-                        <h6 class="text-primary">Impact:</h6>
-                        <p>Early intervention programs in vulnerable neighborhoods could prevent this trend from continuing.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-map-marked-alt me-2"></i>2. Spatial Analysis & Geographic Patterns
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container mb-3" style="height: 300px;">
-                            <canvas id="spatialAnalysisChart"></canvas>
-                        </div>
-                        <h6 class="text-success">Analysis:</h6>
-                        <p class="mb-2">Health outcomes cluster geographically - neighborhoods within 1 mile of each other show similar diabetes rates (correlation 0.72), indicating shared environmental factors.</p>
-                        <h6 class="text-success">Impact:</h6>
-                        <p>Regional interventions targeting multiple adjacent neighborhoods could be more effective than isolated programs.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="row g-4 mb-5">
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header bg-warning text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-users me-2"></i>3. Intersectional Health Equity Analysis
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container mb-3" style="height: 300px;">
-                            <canvas id="intersectionalChart"></canvas>
-                        </div>
-                        <h6 class="text-warning">Analysis:</h6>
-                        <p class="mb-2">Low-income Hispanic residents face 2.3x higher diabetes risk than affluent white residents, with Black residents showing similar disparities. Combined race and income effects amplify health risks.</p>
-                        <h6 class="text-warning">Impact:</h6>
-                        <p>Culturally responsive interventions addressing both economic and racial barriers are essential for equity.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-dollar-sign me-2"></i>4. Resource Allocation & Cost-Effectiveness
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container mb-3" style="height: 300px;">
-                            <canvas id="resourceAllocationChart"></canvas>
-                        </div>
-                        <h6 class="text-info">Analysis:</h6>
-                        <p class="mb-2">Investing $1M in Cramer Hill's diabetes prevention could prevent 847 cases over 10 years, while the same investment in Beideman prevents only 234 cases due to lower baseline risk.</p>
-                        <h6 class="text-info">Impact:</h6>
-                        <p>Resource allocation models can optimize health investment returns by targeting highest-need areas.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="row g-4 mb-5">
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header bg-secondary text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-hands-helping me-2"></i>5. Community Resilience & Social Cohesion
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container mb-3" style="height: 300px;">
-                            <canvas id="resilienceChart"></canvas>
-                        </div>
-                        <h6 class="text-secondary">Analysis:</h6>
-                        <p class="mb-2">Neighborhoods with strong community organizations and social networks show 23% better health outcomes despite similar economic conditions. Bergen Square demonstrates this resilience effect.</p>
-                        <h6 class="text-secondary">Impact:</h6>
-                        <p>Community-building investments can buffer against health risks from economic disadvantage.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header bg-danger text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-leaf me-2"></i>6. Environmental Health Justice
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container mb-3" style="height: 300px;">
-                            <canvas id="environmentalChart"></canvas>
-                        </div>
-                        <h6 class="text-danger">Analysis:</h6>
-                        <p class="mb-2">Neighborhoods near industrial areas show 18% higher asthma rates. Air quality monitoring reveals PM2.5 levels 34% above safe thresholds in Waterfront South and Cooper Grant.</p>
-                        <h6 class="text-danger">Impact:</h6>
-                        <p>Environmental justice interventions could significantly reduce respiratory health disparities.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="row g-4 mb-5">
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header" style="background-color: #6f42c1; color: white;">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-hospital me-2"></i>7. Healthcare System Performance Analysis
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container mb-3" style="height: 300px;">
-                            <canvas id="healthcareSystemChart"></canvas>
-                        </div>
-                        <h6 style="color: #6f42c1;">Analysis:</h6>
-                        <p class="mb-2">Average distance to primary care is 2.3 miles in East Camden vs 0.8 miles in Cooper Grant. Emergency department utilization is 3x higher in areas with limited primary care access.</p>
-                        <h6 style="color: #6f42c1;">Impact:</h6>
-                        <p>Strategic primary care placement could reduce emergency costs and improve preventive care access.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header" style="background-color: #fd7e14; color: white;">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-chart-pie me-2"></i>8. Economic Impact Assessment
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container mb-3" style="height: 300px;">
-                            <canvas id="economicImpactChart"></canvas>
-                        </div>
-                        <h6 style="color: #fd7e14;">Analysis:</h6>
-                        <p class="mb-2">Health disparities cost Camden $127M annually in healthcare expenses and lost productivity. Diabetes alone accounts for $23M in preventable costs concentrated in 6 neighborhoods.</p>
-                        <h6 style="color: #fd7e14;">Impact:</h6>
-                        <p>Health equity investments show 4:1 return on investment through reduced healthcare costs and increased productivity.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="row g-4 mb-5">
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header" style="background-color: #20c997; color: white;">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-crystal-ball me-2"></i>9. Predictive Analytics & Risk Stratification
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container mb-3" style="height: 300px;">
-                            <canvas id="predictiveChart"></canvas>
-                        </div>
-                        <h6 style="color: #20c997;">Analysis:</h6>
-                        <p class="mb-2">Machine learning models predict 73% of residents in Cramer Hill are at high risk for diabetes within 5 years, compared to 21% in Beideman. Early warning indicators include income, education, and food access.</p>
-                        <h6 style="color: #20c997;">Impact:</h6>
-                        <p>Proactive interventions for high-risk populations can prevent disease onset and reduce long-term costs.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header" style="background-color: #e83e8c; color: white;">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-comments me-2"></i>10. Community Voice & Priorities
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container mb-3" style="height: 300px;">
-                            <canvas id="communityVoiceChart"></canvas>
-                        </div>
-                        <h6 style="color: #e83e8c;">Analysis:</h6>
-                        <p class="mb-2">Community surveys reveal residents prioritize mental health support (67%) and affordable healthy food (61%) over clinical diabetes programs (23%). Data priorities and community needs show some misalignment.</p>
-                        <h6 style="color: #e83e8c;">Impact:</h6>
-                        <p>Community-driven interventions addressing resident priorities may achieve better engagement and outcomes.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="row">
-            <div class="col-12">
-                <div class="card border-primary">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-chart-bar me-2"></i>Comprehensive Camden Health Equity Assessment
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-4">
-                            <div class="col-md-4">
-                                <h6 class="text-primary">Critical Findings:</h6>
-                                <ul class="list-unstyled">
-                                    <li class="mb-2"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Health disparities are widening over time</li>
-                                    <li class="mb-2"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Geographic clustering amplifies health risks</li>
-                                    <li class="mb-2"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Intersectional factors compound disadvantages</li>
-                                    <li class="mb-2"><i class="fas fa-exclamation-triangle text-warning me-2"></i>Environmental justice issues persist</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-4">
-                                <h6 class="text-success">Opportunities:</h6>
-                                <ul class="list-unstyled">
-                                    <li class="mb-2"><i class="fas fa-lightbulb text-success me-2"></i>Community resilience as protective factor</li>
-                                    <li class="mb-2"><i class="fas fa-lightbulb text-success me-2"></i>High ROI from targeted interventions</li>
-                                    <li class="mb-2"><i class="fas fa-lightbulb text-success me-2"></i>Predictive models enable prevention</li>
-                                    <li class="mb-2"><i class="fas fa-lightbulb text-success me-2"></i>Community voice guides priorities</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-4">
-                                <h6 class="text-info">Recommended Actions:</h6>
-                                <ul class="list-unstyled">
-                                    <li class="mb-2"><i class="fas fa-arrow-right text-info me-2"></i>Implement place-based interventions</li>
-                                    <li class="mb-2"><i class="fas fa-arrow-right text-info me-2"></i>Address environmental health hazards</li>
-                                    <li class="mb-2"><i class="fas fa-arrow-right text-info me-2"></i>Strengthen community organizations</li>
-                                    <li class="mb-2"><i class="fas fa-arrow-right text-info me-2"></i>Align resources with community priorities</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="py-5">
+<section class="py-5 bg-light">
     <div class="container">
         <div class="row">
             <div class="col-12">
@@ -763,7 +695,7 @@
     </div>
 </section>
 
-<section class="py-5 bg-light">
+<section class="py-5">
     <div class="container">
         <div class="row">
             <div class="col-12">
