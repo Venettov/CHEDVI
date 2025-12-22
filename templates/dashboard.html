@@ -151,7 +151,7 @@
                                 <div class="tab-pane fade show active" id="diabetes" role="tabpanel">
                                     <div class="row align-items-center">
                                         <div class="col-lg-8">
-                                            <div class="chart-container" style="height: 400px;">
+                                            <div class="chart-container" style="height: 400px; width: 100%;">
                                                 <canvas id="diabetesChart"></canvas>
                                             </div>
                                         </div>
@@ -170,7 +170,7 @@
                                 <div class="tab-pane fade" id="obesity" role="tabpanel">
                                     <div class="row align-items-center">
                                         <div class="col-lg-8">
-                                            <div class="chart-container" style="height: 400px;">
+                                            <div class="chart-container" style="height: 400px; width: 100%;">
                                                 <canvas id="obesityChart"></canvas>
                                             </div>
                                         </div>
@@ -189,7 +189,7 @@
                                 <div class="tab-pane fade" id="asthma" role="tabpanel">
                                     <div class="row align-items-center">
                                         <div class="col-lg-8">
-                                            <div class="chart-container" style="height: 400px;">
+                                            <div class="chart-container" style="height: 400px; width: 100%;">
                                                 <canvas id="asthmaChart"></canvas>
                                             </div>
                                         </div>
@@ -208,7 +208,7 @@
                                 <div class="tab-pane fade" id="mental" role="tabpanel">
                                     <div class="row align-items-center">
                                         <div class="col-lg-8">
-                                            <div class="chart-container" style="height: 400px;">
+                                            <div class="chart-container" style="height: 400px; width: 100%;">
                                                 <canvas id="mentalHealthChart"></canvas>
                                             </div>
                                         </div>
@@ -218,7 +218,7 @@
                                                 <p class="mb-3">Self-reported frequent mental distress rates.</p>
                                                 <hr>
                                                 <h6 class="fw-bold small">Why Monitor This?</h6>
-                                                <p class="small mb-0">Mental health is deeply connected to social stability. High rates of distress may indicate a need for greater community support services and economic relief.</p>
+                                                <p class="small mb-0">Mental health is deeply connected to social stability. High rates of distress may indicate a need for greater community support.</p>
                                             </div>
                                         </div>
                                     </div>
@@ -237,7 +237,6 @@
 
 {% block scripts %}
 <script>
-    // Inject data BEFORE loading dashboard logic
     const dashboardData = {{ dashboard_data | tojson | safe }};
 </script>
 
@@ -247,40 +246,20 @@
 <script src="{{ url_for('static', filename='js/dashboard-fixed.js') }}"></script>
 
 <script>
-    // PDF EXPORT FUNCTIONALITY
-    function exportToPDF() {
-        const { jsPDF } = window.jspdf;
-        const element = document.getElementById('export-container');
-        
-        // Temporarily hide controls for cleaner PDF
-        document.querySelectorAll('.dashboard-controls').forEach(el => el.style.display = 'none');
-
-        // Capture the dashboard
-        html2canvas(element, {
-            scale: 2, // Higher quality
-            useCORS: true
-        }).then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const imgProps = pdf.getImageProperties(imgData);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-            
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-            pdf.save('Camden_Health_Report.pdf');
-
-            // Restore controls
-            document.querySelectorAll('.dashboard-controls').forEach(el => el.style.display = 'flex');
-        }).catch(err => {
-            console.error("PDF Export failed:", err);
-            alert("Could not generate PDF. Please try the 'Print' option in your browser for best results with maps.");
+    // Tab Interaction Fix: Force charts to resize when tabs are shown
+    document.addEventListener("DOMContentLoaded", function(){
+        const triggerTabList = document.querySelectorAll('button[data-bs-toggle="tab"]');
+        triggerTabList.forEach(triggerEl => {
+            triggerEl.addEventListener('shown.bs.tab', event => {
+                // Trigger global resize so Chart.js redraws the hidden canvas
+                window.dispatchEvent(new Event('resize'));
+            });
         });
-    }
+    });
 
-    // IMPROVED IMAGE EXPORT
+    // Image Export Function
     function exportToImage() {
         const element = document.getElementById('export-container');
-        
         const fullHeight = element.scrollHeight;
         const fullWidth = element.scrollWidth;
         const originalScroll = window.scrollY;
@@ -299,7 +278,6 @@
                 link.download = 'Camden_Health_Dashboard.png';
                 link.href = canvas.toDataURL();
                 link.click();
-                
                 window.scrollTo(0, originalScroll);
             }).catch(function(err) {
                 console.error(err);
@@ -308,16 +286,5 @@
             });
         }, 500);
     }
-
-    // FIX FOR TABS: Force chart resize when tab is clicked
-    document.addEventListener("DOMContentLoaded", function(){
-        const triggerTabList = document.querySelectorAll('button[data-bs-toggle="tab"]')
-        triggerTabList.forEach(triggerEl => {
-            triggerEl.addEventListener('shown.bs.tab', event => {
-                // Trigger a global window resize event to wake up Chart.js
-                window.dispatchEvent(new Event('resize'));
-            })
-        })
-    });
 </script>
 {% endblock %}
