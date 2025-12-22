@@ -86,131 +86,172 @@
         <div class="row">
             <div class="col-12 text-center mb-5">
                 <h2 class="display-6 fw-bold">Six Key Health Equity Insights</h2>
-                <p class="lead text-muted">Visual data stories showing how neighborhood conditions affect health in Camden</p>
-            </div>
-        </div>
-        
-        <div class="row g-4 mb-5">
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-chart-scatter me-2"></i>Visualization 1: Income and Health Connection
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container mb-3" style="height: 300px;">
-                            <canvas id="incomeHealthChart"></canvas>
-                        </div>
-                        <h6 class="text-primary">What This Shows:</h6>
-                        <p class="mb-2">Neighborhoods with higher household income tend to have lower rates of diabetes and other chronic diseases.</p>
-                        <h6 class="text-primary">Why This Matters:</h6>
-                        <p>When families have more money, they can afford healthier food, safer housing, and better healthcare. This chart shows that economic support helps improve community health.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-chart-bar me-2"></i>Visualization 2: Food Access and Obesity Rates
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container mb-3" style="height: 300px;">
-                            <canvas id="foodObesityChart"></canvas>
-                        </div>
-                        <h6 class="text-success">What This Shows:</h6>
-                        <p class="mb-2">Areas with limited access to fresh, healthy food have higher obesity rates among residents.</p>
-                        <h6 class="text-success">Why This Matters:</h6>
-                        <p>When grocery stores and fresh food sources are far away or expensive, families rely on processed foods. Better food access leads to healthier weight and overall wellness.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="row g-4 mb-5">
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-chart-line me-2"></i>Visualization 3: Education Level and Health Outcomes
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container mb-3" style="height: 300px;">
-                            <canvas id="educationHealthChart"></canvas>
-                        </div>
-                        <h6 class="text-info">What This Shows:</h6>
-                        <p class="mb-2">Neighborhoods where more people finished high school have lower rates of preventable diseases like diabetes and high blood pressure.</p>
-                        <h6 class="text-info">Why This Matters:</h6>
-                        <p>Education helps people understand health information, navigate healthcare systems, and make informed decisions about their wellbeing. Supporting education improves community health.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header bg-warning text-dark">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-chart-area me-2"></i>Visualization 4: Housing Conditions and Respiratory Health
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container mb-3" style="height: 300px;">
-                            <canvas id="housingHealthChart"></canvas>
-                        </div>
-                        <h6 class="text-warning">What This Shows:</h6>
-                        <p class="mb-2">Areas with more vacant or overcrowded housing have higher rates of asthma and other breathing problems.</p>
-                        <h6 class="text-warning">Why This Matters:</h6>
-                        <p>Poor housing quality affects air quality and stress levels. Investing in safe, quality housing directly improves respiratory health and overall community wellbeing.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="row g-4 mb-5">
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header bg-danger text-white">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-chart-pie me-2"></i>Visualization 5: Healthcare Access and Insurance Coverage
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container mb-3" style="height: 300px;">
-                            <canvas id="healthcareAccessChart"></canvas>
-                        </div>
-                        <h6 class="text-danger">What This Shows:</h6>
-                        <p class="mb-2">Neighborhoods with higher rates of uninsured residents have more untreated chronic conditions and emergency room visits.</p>
-                        <h6 class="text-danger">Why This Matters:</h6>
-                        <p>When people can't afford healthcare, small problems become big ones. Expanding insurance coverage and affordable care prevents serious health issues.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header bg-purple text-white" style="background-color: #6f42c1 !important;">
-                        <h5 class="card-title mb-0">
-                            <i class="fas fa-chart-radar me-2"></i>Visualization 6: Community Support and Mental Health
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container mb-3" style="height: 300px;">
-                            <canvas id="mentalHealthChart"></canvas>
-                        </div>
-                        <h6 style="color: #6f42c1;">What This Shows:</h6>
-                        <p class="mb-2">Areas with higher poverty rates and social isolation have increased rates of depression and mental distress.</p>
-                        <h6 style="color: #6f42c1;">Why This Matters:</h6>
-                        <p>Mental health is deeply connected to social conditions. Strong community programs, economic opportunities, and social support networks improve mental wellness for everyone.</p>
-                    </div>
-                </div>
+                <p class="lead text-muted">Explore how different social determinants impact health outcomes in Camden</p>
             </div>
         </div>
         
         <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white p-0">
+                        <ul class="nav nav-tabs nav-justified card-header-tabs m-0" id="insightTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active py-3" id="income-tab" data-bs-toggle="tab" data-bs-target="#income" type="button" role="tab">
+                                    <i class="fas fa-wallet text-primary me-2"></i>Income
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link py-3" id="food-tab" data-bs-toggle="tab" data-bs-target="#food" type="button" role="tab">
+                                    <i class="fas fa-apple-alt text-success me-2"></i>Food Access
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link py-3" id="education-tab" data-bs-toggle="tab" data-bs-target="#education" type="button" role="tab">
+                                    <i class="fas fa-graduation-cap text-info me-2"></i>Education
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link py-3" id="housing-tab" data-bs-toggle="tab" data-bs-target="#housing" type="button" role="tab">
+                                    <i class="fas fa-home text-warning me-2"></i>Housing
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link py-3" id="healthcare-tab" data-bs-toggle="tab" data-bs-target="#healthcare" type="button" role="tab">
+                                    <i class="fas fa-user-md text-danger me-2"></i>Access
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link py-3" id="mental-tab" data-bs-toggle="tab" data-bs-target="#mental" type="button" role="tab">
+                                    <i class="fas fa-brain text-purple me-2" style="color: #6f42c1;"></i>Mental Health
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="card-body p-4">
+                        <div class="tab-content" id="insightTabsContent">
+                            
+                            <div class="tab-pane fade show active" id="income" role="tabpanel">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="incomeHealthChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="alert alert-primary bg-light border-0">
+                                            <h4 class="alert-heading text-primary mb-3">Income & Health</h4>
+                                            <p class="lead">Neighborhoods with higher household income tend to have lower rates of diabetes and other chronic diseases.</p>
+                                            <hr>
+                                            <h6 class="fw-bold">Why This Matters:</h6>
+                                            <p class="mb-0 small">When families have more money, they can afford healthier food, safer housing, and better healthcare. This chart shows that economic support helps improve community health.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="tab-pane fade" id="food" role="tabpanel">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="foodObesityChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="alert alert-success bg-light border-0">
+                                            <h4 class="alert-heading text-success mb-3">Food Access & Obesity</h4>
+                                            <p class="lead">Areas with limited access to fresh, healthy food have higher obesity rates among residents.</p>
+                                            <hr>
+                                            <h6 class="fw-bold">Why This Matters:</h6>
+                                            <p class="mb-0 small">When grocery stores and fresh food sources are far away or expensive, families rely on processed foods. Better food access leads to healthier weight and overall wellness.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="tab-pane fade" id="education" role="tabpanel">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="educationHealthChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="alert alert-info bg-light border-0">
+                                            <h4 class="alert-heading text-info mb-3">Education Impact</h4>
+                                            <p class="lead">Neighborhoods where more people finished high school have lower rates of preventable diseases.</p>
+                                            <hr>
+                                            <h6 class="fw-bold">Why This Matters:</h6>
+                                            <p class="mb-0 small">Education helps people understand health information, navigate healthcare systems, and make informed decisions about their wellbeing.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="housing" role="tabpanel">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="housingHealthChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="alert alert-warning bg-light border-0">
+                                            <h4 class="alert-heading text-warning mb-3">Housing & Health</h4>
+                                            <p class="lead">Areas with more vacant or overcrowded housing have higher rates of asthma and other breathing problems.</p>
+                                            <hr>
+                                            <h6 class="fw-bold">Why This Matters:</h6>
+                                            <p class="mb-0 small">Poor housing quality affects air quality and stress levels. Investing in safe, quality housing directly improves respiratory health.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="healthcare" role="tabpanel">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="healthcareAccessChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="alert alert-danger bg-light border-0">
+                                            <h4 class="alert-heading text-danger mb-3">Insurance Coverage</h4>
+                                            <p class="lead">Neighborhoods with higher rates of uninsured residents have more untreated chronic conditions.</p>
+                                            <hr>
+                                            <h6 class="fw-bold">Why This Matters:</h6>
+                                            <p class="mb-0 small">When people can't afford healthcare, small problems become big ones. Expanding insurance coverage prevents serious health issues.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="tab-pane fade" id="mental" role="tabpanel">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8">
+                                        <div class="chart-container" style="height: 400px;">
+                                            <canvas id="mentalHealthChart"></canvas>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <div class="alert bg-light border-0" style="background-color: #f3f0fa !important;">
+                                            <h4 class="alert-heading mb-3" style="color: #6f42c1;">Mental Wellness</h4>
+                                            <p class="lead">Areas with higher poverty rates and social isolation have increased rates of depression.</p>
+                                            <hr>
+                                            <h6 class="fw-bold">Why This Matters:</h6>
+                                            <p class="mb-0 small">Mental health is deeply connected to social conditions. Strong community programs and social support networks improve mental wellness.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-5">
             <div class="col-12">
                 <div class="card border-primary">
                     <div class="card-header bg-primary text-white">
