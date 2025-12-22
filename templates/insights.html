@@ -482,7 +482,6 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
@@ -580,17 +579,17 @@
     <div class="container">
         <div class="row">
             <div class="col-12 text-center mb-5">
-                <h2 class="display-6 fw-bold">Explore Data Relationships</h2>
-                <p class="lead text-muted">Interactive analysis tool for deeper insights</p>
+                <h2 class="display-6 fw-bold">Interactive Data Exploration</h2>
+                <p class="lead text-muted">Discover patterns and explore raw data behind the insights</p>
             </div>
         </div>
         
         <div class="row g-4">
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
+            <div class="col-lg-12">
+                <div class="card insight-card shadow-sm mb-4">
                     <div class="card-header bg-secondary text-white">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-chart-scatter me-2"></i>Interactive Correlation Analysis
+                            <i class="fas fa-chart-scatter me-2"></i>Correlation Analysis
                         </h5>
                     </div>
                     <div class="card-body">
@@ -624,42 +623,32 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="col-lg-6">
-                <div class="card insight-card h-100">
-                    <div class="card-header bg-secondary text-white">
+
+            <div class="col-lg-12">
+                <div class="card insight-card shadow-sm">
+                    <div class="card-header bg-dark text-white">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-lightbulb me-2"></i>How to Read These Charts
+                            <i class="fas fa-table me-2"></i>Neighborhood Data Explorer
                         </h5>
                     </div>
                     <div class="card-body">
-                        <h6 class="text-secondary">Understanding the Visualizations:</h6>
-                        <ul class="list-unstyled">
-                            <li class="mb-3">
-                                <i class="fas fa-chart-scatter text-primary me-2"></i>
-                                <strong>Scatter Plot:</strong> Shows relationship between two factors - dots spread down-right show negative correlation
-                            </li>
-                            <li class="mb-3">
-                                <i class="fas fa-chart-bar text-success me-2"></i>
-                                <strong>Bar Chart:</strong> Compares values across neighborhoods - taller bars show higher rates
-                            </li>
-                            <li class="mb-3">
-                                <i class="fas fa-chart-line text-info me-2"></i>
-                                <strong>Line Chart:</strong> Shows trends - line going down means improvement as x-factor increases
-                            </li>
-                            <li class="mb-3">
-                                <i class="fas fa-chart-pie text-danger me-2"></i>
-                                <strong>Pie Chart:</strong> Shows how Camden neighborhoods are divided into different groups
-                            </li>
-                            <li class="mb-3">
-                                <i class="fas fa-chart-area text-warning me-2"></i>
-                                <strong>Area Chart:</strong> Filled area emphasizes the relationship between housing and health
-                            </li>
-                            <li class="mb-3">
-                                <i class="fas fa-chart-radar" style="color: #6f42c1;" aria-hidden="true"></i>
-                                <strong> Radar Chart:</strong> Compares multiple factors at once - larger areas show bigger problems
-                            </li>
-                        </ul>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped" id="dataExplorerTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Neighborhood</th>
+                                        <th>Income</th>
+                                        <th>Poverty (%)</th>
+                                        <th>Diabetes (%)</th>
+                                        <th>Obesity (%)</th>
+                                        <th>Asthma (%)</th>
+                                        <th>Mental Distress (%)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tableBody">
+                                    </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -694,66 +683,6 @@
         </div>
     </div>
 </section>
-
-<section class="py-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-12">
-                <div class="card border-primary">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="card-title mb-0">
-                            <i class="fas fa-hands-helping me-2"></i>Take Action in Your Community
-                        </h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-lg-8">
-                                <h5 class="text-primary mb-3">Connect with Local Resources</h5>
-                                <p class="text-muted mb-3">
-                                    These insights reveal the health challenges facing Camden neighborhoods. 
-                                    Use MyResourcePal to find specific resources and services that can help address these disparities in your community.
-                                </p>
-                                <div class="row g-2">
-                                    <div class="col-sm-6">
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-check-circle text-success me-2"></i>
-                                            <small>Healthcare services and clinics</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-check-circle text-success me-2"></i>
-                                            <small>Food assistance programs</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-check-circle text-success me-2"></i>
-                                            <small>Mental health support</small>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="d-flex align-items-center">
-                                            <i class="fas fa-check-circle text-success me-2"></i>
-                                            <small>Housing and financial assistance</small>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-lg-4 text-center">
-                                <h6 class="text-primary mb-3">MyResourcePal</h6>
-                                <p class="text-muted small mb-3">Camden's comprehensive resource hub</p>
-                                <a href="https://www.myresourcepal.org/" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-external-link-alt me-2"></i>Find Resources
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 {% endblock %}
 
 {% block scripts %}
@@ -764,7 +693,7 @@
     // INJECT DATA FROM PYTHON
     const insightsData = {{ insights_data | tojson | safe }};
     
-    // CORRELATION CHART LOGIC
+    // --- 1. CORRELATION CHART LOGIC ---
     let correlationChart = null;
 
     function renderCorrelationChart() {
@@ -772,14 +701,12 @@
         const yVar = document.getElementById('yVariable').value;
         const ctx = document.getElementById('interactiveCorrelationChart').getContext('2d');
 
-        // Create data points for Scatter Plot
         const plotData = insightsData.map(item => ({
             x: item[xVar],
             y: item[yVar],
             name: item.name 
         }));
 
-        // Labels for the axes
         const labelsMap = {
             'income': 'Median Income ($)',
             'poverty': 'Poverty Rate (%)',
@@ -833,7 +760,6 @@
             }
         });
         
-        // Update the insight text box
         updateInsightText(xVar, yVar);
     }
 
@@ -848,17 +774,38 @@
         } else {
              text = `Analyzing the relationship between <strong>${x}</strong> and <strong>${y}</strong> across Camden neighborhoods.`;
         }
-        
         box.innerHTML = `<p class="mb-0">${text}</p>`;
     }
 
-    // EVENT LISTENERS
+    // --- 2. NEW DATA TABLE LOGIC ---
+    function renderDataTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = ''; // Clear existing
+
+        insightsData.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${row.name}</strong></td>
+                <td>$${row.income.toLocaleString()}</td>
+                <td>${row.poverty}%</td>
+                <td>${row.diabetes}%</td>
+                <td>${row.obesity}%</td>
+                <td>${row.asthma}%</td>
+                <td>${row.mentalDistress}%</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // --- 3. EVENT LISTENERS ---
     document.addEventListener('DOMContentLoaded', function() {
+        // Chart Listeners
         document.getElementById('xVariable').addEventListener('change', renderCorrelationChart);
         document.getElementById('yVariable').addEventListener('change', renderCorrelationChart);
         
-        // Initial Render
+        // Initial Renders
         renderCorrelationChart();
+        renderDataTable();
     });
 </script>
 {% endblock %}
