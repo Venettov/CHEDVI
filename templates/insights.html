@@ -781,16 +781,20 @@
         </div>
     </div>
 </section>
+
+<canvas id="correlationChart" style="display: none;"></canvas>
+
 {% endblock %}
 
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/insights.js') }}"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    // 1. INJECT DATA FROM PYTHON
-    // This connects your Flask backend to the frontend JavaScript
+    // INJECT DATA FROM PYTHON
     const insightsData = {{ insights_data | tojson | safe }};
     
-    // 2. CORRELATION CHART LOGIC
+    // CORRELATION CHART LOGIC
     let correlationChart = null;
 
     function renderCorrelationChart() {
@@ -802,7 +806,7 @@
         const plotData = insightsData.map(item => ({
             x: item[xVar],
             y: item[yVar],
-            name: item.name // Store neighborhood name for tooltip
+            name: item.name 
         }));
 
         // Labels for the axes
@@ -878,7 +882,7 @@
         box.innerHTML = `<p class="mb-0">${text}</p>`;
     }
 
-    // 3. EVENT LISTENERS
+    // EVENT LISTENERS
     document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('xVariable').addEventListener('change', renderCorrelationChart);
         document.getElementById('yVariable').addEventListener('change', renderCorrelationChart);
