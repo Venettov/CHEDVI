@@ -246,115 +246,58 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <section class="py-4">
-        <div class="container">
+            
             <div class="row">
-                <div class="col-12">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-white p-0">
-                            <ul class="nav nav-tabs nav-fill card-header-tabs m-0" id="analyticsTabs" role="tablist">
-                                <li class="nav-item">
-                                    <button class="nav-link active py-3 fw-bold" id="comparison-tab" data-bs-toggle="tab" data-bs-target="#comparison" type="button">
-                                        <i class="fas fa-chart-bar text-primary me-2"></i>Neighborhood Comparison
-                                    </button>
-                                </li>
-                                <li class="nav-item">
-                                    <button class="nav-link py-3 fw-bold" id="trend-tab" data-bs-toggle="tab" data-bs-target="#trend" type="button">
-                                        <i class="fas fa-chart-line text-success me-2"></i>Trend Analysis
-                                    </button>
-                                </li>
-                                <li class="nav-item">
-                                    <button class="nav-link py-3 fw-bold" id="demographics-tab" data-bs-toggle="tab" data-bs-target="#demographics" type="button">
-                                        <i class="fas fa-users text-info me-2"></i>Demographics Overview
-                                    </button>
-                                </li>
-                                <li class="nav-item">
-                                    <button class="nav-link py-3 fw-bold" id="determinants-tab" data-bs-toggle="tab" data-bs-target="#determinants" type="button">
-                                        <i class="fas fa-project-diagram text-warning me-2"></i>Social Determinants
-                                    </button>
-                                </li>
-                            </ul>
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-column me-2"></i>Neighborhood Comparison
+                            </h5>
                         </div>
-
-                        <div class="card-body p-4">
-                            <div class="tab-content" id="analyticsTabsContent">
-                                
-                                <div class="tab-pane fade show active" id="comparison" role="tabpanel">
-                                    <div class="row align-items-center">
-                                        <div class="col-lg-9">
-                                            <div class="chart-container" style="height: 400px; width: 100%;">
-                                                <canvas id="neighborhoodChart"></canvas>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-3">
-                                            <div class="p-3 bg-light rounded border-start border-4 border-primary">
-                                                <h5 class="text-primary fw-bold">Comparative View</h5>
-                                                <p class="text-muted small">Compare health metrics across different neighborhoods to identify disparities.</p>
-                                                <hr>
-                                                <small class="text-muted"><i class="fas fa-info-circle me-1"></i> Bars indicate prevalence rates.</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="tab-pane fade" id="trend" role="tabpanel">
-                                    <div class="row align-items-center">
-                                        <div class="col-lg-9">
-                                            <div class="chart-container" style="height: 400px; width: 100%;">
-                                                <canvas id="trendChart"></canvas>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-3">
-                                            <div class="p-3 bg-light rounded border-start border-4 border-success">
-                                                <h5 class="text-success fw-bold">5-Year Trends</h5>
-                                                <p class="text-muted small">Track changes in health outcomes over the last five years.</p>
-                                                <hr>
-                                                <small class="text-muted"><i class="fas fa-arrow-up me-1"></i> Upward trends indicate increasing prevalence.</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="tab-pane fade" id="demographics" role="tabpanel">
-                                    <div class="row align-items-center">
-                                        <div class="col-lg-9">
-                                            <div class="chart-container" style="height: 400px; width: 100%;">
-                                                <canvas id="demographicsChart"></canvas>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-3">
-                                            <div class="p-3 bg-light rounded border-start border-4 border-info">
-                                                <h5 class="text-info fw-bold">Demographics</h5>
-                                                <p class="text-muted small">Breakdown of population by age groups and key demographic categories.</p>
-                                                <hr>
-                                                <small class="text-muted"><i class="fas fa-user-friends me-1"></i> Based on 2022 Census Data.</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="tab-pane fade" id="determinants" role="tabpanel">
-                                    <div class="row align-items-center">
-                                        <div class="col-lg-9">
-                                            <div class="chart-container" style="height: 400px; width: 100%;">
-                                                <canvas id="determinantsChart"></canvas>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-3">
-                                            <div class="p-3 bg-light rounded border-start border-4 border-warning">
-                                                <h5 class="text-warning fw-bold">Social Factors</h5>
-                                                <p class="text-muted small">Analysis of social determinants of health including income, education, and housing.</p>
-                                                <hr>
-                                                <small class="text-muted"><i class="fas fa-home me-1"></i> Impact factors.</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
+                        <div class="card-body">
+                            <canvas id="neighborhoodChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-line me-2"></i>Trend Analysis
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="trendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-pie me-2"></i>Demographics Overview
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="demographicsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="fas fa-chart-area me-2"></i>Social Determinants
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <canvas id="sdohChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -613,213 +556,5 @@
             });
         }, 500);
     }
-
-    // -----------------------------------------------------------------
-    // 1. NEIGHBORHOOD COMPARISON CHART
-    // -----------------------------------------------------------------
-    const ctxNeighborhood = document.getElementById('neighborhoodChart').getContext('2d');
-    const neighborhoodChart = new Chart(ctxNeighborhood, {
-        type: 'bar',
-        data: {
-            labels: ['Cramer Hill', 'East Camden', 'Waterfront South', 'Parkside', 'Liberty Park', 'Whitman Park'],
-            datasets: [{
-                label: 'Diabetes Rate (%)',
-                data: [18.4, 16.2, 21.5, 15.8, 19.2, 22.1],
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1
-            }, {
-                label: 'Obesity Rate (%)',
-                data: [38.2, 35.5, 42.1, 33.8, 40.5, 44.2],
-                backgroundColor: 'rgba(255, 159, 64, 0.6)',
-                borderColor: 'rgba(255, 159, 64, 1)',
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'top' },
-                title: { display: true, text: 'Health Outcomes by Neighborhood' },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return context.dataset.label + ': ' + context.raw + '%';
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: { 
-                    beginAtZero: true, 
-                    title: { display: true, text: 'Percentage (%)' },
-                    grid: { color: 'rgba(0,0,0,0.05)' }
-                },
-                x: {
-                    grid: { display: false }
-                }
-            }
-        }
-    });
-
-    // -----------------------------------------------------------------
-    // 2. TREND ANALYSIS CHART
-    // -----------------------------------------------------------------
-    const ctxTrend = document.getElementById('trendChart').getContext('2d');
-    const trendChart = new Chart(ctxTrend, {
-        type: 'line',
-        data: {
-            labels: ['2018', '2019', '2020', '2021', '2022'],
-            datasets: [{
-                label: 'Citywide Diabetes Rate',
-                data: [16.5, 16.8, 17.5, 18.2, 18.6],
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                tension: 0.3,
-                fill: true,
-                pointRadius: 4,
-                pointHoverRadius: 6
-            }, {
-                label: 'Citywide Obesity Rate',
-                data: [32.0, 32.5, 34.1, 35.8, 36.5],
-                borderColor: 'rgb(255, 99, 132)',
-                backgroundColor: 'rgba(255, 99, 132, 0.1)',
-                tension: 0.3,
-                fill: true,
-                pointRadius: 4,
-                pointHoverRadius: 6
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'top' },
-                title: { display: true, text: '5-Year Health Trends' },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false
-                }
-            },
-            scales: {
-                y: { 
-                    beginAtZero: false,
-                    grid: { color: 'rgba(0,0,0,0.05)' }
-                },
-                x: {
-                    grid: { display: false }
-                }
-            },
-            interaction: {
-                mode: 'nearest',
-                axis: 'x',
-                intersect: false
-            }
-        }
-    });
-
-    // -----------------------------------------------------------------
-    // 3. DEMOGRAPHICS CHART
-    // -----------------------------------------------------------------
-    const ctxDemo = document.getElementById('demographicsChart').getContext('2d');
-    const demographicsChart = new Chart(ctxDemo, {
-        type: 'doughnut',
-        data: {
-            labels: ['Hispanic/Latino', 'Black/African American', 'White', 'Asian', 'Other'],
-            datasets: [{
-                data: [51.2, 42.4, 3.8, 1.6, 1.0], // Sample Camden demographics
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.7)',
-                    'rgba(54, 162, 235, 0.7)',
-                    'rgba(255, 206, 86, 0.7)',
-                    'rgba(75, 192, 192, 0.7)',
-                    'rgba(153, 102, 255, 0.7)'
-                ],
-                borderColor: '#ffffff',
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'right' },
-                title: { display: true, text: 'Population Distribution by Ethnicity' }
-            },
-            cutout: '60%'
-        }
-    });
-
-    // -----------------------------------------------------------------
-    // 4. SOCIAL DETERMINANTS CHART
-    // -----------------------------------------------------------------
-    const ctxDeterminants = document.getElementById('determinantsChart').getContext('2d');
-    const determinantsChart = new Chart(ctxDeterminants, {
-        type: 'radar',
-        data: {
-            labels: ['Income Stability', 'Education Access', 'Food Security', 'Housing Quality', 'Neighborhood Safety', 'Healthcare Access'],
-            datasets: [{
-                label: 'City Average',
-                data: [65, 59, 70, 61, 56, 75], // Normalize scores 0-100
-                fill: true,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgb(255, 99, 132)',
-                pointBackgroundColor: 'rgb(255, 99, 132)',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgb(255, 99, 132)'
-            }, {
-                label: 'High Priority Zone',
-                data: [45, 40, 30, 35, 40, 50],
-                fill: true,
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgb(54, 162, 235)',
-                pointBackgroundColor: 'rgb(54, 162, 235)',
-                pointBorderColor: '#fff',
-                pointHoverBackgroundColor: '#fff',
-                pointHoverBorderColor: 'rgb(54, 162, 235)'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            elements: {
-                line: { borderWidth: 3 }
-            },
-            scales: {
-                r: {
-                    angleLines: { display: true, color: 'rgba(0,0,0,0.1)' },
-                    grid: { color: 'rgba(0,0,0,0.1)' },
-                    pointLabels: {
-                        font: { size: 12, weight: 'bold' }
-                    },
-                    suggestedMin: 0,
-                    suggestedMax: 100,
-                    ticks: {
-                        backdropColor: 'transparent'
-                    }
-                }
-            },
-            plugins: {
-                title: { display: true, text: 'Social Determinants Impact Analysis' }
-            }
-        }
-    });
-    
-    // -----------------------------------------------------------------
-    // CRITICAL: RESIZE HANDLER FOR TABS
-    // -----------------------------------------------------------------
-    // This ensures charts inside hidden tabs render correctly when shown
-    document.addEventListener("DOMContentLoaded", function(){
-        const triggerTabList = document.querySelectorAll('button[data-bs-toggle="tab"]');
-        triggerTabList.forEach(triggerEl => {
-            triggerEl.addEventListener('shown.bs.tab', event => {
-                // Trigger a window resize event to force Chart.js to redraw
-                window.dispatchEvent(new Event('resize'));
-            });
-        });
-    });
-
 </script>
 {% endblock %}
