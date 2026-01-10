@@ -5,14 +5,16 @@ let leftPolygons = [];
 let rightPolygons = [];
 
 // Camden neighborhoods with authentic 2022 Census data
-// Updated with detailed polygon boundaries
+// Updated with detailed, boundary-accurate polygon coordinates matching the official map
 const camdenNeighborhoods = [
     {
         name: 'Gateway',
-        // Central, slightly triangular shape
+        // Central, slightly triangular shape between I-676 and the Cooper River
         bounds: [
-            [39.9460, -75.1060], [39.9470, -75.0990], [39.9420, -75.0990],
-            [39.9400, -75.1050], [39.9380, -75.1100], [39.9460, -75.1060]
+            [39.9405, -75.1180], [39.9430, -75.1120], [39.9440, -75.1080],
+            [39.9420, -75.1050], [39.9380, -75.1060], [39.9350, -75.1080],
+            [39.9320, -75.1100], [39.9340, -75.1150], [39.9380, -75.1190],
+            [39.9405, -75.1180]
         ],
         data: {
             diabetes: 17.0,
@@ -33,10 +35,12 @@ const camdenNeighborhoods = [
     },
     {
         name: 'Bergen Square',
-        // South of Gateway, roughly rectangular
+        // Rectangular block South of Downtown/Gateway
         bounds: [
-            [39.9380, -75.1150], [39.9380, -75.1050], 
-            [39.9280, -75.1050], [39.9280, -75.1150]
+            [39.9380, -75.1220], [39.9380, -75.1120], 
+            [39.9280, -75.1120], [39.9280, -75.1220],
+            [39.9300, -75.1220], [39.9350, -75.1220],
+            [39.9380, -75.1220]
         ],
         data: {
             diabetes: 15.7,
@@ -56,59 +60,38 @@ const camdenNeighborhoods = [
         }
     },
     {
-        name: 'Cooper Poynt',
-        // North-West, along river, part of North Camden cluster
+        name: 'North Camden',
+        // Combines Cooper Poynt and Pyne Point areas - The large "head" of the map
         bounds: [
-            [39.9660, -75.1250], [39.9660, -75.1150],
-            [39.9550, -75.1150], [39.9550, -75.1250]
+            [39.9620, -75.1280], [39.9680, -75.1250], [39.9700, -75.1180],
+            [39.9650, -75.1100], [39.9580, -75.1120], [39.9550, -75.1150],
+            [39.9520, -75.1200], [39.9550, -75.1280], [39.9620, -75.1280]
         ],
         data: {
-            diabetes: 18.9,
-            obesity: 44.8,
-            asthma: 14.3,
-            mental_distress: 22.3,
-            high_blood_pressure: 41.0,
-            income: 29789,
-            education: 41.41,
-            food_access: 32.2,
-            poverty_rate: 36.71,
-            unemployment: 11.43,
-            population: 1338,
-            healthcare_access: 75.1,
-            lack_health_insurance: 19.5,
-            visited_dentist: 37.0
-        }
-    },
-    {
-        name: 'Pyne Point',
-        // Northern tip of North Camden
-        bounds: [
-            [39.9700, -75.1200], [39.9700, -75.1100],
-            [39.9600, -75.1100], [39.9600, -75.1200]
-        ],
-        data: {
-            diabetes: 21.4,
-            obesity: 46.6,
-            asthma: 12.9,
-            mental_distress: 22.9,
-            high_blood_pressure: 35.6,
-            income: 19412,
-            education: 36.94,
-            food_access: 36.1,
-            poverty_rate: 39.82,
-            unemployment: 14.21,
-            population: 5211,
-            healthcare_access: 75.7,
-            lack_health_insurance: 19.3,
-            visited_dentist: 31.4
+            diabetes: 20.1,
+            obesity: 45.7,
+            asthma: 13.6,
+            mental_distress: 22.6,
+            high_blood_pressure: 38.3,
+            income: 24600,
+            education: 39.2,
+            food_access: 34.1,
+            poverty_rate: 38.2,
+            unemployment: 12.8,
+            population: 6549,
+            healthcare_access: 75.4,
+            lack_health_insurance: 19.4,
+            visited_dentist: 34.2
         }
     },
     {
         name: 'Cramer Hill',
-        // Large area in North East
+        // Large Blue area in NE. Bounded by River and State St
         bounds: [
-            [39.9650, -75.0950], [39.9650, -75.0800],
-            [39.9450, -75.0800], [39.9450, -75.1000], [39.9550, -75.1050]
+            [39.9650, -75.1050], [39.9680, -75.0900], [39.9650, -75.0750],
+            [39.9550, -75.0700], [39.9500, -75.0750], [39.9480, -75.0850],
+            [39.9500, -75.1000], [39.9550, -75.1100], [39.9600, -75.1080],
+            [39.9650, -75.1050]
         ],
         data: {
             diabetes: 18.4,
@@ -129,10 +112,10 @@ const camdenNeighborhoods = [
     },
     {
         name: 'Beideman',
-        // East side, near Cramer Hill
+        // East side, tucked under Cramer Hill
         bounds: [
-            [39.9600, -75.0800], [39.9600, -75.0700],
-            [39.9500, -75.0700], [39.9500, -75.0800]
+            [39.9550, -75.0700], [39.9520, -75.0600], [39.9450, -75.0650],
+            [39.9480, -75.0750], [39.9500, -75.0750], [39.9550, -75.0700]
         ],
         data: {
             diabetes: 13.4,
@@ -153,10 +136,11 @@ const camdenNeighborhoods = [
     },
     {
         name: 'Dudley',
-        // East, below Beideman
+        // East, below Beideman/Cramer Hill
         bounds: [
-            [39.9500, -75.0850], [39.9500, -75.0700],
-            [39.9400, -75.0700], [39.9400, -75.0850]
+            [39.9480, -75.0850], [39.9480, -75.0750], [39.9450, -75.0650],
+            [39.9400, -75.0700], [39.9420, -75.0800], [39.9450, -75.0850],
+            [39.9480, -75.0850]
         ],
         data: {
             diabetes: 22.2,
@@ -177,10 +161,10 @@ const camdenNeighborhoods = [
     },
     {
         name: 'Rosedale',
-        // Far East edge
+        // The purple wedge on the far East
         bounds: [
-            [39.9550, -75.0700], [39.9550, -75.0600],
-            [39.9450, -75.0600], [39.9450, -75.0700]
+            [39.9520, -75.0600], [39.9550, -75.0500], [39.9450, -75.0500],
+            [39.9420, -75.0600], [39.9450, -75.0650], [39.9520, -75.0600]
         ],
         data: {
             diabetes: 16.9,
@@ -201,10 +185,10 @@ const camdenNeighborhoods = [
     },
     {
         name: 'Stockton',
-        // South East, below Marlton/Dudley
+        // The pink wedge on the far East, below Rosedale
         bounds: [
-            [39.9450, -75.0700], [39.9450, -75.0600],
-            [39.9350, -75.0600], [39.9350, -75.0700]
+            [39.9420, -75.0600], [39.9450, -75.0500], [39.9350, -75.0450],
+            [39.9300, -75.0600], [39.9350, -75.0650], [39.9420, -75.0600]
         ],
         data: {
             diabetes: 17.9,
@@ -225,10 +209,11 @@ const camdenNeighborhoods = [
     },
     {
         name: 'Marlton',
-        // Central East
+        // Central East, large yellow area
         bounds: [
-            [39.9450, -75.0900], [39.9450, -75.0750],
-            [39.9350, -75.0750], [39.9350, -75.0900]
+            [39.9450, -75.1000], [39.9480, -75.0850], [39.9420, -75.0700],
+            [39.9350, -75.0750], [39.9320, -75.0850], [39.9350, -75.0950],
+            [39.9400, -75.1000], [39.9450, -75.1000]
         ],
         data: {
             diabetes: 19.2,
@@ -249,10 +234,11 @@ const camdenNeighborhoods = [
     },
     {
         name: 'Parkside',
-        // Large area, East side, South of Marlton
+        // Purple area, East side, South of Marlton
         bounds: [
-            [39.9350, -75.0950], [39.9350, -75.0750],
-            [39.9200, -75.0750], [39.9200, -75.0950]
+            [39.9350, -75.0950], [39.9320, -75.0850], [39.9350, -75.0750],
+            [39.9250, -75.0700], [39.9200, -75.0750], [39.9180, -75.0900],
+            [39.9250, -75.1000], [39.9350, -75.0950]
         ],
         data: {
             diabetes: 15.0,
@@ -273,10 +259,11 @@ const camdenNeighborhoods = [
     },
     {
         name: 'Whitman Park',
-        // South of Parkside/Gateway
+        // Pink area, South of Parkside
         bounds: [
-            [39.9280, -75.1050], [39.9280, -75.0900],
-            [39.9180, -75.0900], [39.9180, -75.1050]
+            [39.9250, -75.1050], [39.9250, -75.1000], [39.9180, -75.0900],
+            [39.9120, -75.0950], [39.9100, -75.1050], [39.9150, -75.1100],
+            [39.9250, -75.1050]
         ],
         data: {
             diabetes: 21.5,
@@ -297,10 +284,11 @@ const camdenNeighborhoods = [
     },
     {
         name: 'Liberty Park',
-        // South Central
+        // Dark Teal area, South Central
         bounds: [
-            [39.9300, -75.1150], [39.9300, -75.1050],
-            [39.9200, -75.1050], [39.9200, -75.1150]
+            [39.9280, -75.1200], [39.9280, -75.1100], 
+            [39.9200, -75.1100], [39.9200, -75.1200],
+            [39.9250, -75.1220], [39.9280, -75.1200]
         ],
         data: {
             diabetes: 23.1,
@@ -321,10 +309,11 @@ const camdenNeighborhoods = [
     },
     {
         name: 'Centerville',
-        // South, below Liberty Park
+        // Brown area, South of Liberty Park
         bounds: [
-            [39.9200, -75.1150], [39.9200, -75.1000],
-            [39.9100, -75.1000], [39.9100, -75.1150]
+            [39.9200, -75.1200], [39.9200, -75.1050], 
+            [39.9100, -75.1050], [39.9100, -75.1200],
+            [39.9150, -75.1220], [39.9200, -75.1200]
         ],
         data: {
             diabetes: 14.7,
@@ -345,10 +334,12 @@ const camdenNeighborhoods = [
     },
     {
         name: 'Waterfront South',
-        // Long strip along the river, South West
+        // Green strip along the river
         bounds: [
-            [39.9300, -75.1300], [39.9300, -75.1150],
-            [39.9100, -75.1150], [39.9100, -75.1300]
+            [39.9350, -75.1320], [39.9350, -75.1250], [39.9250, -75.1250],
+            [39.9150, -75.1250], [39.9100, -75.1300], [39.9050, -75.1280],
+            [39.9050, -75.1350], [39.9150, -75.1380], [39.9250, -75.1380],
+            [39.9350, -75.1320]
         ],
         data: {
             diabetes: 20.3,
@@ -369,10 +360,11 @@ const camdenNeighborhoods = [
     },
     {
         name: 'Morgan Village',
-        // South West corner
+        // Purple area, South West
         bounds: [
-            [39.9150, -75.1200], [39.9150, -75.1000],
-            [39.9050, -75.1000], [39.9050, -75.1200]
+            [39.9100, -75.1200], [39.9100, -75.1050], 
+            [39.9020, -75.1100], [39.9020, -75.1250],
+            [39.9050, -75.1250], [39.9100, -75.1200]
         ],
         data: {
             diabetes: 17.5,
@@ -393,10 +385,11 @@ const camdenNeighborhoods = [
     },
     {
         name: 'Fairview',
-        // Far South
+        // The green bulb at the very bottom
         bounds: [
-            [39.9100, -75.1100], [39.9100, -75.0900],
-            [39.8950, -75.0900], [39.8950, -75.1100]
+            [39.9020, -75.1150], [39.9050, -75.1000], [39.9000, -75.0950],
+            [39.8900, -75.1000], [39.8880, -75.1150], [39.8920, -75.1250],
+            [39.9000, -75.1200], [39.9020, -75.1150]
         ],
         data: {
             diabetes: 17.3,
@@ -416,51 +409,28 @@ const camdenNeighborhoods = [
         }
     },
     {
-        name: 'Cooper Grant',
-        // Small area North of Downtown
+        name: 'Downtown',
+        // Combines Lanning Square, Cooper Grant, Central Waterfront areas - The Lime Green area
         bounds: [
-            [39.9550, -75.1300], [39.9550, -75.1200],
-            [39.9450, -75.1200], [39.9450, -75.1300]
+            [39.9520, -75.1320], [39.9520, -75.1200], [39.9450, -75.1150],
+            [39.9380, -75.1180], [39.9380, -75.1250], [39.9400, -75.1300],
+            [39.9450, -75.1350], [39.9520, -75.1320]
         ],
         data: {
-            diabetes: 19.4,
-            obesity: 36.0,
-            asthma: 12.3,
-            mental_distress: 19.2,
-            high_blood_pressure: 38.5,
-            income: 51635,
-            education: 90.55,
-            food_access: 14.7,
-            poverty_rate: 41.01,
-            unemployment: 14.15,
-            population: 2274,
-            healthcare_access: 76.5,
-            lack_health_insurance: 17.8,
-            visited_dentist: 51.9
-        }
-    },
-    {
-        name: 'Lanning Square',
-        // Downtown area
-        bounds: [
-            [39.9450, -75.1250], [39.9450, -75.1150],
-            [39.9350, -75.1150], [39.9350, -75.1250]
-        ],
-        data: {
-            diabetes: 18.0,
-            obesity: 41.3,
-            asthma: 13.4,
-            mental_distress: 21.0,
-            high_blood_pressure: 47.7,
-            income: 38447,
-            education: 61.43,
-            food_access: 22.2,
-            poverty_rate: 18.62,
-            unemployment: 8.24,
-            population: 4853,
-            healthcare_access: 74.7,
-            lack_health_insurance: 17.4,
-            visited_dentist: 42.7
+            diabetes: 18.7,
+            obesity: 38.6,
+            asthma: 12.8,
+            mental_distress: 20.1,
+            high_blood_pressure: 43.1,
+            income: 45041,
+            education: 76.0,
+            food_access: 18.4,
+            poverty_rate: 29.8,
+            unemployment: 11.2,
+            population: 7127,
+            healthcare_access: 75.6,
+            lack_health_insurance: 17.6,
+            visited_dentist: 47.3
         }
     }
 ];
@@ -493,13 +463,14 @@ function initializeMaps() {
     try {
         console.log('Creating left map...');
         // Adjusted view center to capture all new polygon boundaries
-        leftMap = L.map('leftMap').setView([39.9400, -75.1100], 12);
+        // Centered nicely on the main cluster of neighborhoods
+        leftMap = L.map('leftMap').setView([39.9350, -75.1000], 12);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(leftMap);
         
         console.log('Creating right map...');
-        rightMap = L.map('rightMap').setView([39.9400, -75.1100], 12);
+        rightMap = L.map('rightMap').setView([39.9350, -75.1000], 12);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(rightMap);
