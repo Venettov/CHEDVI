@@ -279,36 +279,30 @@ function createEducationHealthChart() {
     });
 }
 
-// Visualization 4: Housing Quality vs Respiratory Health (Area Chart)
+// Visualization 4: Housing Quality vs Respiratory Health (Scatter Plot) - REPLACES AREA CHART
 function createHousingHealthChart() {
     const ctx = document.getElementById('housingHealthChart');
     if (!ctx) return;
     
-    // Sort by housing problems
-    const sortedIndices = camdenData.housing
-        .map((housing, index) => ({ housing, index }))
-        .sort((a, b) => a.housing - b.housing)
-        .map(item => item.index);
-    
-    const sortedHousing = sortedIndices.map(i => camdenData.housing[i]);
-    const sortedAsthma = sortedIndices.map(i => camdenData.asthma[i]);
-    
+    // 1. Prepare Scatter Data (X: Housing Problems, Y: Asthma)
+    const scatterData = camdenData.neighborhoods.map((name, i) => ({
+        x: camdenData.housing[i],
+        y: camdenData.asthma[i],
+        neighborhood: name
+    }));
+
+    // 2. Create Chart
     housingHealthChart = new Chart(ctx, {
-        type: 'line',
+        type: 'scatter',
         data: {
-            labels: sortedHousing.map(h => h + '%'),
             datasets: [{
-                label: 'Asthma Rate',
-                data: sortedAsthma,
+                label: 'Neighborhoods',
+                data: scatterData,
+                backgroundColor: 'rgba(255, 193, 7, 0.6)', // Warning/Yellow theme
                 borderColor: 'rgba(255, 193, 7, 1)',
-                backgroundColor: 'rgba(255, 193, 7, 0.3)',
-                borderWidth: 3,
-                pointBackgroundColor: 'rgba(255, 193, 7, 1)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
+                borderWidth: 1,
                 pointRadius: 6,
-                tension: 0.4,
-                fill: true
+                pointHoverRadius: 9
             }]
         },
         options: {
@@ -317,13 +311,26 @@ function createHousingHealthChart() {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Poor Housing Conditions Increase Respiratory Problems',
+                    text: 'Correlation: Poor Housing & Asthma Rates',
                     font: { size: 16, weight: 'bold' }
-                }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw.neighborhood}: Housing Problems ${context.raw.x}%, Asthma ${context.raw.y}%`;
+                        }
+                    }
+                },
+                legend: { display: false }
             },
             scales: {
-                x: { title: { display: true, text: 'Housing Problems Rate (Vacant/Overcrowded)' } },
-                y: { title: { display: true, text: 'Asthma Rate (%)' } }
+                x: {
+                    title: { display: true, text: 'Housing Problems Rate (Vacant/Overcrowded %)' },
+                    min: 0
+                },
+                y: {
+                    title: { display: true, text: 'Asthma Rate (%)' }
+                }
             }
         }
     });
