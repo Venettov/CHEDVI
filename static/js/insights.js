@@ -163,31 +163,30 @@ function createIncomeHealthChart() {
     });
 }
 
-// Visualization 2: Food Access vs Obesity (Bar Chart)
+// Visualization 2: Food Access vs Obesity (Scatter Plot) - REPLACES BAR CHART
 function createFoodObesityChart() {
     const ctx = document.getElementById('foodObesityChart');
     if (!ctx) return;
     
-    // Sort by food access score (low to high)
-    const sortedIndices = camdenData.foodAccess
-        .map((score, index) => ({ score, index }))
-        .sort((a, b) => a.score - b.score)
-        .map(item => item.index);
-    
-    const sortedNeighborhoods = sortedIndices.map(i => camdenData.neighborhoods[i]);
-    const sortedObesity = sortedIndices.map(i => camdenData.obesity[i]);
-    const sortedFoodAccess = sortedIndices.map(i => camdenData.foodAccess[i]);
-    
+    // 1. Prepare Scatter Data (X: Food Access, Y: Obesity)
+    const scatterData = camdenData.neighborhoods.map((name, i) => ({
+        x: camdenData.foodAccess[i],
+        y: camdenData.obesity[i],
+        neighborhood: name
+    }));
+
+    // 2. Create Chart
     foodObesityChart = new Chart(ctx, {
-        type: 'bar',
+        type: 'scatter',
         data: {
-            labels: sortedNeighborhoods.slice(0, 10), // Show worst 10 areas
             datasets: [{
-                label: 'Obesity Rate (%)',
-                data: sortedObesity.slice(0, 10),
-                backgroundColor: 'rgba(25, 135, 84, 0.7)',
+                label: 'Neighborhoods',
+                data: scatterData,
+                backgroundColor: 'rgba(25, 135, 84, 0.6)', // Green theme
                 borderColor: 'rgba(25, 135, 84, 1)',
-                borderWidth: 2
+                borderWidth: 1,
+                pointRadius: 6,
+                pointHoverRadius: 9
             }]
         },
         options: {
@@ -196,16 +195,26 @@ function createFoodObesityChart() {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Areas with Poor Food Access Have Higher Obesity Rates',
+                    text: 'Correlation: Food Deserts & Obesity Rates',
                     font: { size: 16, weight: 'bold' }
-                }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw.neighborhood}: Score ${context.raw.x}, Obesity ${context.raw.y}%`;
+                        }
+                    }
+                },
+                legend: { display: false }
             },
             scales: {
-                x: { title: { display: true, text: 'Neighborhoods (Sorted by Food Access - Worst First)' } },
-                y: { 
+                x: {
+                    title: { display: true, text: 'Food Access Score (Higher = Worse Access)' },
+                    min: 0
+                },
+                y: {
                     title: { display: true, text: 'Obesity Rate (%)' },
-                    beginAtZero: true,
-                    max: 45
+                    min: 30 // Start Y-axis at 30 to emphasize differences
                 }
             }
         }
