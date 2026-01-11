@@ -1007,29 +1007,49 @@ function createHealthcareSystemChart() {
     });
 }
 
-// Advanced Insight 8: Economic Impact Assessment
+// Advanced Insight 8: Economic Impact Assessment - POPULATED WITH ALL 19 NEIGHBORHOODS
 function createEconomicImpactChart() {
     const ctx = document.getElementById('economicImpactChart');
     if (!ctx) return;
     
-    const neighborhoods = ['Cramer Hill', 'Liberty Park', 'Dudley', 'Bergen Square', 'Waterfront South'];
-    const healthcareCosts = [18.2, 16.8, 15.3, 12.4, 14.7];
-    const productivityLoss = [12.8, 11.2, 10.9, 8.3, 9.6];
-    
+    // 1. Calculate Economic Impact Estimates
+    const economicData = camdenData.neighborhoods.map((name, i) => {
+        // Proxy 1: Healthcare Costs driven by chronic disease burden
+        // We sum Diabetes + High Blood Pressure and scale it to represent Millions ($M)
+        const diseaseBurden = camdenData.diabetes[i] + camdenData.highBloodPressure[i];
+        const healthCost = (diseaseBurden * 0.35).toFixed(1); 
+
+        // Proxy 2: Productivity Loss driven by unemployment and mental health
+        // We sum Unemployment + Mental Distress and scale it
+        const socialBurden = camdenData.unemployment[i] + camdenData.mentalDistress[i];
+        const prodLoss = (socialBurden * 0.3).toFixed(1);
+
+        return {
+            neighborhood: name,
+            healthCost: parseFloat(healthCost),
+            prodLoss: parseFloat(prodLoss),
+            total: parseFloat(healthCost) + parseFloat(prodLoss)
+        };
+    });
+
+    // 2. Sort by Total Economic Impact (Descending)
+    economicData.sort((a, b) => b.total - a.total);
+
+    // 3. Create Chart
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: neighborhoods,
+            labels: economicData.map(d => d.neighborhood),
             datasets: [{
-                label: 'Healthcare Costs ($M)',
-                data: healthcareCosts,
-                backgroundColor: 'rgba(255, 206, 86, 0.6)',
+                label: 'Est. Healthcare Costs ($M)',
+                data: economicData.map(d => d.healthCost),
+                backgroundColor: 'rgba(255, 206, 86, 0.6)', // Yellow
                 borderColor: 'rgba(255, 206, 86, 1)',
                 borderWidth: 1
             }, {
-                label: 'Productivity Loss ($M)',
-                data: productivityLoss,
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                label: 'Est. Productivity Loss ($M)',
+                data: economicData.map(d => d.prodLoss),
+                backgroundColor: 'rgba(75, 192, 192, 0.6)', // Teal
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
             }]
@@ -1039,20 +1059,37 @@ function createEconomicImpactChart() {
             maintainAspectRatio: false,
             scales: {
                 x: {
-                    stacked: true
+                    stacked: true,
+                    ticks: {
+                        autoSkip: false, // Show all neighborhoods
+                        maxRotation: 45,
+                        minRotation: 45,
+                        font: { size: 10 }
+                    }
                 },
                 y: {
                     stacked: true,
-                    title: {
-                        display: true,
-                        text: 'Economic Impact ($ Millions)'
-                    }
+                    title: { display: true, text: 'Annual Economic Impact ($ Millions)' }
                 }
             },
             plugins: {
                 title: {
                     display: true,
-                    text: 'Economic Burden of Health Disparities'
+                    text: 'The Economic Burden of Health Disparities',
+                    font: { size: 16, weight: 'bold' }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        footer: function(tooltipItems) {
+                            let total = 0;
+                            tooltipItems.forEach(function(tooltipItem) {
+                                total += tooltipItem.parsed.y;
+                            });
+                            return 'Total Est. Impact: $' + total.toFixed(1) + 'M';
+                        }
+                    }
                 }
             }
         }
