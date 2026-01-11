@@ -88,50 +88,33 @@ function initializeAllVisualizations() {
     }
 }
 
-// Visualization 1: Income Tiers vs Health (Bar Chart) - REPLACES SCATTER PLOT
+// Visualization 1: Income vs Health Outcomes (Scatter Plot)
 function createIncomeHealthChart() {
     const ctx = document.getElementById('incomeHealthChart');
-    if (!ctx) return;
+    if (!ctx) {
+        console.error('Canvas element incomeHealthChart not found');
+        return;
+    }
     
-    // 1. Bucketing Logic
-    let tiers = {
-        low: { label: 'Low Income (<$30k)', count: 0, sumDiabetes: 0, color: 'rgba(220, 53, 69, 0.7)', border: 'rgba(220, 53, 69, 1)' }, // Red
-        mid: { label: 'Mid Income ($30k-$45k)', count: 0, sumDiabetes: 0, color: 'rgba(255, 193, 7, 0.7)', border: 'rgba(255, 193, 7, 1)' }, // Yellow
-        high: { label: 'High Income (>$45k)', count: 0, sumDiabetes: 0, color: 'rgba(25, 135, 84, 0.7)', border: 'rgba(25, 135, 84, 1)' }   // Green
-    };
-
-    // 2. Sort Data into Tiers
-    camdenData.income.forEach((inc, i) => {
-        let rate = camdenData.diabetes[i];
-        if (inc < 30000) {
-            tiers.low.sumDiabetes += rate;
-            tiers.low.count++;
-        } else if (inc < 45000) {
-            tiers.mid.sumDiabetes += rate;
-            tiers.mid.count++;
-        } else {
-            tiers.high.sumDiabetes += rate;
-            tiers.high.count++;
-        }
-    });
-
-    // 3. Calculate Averages
-    const avgLow = (tiers.low.sumDiabetes / tiers.low.count).toFixed(1);
-    const avgMid = (tiers.mid.sumDiabetes / tiers.mid.count).toFixed(1);
-    const avgHigh = (tiers.high.sumDiabetes / tiers.high.count).toFixed(1);
-
-    // 4. Create Chart
+    console.log('Creating income vs health scatter plot with', camdenData.neighborhoods.length, 'neighborhoods');
+    
+    const scatterData = camdenData.neighborhoods.map((name, i) => ({
+        x: camdenData.income[i],
+        y: camdenData.diabetes[i],
+        neighborhood: name
+    }));
+    
     incomeHealthChart = new Chart(ctx, {
-        type: 'bar',
+        type: 'scatter',
         data: {
-            labels: [tiers.low.label, tiers.mid.label, tiers.high.label],
             datasets: [{
-                label: 'Average Diabetes Rate (%)',
-                data: [avgLow, avgMid, avgHigh],
-                backgroundColor: [tiers.low.color, tiers.mid.color, tiers.high.color],
-                borderColor: [tiers.low.border, tiers.mid.border, tiers.high.border],
+                label: 'Neighborhoods',
+                data: scatterData,
+                backgroundColor: 'rgba(13, 110, 253, 0.7)',
+                borderColor: 'rgba(13, 110, 253, 1)',
                 borderWidth: 2,
-                barPercentage: 0.6
+                pointRadius: 8,
+                pointHoverRadius: 10
             }]
         },
         options: {
@@ -140,23 +123,24 @@ function createIncomeHealthChart() {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Diabetes Rates Drop Significantly as Income Rises',
+                    text: 'Higher Income Areas Have Lower Diabetes Rates',
                     font: { size: 16, weight: 'bold' }
                 },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `Avg Diabetes Rate: ${context.raw}%`;
+                            return `${context.raw.neighborhood}: $${context.raw.x.toLocaleString()} income, ${context.raw.y}% diabetes`;
                         }
                     }
-                },
-                legend: { display: false }
+                }
             },
             scales: {
+                x: {
+                    title: { display: true, text: 'Median Household Income ($)' },
+                    ticks: { callback: function(value) { return '$' + (value/1000) + 'K'; } }
+                },
                 y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'Average Diabetes Rate (%)' },
-                    max: 25 // Set max slightly higher than data to look balanced
+                    title: { display: true, text: 'Diabetes Rate (%)' }
                 }
             }
         }
