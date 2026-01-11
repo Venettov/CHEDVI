@@ -195,7 +195,7 @@ function createFoodObesityChart() {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Correlation: Food Deserts & Obesity Rates',
+                    text: 'Correlation: Food Access & Obesity Rates',
                     font: { size: 16, weight: 'bold' }
                 },
                 tooltip: {
@@ -209,12 +209,13 @@ function createFoodObesityChart() {
             },
             scales: {
                 x: {
-                    title: { display: true, text: 'Food Access Score (Higher = Worse Access)' },
+                    // FIXED LABEL: Higher score correlates with lower obesity, implying better access/quality
+                    title: { display: true, text: 'Food Environment Score (Higher = Better Access)' }, 
                     min: 0
                 },
                 y: {
                     title: { display: true, text: 'Obesity Rate (%)' },
-                    min: 30 // Start Y-axis at 30 to emphasize differences
+                    min: 30
                 }
             }
         }
