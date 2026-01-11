@@ -890,59 +890,58 @@ function createEnvironmentalChart() {
     });
 }
 
-// Advanced Insight 7: Healthcare System Performance
+// Advanced Insight 7: Healthcare Access Barriers (Scatter Plot) - POPULATED WITH ALL 19 NEIGHBORHOODS
 function createHealthcareSystemChart() {
     const ctx = document.getElementById('healthcareSystemChart');
     if (!ctx) return;
     
-    const neighborhoods = ['East Camden', 'Cooper Grant', 'Cramer Hill', 'Beideman', 'Waterfront South'];
-    const primaryCareDistance = [2.3, 0.8, 1.7, 0.5, 1.2];
-    const edUtilization = [34.5, 12.8, 28.3, 11.2, 22.1];
-    
+    // 1. Prepare Scatter Data (X: Uninsured Rate, Y: High Blood Pressure)
+    // Logic: Lack of insurance (X) often correlates with unmanaged chronic conditions (Y)
+    const systemData = camdenData.neighborhoods.map((name, i) => ({
+        x: camdenData.uninsured[i],
+        y: camdenData.highBloodPressure[i],
+        neighborhood: name
+    }));
+
+    // 2. Create Chart
     new Chart(ctx, {
         type: 'scatter',
         data: {
             datasets: [{
-                label: 'Healthcare Access Gap',
-                data: neighborhoods.map((name, i) => ({
-                    x: primaryCareDistance[i],
-                    y: edUtilization[i],
-                    neighborhood: name
-                })),
-                backgroundColor: 'rgba(255, 99, 132, 0.6)',
+                label: 'Neighborhoods',
+                data: systemData,
+                backgroundColor: 'rgba(255, 99, 132, 0.6)', // Pink/Red theme
                 borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1
+                borderWidth: 1,
+                pointRadius: 6,
+                pointHoverRadius: 9
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Distance to Primary Care (miles)'
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: 'ED Visits per 100 Residents'
-                    }
-                }
-            },
             plugins: {
                 title: {
                     display: true,
-                    text: 'Healthcare Access vs Emergency Department Use'
+                    text: 'Insurance Barriers vs. Chronic Disease',
+                    font: { size: 16, weight: 'bold' }
                 },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            const point = context.raw;
-                            return `${point.neighborhood}: ${context.parsed.x} miles, ${context.parsed.y} ED visits`;
+                            return `${context.raw.neighborhood}: Uninsured ${context.raw.x}%, HBP ${context.raw.y}%`;
                         }
                     }
+                },
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Uninsured Rate (%)' },
+                    min: 0
+                },
+                y: {
+                    title: { display: true, text: 'High Blood Pressure Rate (%)' }
                 }
             }
         }
