@@ -411,19 +411,17 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeAllCharts();
 });
 
-// 1. UPDATED MAP INITIALIZATION (Zoomed out to 10.8)
+// Initialize both maps
 function initializeMaps() {
     try {
         console.log('Creating left map...');
-        // Changed zoom from 11.5 to 10.8 to "zoom out a little"
-        leftMap = L.map('leftMap', { zoomControl: false }).setView([39.9259, -75.1196], 10.8);
+        leftMap = L.map('leftMap').setView([39.9259, -75.1196], 12);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(leftMap);
         
         console.log('Creating right map...');
-        // Changed zoom from 11.5 to 10.8
-        rightMap = L.map('rightMap', { zoomControl: false }).setView([39.9259, -75.1196], 10.8);
+        rightMap = L.map('rightMap').setView([39.9259, -75.1196], 12);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(rightMap);
@@ -434,13 +432,11 @@ function initializeMaps() {
     }
 }
 
-// 2. UPDATED EVENT LISTENERS (With Overlay/Sync Logic)
+// Setup event listeners
 function setupEventListeners() {
     const leftSelector = document.getElementById('leftMapSelector');
     const rightSelector = document.getElementById('rightMapSelector');
-    const overlayToggle = document.getElementById('overlayToggle'); // Get the checkbox
     
-    // Existing selector logic
     if (leftSelector) {
         leftSelector.addEventListener('change', function() {
             updateLeftMap(this.value);
@@ -452,36 +448,6 @@ function setupEventListeners() {
         rightSelector.addEventListener('change', function() {
             updateRightMap(this.value);
             updateMetrics();
-        });
-    }
-
-    // --- NEW: Overlay/Sync Mode Logic ---
-    let isSyncing = false; // Flag to prevent infinite loop
-
-    if (overlayToggle) {
-        // 1. When checked, sync immediately
-        overlayToggle.addEventListener('change', function() {
-            if (this.checked) {
-                rightMap.setView(leftMap.getCenter(), leftMap.getZoom(), { animate: true });
-            }
-        });
-
-        // 2. Sync Left -> Right
-        leftMap.on('move', function() {
-            if (overlayToggle.checked && !isSyncing) {
-                isSyncing = true;
-                rightMap.setView(leftMap.getCenter(), leftMap.getZoom(), { animate: false });
-                isSyncing = false;
-            }
-        });
-
-        // 3. Sync Right -> Left
-        rightMap.on('move', function() {
-            if (overlayToggle.checked && !isSyncing) {
-                isSyncing = true;
-                leftMap.setView(rightMap.getCenter(), rightMap.getZoom(), { animate: false });
-                isSyncing = false;
-            }
         });
     }
 }
