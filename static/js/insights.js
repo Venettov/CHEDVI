@@ -564,27 +564,50 @@ function createTemporalTrendsChart() {
     });
 }
 
-// Advanced Insight 2: Spatial Analysis & Geographic Patterns
+// Advanced Insight 2: Spatial Analysis (Geo-Map Scatter Plot) - REPLACES RANDOM BUBBLE CHART
 function createSpatialAnalysisChart() {
     const ctx = document.getElementById('spatialAnalysisChart');
     if (!ctx) return;
     
-    const spatialData = camdenData.neighborhoods.map((name, i) => ({
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        r: camdenData.diabetes[i] * 2,
-        neighborhood: name,
-        diabetes: camdenData.diabetes[i]
-    }));
-    
+    // 1. Define Approximate Map Coordinates for Camden Neighborhoods (0-100 Grid)
+    // North is high Y, East is high X.
+    const geoMap = {
+        'Pyne Point': {x: 30, y: 85}, 'Cooper Poynt': {x: 35, y: 80}, 'Cramer Hill': {x: 75, y: 85}, 'Beideman': {x: 85, y: 80},
+        'Cooper Grant': {x: 20, y: 65}, 'Lanning Square': {x: 25, y: 55}, 'Gateway': {x: 35, y: 50}, 'Bergen Square': {x: 45, y: 45},
+        'Parkside': {x: 65, y: 50}, 'Rosedale': {x: 85, y: 55}, 'Dudley': {x: 80, y: 60}, 'Marlton': {x: 75, y: 45},
+        'Stockton': {x: 90, y: 65}, 'Whitman Park': {x: 45, y: 35}, 'Liberty Park': {x: 55, y: 35}, 'Centerville': {x: 40, y: 25},
+        'Waterfront South': {x: 20, y: 20}, 'Morgan Village': {x: 30, y: 10}, 'Fairview': {x: 75, y: 15}
+    };
+
+    // 2. Map Data to Coordinates and Assign Colors based on Diabetes Rate
+    const spatialData = camdenData.neighborhoods.map((name, i) => {
+        const coords = geoMap[name] || {x: 50, y: 50}; // Fallback to center if missing
+        const rate = camdenData.diabetes[i];
+        
+        // Color Logic: Low (<15) = Green, Med (15-20) = Yellow, High (>20) = Red
+        let color = 'rgba(25, 135, 84, 0.7)'; // Green
+        if (rate > 20) color = 'rgba(220, 53, 69, 0.7)'; // Red
+        else if (rate > 15) color = 'rgba(255, 193, 7, 0.7)'; // Yellow
+
+        return {
+            x: coords.x,
+            y: coords.y,
+            r: 10, // Fixed radius for cleanliness
+            neighborhood: name,
+            diabetes: rate,
+            bgColor: color
+        };
+    });
+
+    // 3. Create Chart
     new Chart(ctx, {
         type: 'bubble',
         data: {
             datasets: [{
-                label: 'Neighborhood Health Clusters',
+                label: 'Neighborhoods',
                 data: spatialData,
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: spatialData.map(d => d.bgColor),
+                borderColor: 'rgba(0,0,0,0.2)',
                 borderWidth: 1
             }]
         },
@@ -593,31 +616,33 @@ function createSpatialAnalysisChart() {
             maintainAspectRatio: false,
             scales: {
                 x: {
-                    title: {
-                        display: true,
-                        text: 'Geographic East-West Position'
-                    }
+                    title: { display: true, text: 'West ⟷ East' },
+                    min: 0, max: 100,
+                    grid: { display: false },
+                    ticks: { display: false } // Hide numbers for abstract map look
                 },
                 y: {
-                    title: {
-                        display: true,
-                        text: 'Geographic North-South Position'
-                    }
+                    title: { display: true, text: 'South ⟷ North' },
+                    min: 0, max: 100,
+                    grid: { display: false },
+                    ticks: { display: false }
                 }
             },
             plugins: {
                 title: {
                     display: true,
-                    text: 'Geographic Clustering of Health Outcomes'
+                    text: 'Geographic Health Map (Red = High Diabetes Rate)',
+                    font: { size: 16, weight: 'bold' }
                 },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
                             const point = context.raw;
-                            return `${point.neighborhood}: ${point.diabetes.toFixed(1)}% diabetes rate`;
+                            return `${point.neighborhood}: ${point.diabetes}% Diabetes`;
                         }
                     }
-                }
+                },
+                legend: { display: false }
             }
         }
     });
