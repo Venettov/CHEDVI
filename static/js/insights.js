@@ -381,40 +381,31 @@ function createHealthcareAccessChart() {
     });
 }
 
-// Visualization 6: Mental Health Radar Chart
+// Visualization 6: Poverty vs Mental Distress (Scatter Plot) - REPLACES RADAR CHART
 function createMentalHealthChart() {
     const ctx = document.getElementById('mentalHealthChart');
     if (!ctx) return;
     
-    // Compare high-poverty vs low-poverty areas
-    const highPoverty = camdenData.poverty.map((p, i) => p > 30 ? i : -1).filter(i => i !== -1);
-    const lowPoverty = camdenData.poverty.map((p, i) => p < 20 ? i : -1).filter(i => i !== -1);
-    
-    const highPovertyMentalDistress = highPoverty.reduce((sum, i) => sum + camdenData.mentalDistress[i], 0) / highPoverty.length;
-    const lowPovertyMentalDistress = lowPoverty.reduce((sum, i) => sum + camdenData.mentalDistress[i], 0) / lowPoverty.length;
-    
+    // 1. Prepare Scatter Data (X: Poverty, Y: Mental Distress)
+    const scatterData = camdenData.neighborhoods.map((name, i) => ({
+        x: camdenData.poverty[i],
+        y: camdenData.mentalDistress[i],
+        neighborhood: name
+    }));
+
+    // 2. Create Chart
     mentalHealthChart = new Chart(ctx, {
-        type: 'radar',
+        type: 'scatter',
         data: {
-            labels: ['Mental Distress', 'Social Isolation', 'Economic Stress', 'Housing Instability', 'Food Insecurity'],
-            datasets: [
-                {
-                    label: 'High-Poverty Areas',
-                    data: [highPovertyMentalDistress, 75, 85, 70, 80],
-                    borderColor: 'rgba(220, 53, 69, 1)',
-                    backgroundColor: 'rgba(220, 53, 69, 0.2)',
-                    borderWidth: 2,
-                    pointBackgroundColor: 'rgba(220, 53, 69, 1)'
-                },
-                {
-                    label: 'Low-Poverty Areas',
-                    data: [lowPovertyMentalDistress, 25, 20, 15, 25],
-                    borderColor: 'rgba(111, 66, 193, 1)',
-                    backgroundColor: 'rgba(111, 66, 193, 0.2)',
-                    borderWidth: 2,
-                    pointBackgroundColor: 'rgba(111, 66, 193, 1)'
-                }
-            ]
+            datasets: [{
+                label: 'Neighborhoods',
+                data: scatterData,
+                backgroundColor: 'rgba(111, 66, 193, 0.6)', // Purple theme
+                borderColor: 'rgba(111, 66, 193, 1)',
+                borderWidth: 1,
+                pointRadius: 6,
+                pointHoverRadius: 9
+            }]
         },
         options: {
             responsive: true,
@@ -422,15 +413,25 @@ function createMentalHealthChart() {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Mental Health Impacts Are Interconnected',
+                    text: 'Correlation: Poverty & Mental Distress',
                     font: { size: 16, weight: 'bold' }
-                }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw.neighborhood}: Poverty ${context.raw.x}%, Distress ${context.raw.y}%`;
+                        }
+                    }
+                },
+                legend: { display: false }
             },
             scales: {
-                r: {
-                    beginAtZero: true,
-                    max: 100,
-                    ticks: { stepSize: 20 }
+                x: {
+                    title: { display: true, text: 'Poverty Rate (%)' },
+                    min: 0
+                },
+                y: {
+                    title: { display: true, text: 'Mental Distress Rate (%)' }
                 }
             }
         }
