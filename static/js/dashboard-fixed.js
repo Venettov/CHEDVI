@@ -411,19 +411,30 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeAllCharts();
 });
 
-// 1. UPDATED MAP INITIALIZATION (Zoomed out to 10.8)
+// 1. UPDATED MAP INITIALIZATION
 function initializeMaps() {
     try {
         console.log('Creating left map...');
-        // Changed zoom from 11.5 to 10.8 to "zoom out a little"
-        leftMap = L.map('leftMap', { zoomControl: false }).setView([39.9259, -75.1196], 10.8);
+        
+        // FIXED: Enabled zoomControl (+/- buttons) and Disabled scrollWheelZoom (prevents scroll trap)
+        // Zoom set to 11.5 as requested
+        leftMap = L.map('leftMap', { 
+            zoomControl: true,       // Shows + / - buttons
+            scrollWheelZoom: false   // Prevents mouse getting trapped when scrolling page
+        }).setView([39.9259, -75.1196], 11.5);
+        
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(leftMap);
         
         console.log('Creating right map...');
-        // Changed zoom from 11.5 to 10.8
-        rightMap = L.map('rightMap', { zoomControl: false }).setView([39.9259, -75.1196], 10.8);
+        
+        // Apply same settings to Right Map
+        rightMap = L.map('rightMap', { 
+            zoomControl: true,       // Shows + / - buttons
+            scrollWheelZoom: false   // Prevents mouse getting trapped
+        }).setView([39.9259, -75.1196], 11.5);
+        
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(rightMap);
