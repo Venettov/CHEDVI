@@ -857,65 +857,92 @@ function createResilienceChart() {
     });
 }
 
-// Advanced Insight 6: Environmental Health Justice
+// Advanced Insight 6: Environmental Health Justice - POPULATED WITH ALL 19 NEIGHBORHOODS
 function createEnvironmentalChart() {
     const ctx = document.getElementById('environmentalChart');
     if (!ctx) return;
     
-    const neighborhoods = ['Waterfront South', 'Cooper Grant', 'Gateway', 'Beideman', 'Stockton'];
-    const airQualityIndex = [145, 132, 95, 78, 82];
-    const asthmaRates = [22.1, 19.2, 20.3, 19.1, 20.1];
-    
+    // 1. Calculate "Environmental Risk Score" (Proxy)
+    // Logic: Combine Poverty (Industrial proximity) + Housing (Indoor air quality)
+    const envData = camdenData.neighborhoods.map((name, i) => {
+        // Formula: Weighted average scaled to look like an Index (0-150)
+        const riskScore = Math.round((camdenData.poverty[i] * 1.5) + (camdenData.housing[i] * 3) + 20);
+        
+        return {
+            neighborhood: name,
+            risk: riskScore,
+            asthma: camdenData.asthma[i]
+        };
+    });
+
+    // 2. Sort by Risk Score (Descending)
+    envData.sort((a, b) => b.risk - a.risk);
+
+    const labels = envData.map(d => d.neighborhood);
+    const riskData = envData.map(d => d.risk);
+    const asthmaData = envData.map(d => d.asthma);
+
+    // 3. Create Chart
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: neighborhoods,
+            labels: labels,
             datasets: [{
-                label: 'Air Quality Index',
-                data: airQualityIndex,
-                backgroundColor: 'rgba(255, 159, 64, 0.6)',
+                label: 'Environmental Risk Index (Est.)',
+                data: riskData,
+                backgroundColor: 'rgba(255, 159, 64, 0.6)', // Orange theme
                 borderColor: 'rgba(255, 159, 64, 1)',
                 borderWidth: 1,
-                yAxisID: 'y'
+                yAxisID: 'y',
+                order: 2
             }, {
                 label: 'Asthma Rate (%)',
-                data: asthmaRates,
+                data: asthmaData,
                 type: 'line',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                borderColor: 'rgba(54, 162, 235, 1)', // Blue line
                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                yAxisID: 'y1'
+                borderWidth: 2,
+                tension: 0.3,
+                pointRadius: 3,
+                yAxisID: 'y1',
+                order: 1
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
+                x: {
+                    ticks: {
+                        autoSkip: false, // Ensure all 19 names show
+                        maxRotation: 45,
+                        minRotation: 45,
+                        font: { size: 10 }
+                    }
+                },
                 y: {
                     type: 'linear',
                     display: true,
                     position: 'left',
-                    title: {
-                        display: true,
-                        text: 'Air Quality Index'
-                    }
+                    title: { display: true, text: 'Environmental Risk Index' }
                 },
                 y1: {
                     type: 'linear',
                     display: true,
                     position: 'right',
-                    title: {
-                        display: true,
-                        text: 'Asthma Rate (%)'
-                    },
-                    grid: {
-                        drawOnChartArea: false
-                    }
+                    title: { display: true, text: 'Asthma Rate (%)' },
+                    grid: { drawOnChartArea: false }
                 }
             },
             plugins: {
                 title: {
                     display: true,
-                    text: 'Environmental Health Justice Analysis'
+                    text: 'Environmental Burden vs. Respiratory Health',
+                    font: { size: 16, weight: 'bold' }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
                 }
             }
         }
