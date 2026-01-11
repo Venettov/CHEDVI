@@ -337,33 +337,34 @@ function createHousingHealthChart() {
     });
 }
 
-// Visualization 5: Healthcare Access (Doughnut Chart)
+// Visualization 5: Uninsured Rates by Neighborhood (Horizontal Bar Chart) - REPLACES DOUGHNUT
 function createHealthcareAccessChart() {
     const ctx = document.getElementById('healthcareAccessChart');
     if (!ctx) return;
     
-    // Calculate averages for different access levels
-    const highAccess = camdenData.uninsured.filter(rate => rate < 15).length;
-    const mediumAccess = camdenData.uninsured.filter(rate => rate >= 15 && rate < 25).length;
-    const lowAccess = camdenData.uninsured.filter(rate => rate >= 25).length;
-    
+    // 1. Prepare Data and Sort by Uninsured Rate (Highest/Worst First)
+    const accessData = camdenData.neighborhoods.map((name, i) => ({
+        rate: camdenData.uninsured[i],
+        neighborhood: name
+    }));
+
+    accessData.sort((a, b) => b.rate - a.rate); // Descending sort
+
+    const labels = accessData.map(d => d.neighborhood);
+    const data = accessData.map(d => d.rate);
+
+    // 2. Create Chart
     healthcareAccessChart = new Chart(ctx, {
-        type: 'doughnut',
+        type: 'bar',
+        indexAxis: 'y', // Horizontal Bar Chart
         data: {
-            labels: ['Good Access (< 15% uninsured)', 'Fair Access (15-25% uninsured)', 'Poor Access (> 25% uninsured)'],
+            labels: labels,
             datasets: [{
-                data: [highAccess, mediumAccess, lowAccess],
-                backgroundColor: [
-                    'rgba(25, 135, 84, 0.8)',
-                    'rgba(255, 193, 7, 0.8)',
-                    'rgba(220, 53, 69, 0.8)'
-                ],
-                borderColor: [
-                    'rgba(25, 135, 84, 1)',
-                    'rgba(255, 193, 7, 1)',
-                    'rgba(220, 53, 69, 1)'
-                ],
-                borderWidth: 2
+                label: 'Uninsured Rate (%)',
+                data: data,
+                backgroundColor: data.map(val => val > 40 ? 'rgba(220, 53, 69, 0.7)' : 'rgba(255, 193, 7, 0.7)'), // Red for >40%, Yellow for others
+                borderColor: data.map(val => val > 40 ? 'rgba(220, 53, 69, 1)' : 'rgba(255, 193, 7, 1)'),
+                borderWidth: 1
             }]
         },
         options: {
@@ -372,10 +373,17 @@ function createHealthcareAccessChart() {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Healthcare Access Varies Dramatically Across Camden',
+                    text: 'Uninsured Rates by Neighborhood (Red = Critical Gap)',
                     font: { size: 16, weight: 'bold' }
                 },
-                legend: { position: 'bottom' }
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Percentage of Residents Without Health Insurance' },
+                    min: 0,
+                    max: 80 // Set max to accommodate the high 70% values
+                }
             }
         }
     });
