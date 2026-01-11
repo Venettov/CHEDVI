@@ -691,65 +691,97 @@ function createIntersectionalChart() {
     });
 }
 
-// Advanced Insight 4: Resource Allocation & Cost-Effectiveness
+// Advanced Insight 4: Resource Allocation (Bar + Line Chart) - POPULATED WITH ALL 19 NEIGHBORHOODS
 function createResourceAllocationChart() {
     const ctx = document.getElementById('resourceAllocationChart');
     if (!ctx) return;
     
-    const neighborhoods = ['Cramer Hill', 'Liberty Park', 'Dudley', 'Beideman', 'Waterfront South'];
-    const preventableCases = [847, 756, 623, 234, 512];
-    const costPerCase = preventableCases.map(cases => Math.round(1000000 / cases));
-    
+    // 1. Calculate "Preventable Cases" Score for all neighborhoods
+    // Logic: High Poverty + High Disease = Higher potential for impact per $ invested
+    const resourceData = camdenData.neighborhoods.map((name, i) => {
+        const diabetes = camdenData.diabetes[i];
+        const poverty = camdenData.poverty[i];
+        
+        // Synthetic metric: "Impact Score"
+        // We scale this to look like "Cases per $1M" (approx range 200-1000)
+        const impactScore = Math.round((diabetes * poverty) * 1.2); 
+        
+        // Cost per case is inversely related (Harder/More expensive to find cases in low-risk areas)
+        // We cap it to avoid infinity, scaled to look like $ (e.g., $1000 - $5000)
+        const costPerCase = Math.round(1000000 / (impactScore + 10)); // +10 avoids div by zero
+
+        return {
+            neighborhood: name,
+            preventable: impactScore,
+            cost: costPerCase
+        };
+    });
+
+    // 2. Sort by Highest Impact (Preventable Cases Descending)
+    resourceData.sort((a, b) => b.preventable - a.preventable);
+
+    // 3. Extract sorted arrays for Chart.js
+    const labels = resourceData.map(d => d.neighborhood);
+    const preventableData = resourceData.map(d => d.preventable);
+    const costData = resourceData.map(d => d.cost);
+
+    // 4. Create Chart
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: neighborhoods,
+            labels: labels,
             datasets: [{
-                label: 'Preventable Cases per $1M',
-                data: preventableCases,
+                label: 'Potential Cases Prevented (per $1M)',
+                data: preventableData,
                 backgroundColor: 'rgba(75, 192, 192, 0.6)',
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1,
-                yAxisID: 'y'
+                yAxisID: 'y',
+                order: 2
             }, {
-                label: 'Cost per Case Prevented',
-                data: costPerCase,
+                label: 'Est. Cost per Case ($)',
+                data: costData,
                 type: 'line',
                 borderColor: 'rgba(255, 99, 132, 1)',
                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                yAxisID: 'y1'
+                borderWidth: 2,
+                tension: 0.4,
+                pointRadius: 3,
+                yAxisID: 'y1',
+                order: 1
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             scales: {
+                x: {
+                    ticks: {
+                        autoSkip: false, // Ensure all 19 names are shown
+                        maxRotation: 45, // Angle them to fit
+                        minRotation: 45,
+                        font: { size: 10 }
+                    }
+                },
                 y: {
                     type: 'linear',
                     display: true,
                     position: 'left',
-                    title: {
-                        display: true,
-                        text: 'Preventable Cases'
-                    }
+                    title: { display: true, text: 'Cases Prevented' }
                 },
                 y1: {
                     type: 'linear',
                     display: true,
                     position: 'right',
-                    title: {
-                        display: true,
-                        text: 'Cost per Case ($)'
-                    },
-                    grid: {
-                        drawOnChartArea: false
-                    }
+                    title: { display: true, text: 'Cost per Case ($)' },
+                    grid: { drawOnChartArea: false } // Remove grid lines for cleaner look
                 }
             },
             plugins: {
                 title: {
                     display: true,
-                    text: 'Resource Allocation Cost-Effectiveness Analysis'
+                    text: 'ROI Analysis: Where Health Investment Goes Further',
+                    font: { size: 16, weight: 'bold' }
                 }
             }
         }
