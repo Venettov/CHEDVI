@@ -756,59 +756,69 @@ function createResourceAllocationChart() {
     });
 }
 
-// Advanced Insight 5: Community Resilience & Social Cohesion
+// Advanced Insight 5: Community Resilience (Scatter Plot) - POPULATED WITH ALL 19 NEIGHBORHOODS
 function createResilienceChart() {
     const ctx = document.getElementById('resilienceChart');
     if (!ctx) return;
-    
-    const neighborhoods = ['Bergen Square', 'Cooper Grant', 'Cramer Hill', 'Dudley', 'Beideman'];
-    const resilienceIndex = [8.2, 7.8, 4.3, 3.9, 6.1];
-    const healthOutcomes = [15.7, 19.4, 18.4, 22.2, 13.4];
-    
+
+    // 1. Calculate a "Resilience Index" for ALL 19 neighborhoods
+    // Formula: Average of (Education Rate) and (100 - Poverty Rate), scaled to 1-10
+    const resilienceData = camdenData.neighborhoods.map((name, i) => {
+        const edu = camdenData.education[i];
+        const poverty = camdenData.poverty[i];
+        
+        // Higher Education + Lower Poverty = Higher Resilience
+        // We normalize this to a roughly 0-10 scale for the "Index"
+        const rawScore = (edu + (100 - poverty)) / 2; 
+        const indexScore = (rawScore / 10).toFixed(1); // Scale to roughly 3.0 - 9.0
+
+        return {
+            x: indexScore,
+            y: camdenData.diabetes[i],
+            neighborhood: name
+        };
+    });
+
+    // 2. Create Chart
     new Chart(ctx, {
         type: 'scatter',
         data: {
             datasets: [{
-                label: 'Community Resilience Effect',
-                data: neighborhoods.map((name, i) => ({
-                    x: resilienceIndex[i],
-                    y: healthOutcomes[i],
-                    neighborhood: name
-                })),
-                backgroundColor: 'rgba(153, 102, 255, 0.6)',
-                borderColor: 'rgba(153, 102, 255, 1)',
-                borderWidth: 1
+                label: 'Neighborhoods',
+                data: resilienceData,
+                backgroundColor: 'rgba(13, 202, 240, 0.6)', // Cyan/Teal theme
+                borderColor: 'rgba(13, 202, 240, 1)',
+                borderWidth: 1,
+                pointRadius: 6,
+                pointHoverRadius: 9
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'Community Resilience Index'
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Diabetes Rate (%)'
-                    }
-                }
-            },
             plugins: {
                 title: {
                     display: true,
-                    text: 'Community Resilience vs Health Outcomes'
+                    text: 'Community Resilience vs. Health Outcomes',
+                    font: { size: 16, weight: 'bold' }
                 },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            const point = context.raw;
-                            return `${point.neighborhood}: Resilience ${context.parsed.x}, Diabetes ${context.parsed.y}%`;
+                            return `${context.raw.neighborhood}: Index ${context.raw.x}, Diabetes ${context.raw.y}%`;
                         }
                     }
+                },
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Community Resilience Index (Composite Score 1-10)' },
+                    min: 2,
+                    max: 10
+                },
+                y: {
+                    title: { display: true, text: 'Diabetes Rate (%)' }
                 }
             }
         }
