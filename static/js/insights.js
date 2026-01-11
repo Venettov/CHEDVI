@@ -221,36 +221,30 @@ function createFoodObesityChart() {
     });
 }
 
-// Visualization 3: Education vs Health (Line Chart)
+// Visualization 3: Education vs Health (Scatter Plot) - REPLACES LINE CHART
 function createEducationHealthChart() {
     const ctx = document.getElementById('educationHealthChart');
     if (!ctx) return;
     
-    // Sort by education level
-    const sortedIndices = camdenData.education
-        .map((edu, index) => ({ edu, index }))
-        .sort((a, b) => a.edu - b.edu)
-        .map(item => item.index);
-    
-    const sortedEducation = sortedIndices.map(i => camdenData.education[i]);
-    const sortedDiabetes = sortedIndices.map(i => camdenData.diabetes[i]);
-    
+    // 1. Prepare Scatter Data (X: Education, Y: Diabetes)
+    const scatterData = camdenData.neighborhoods.map((name, i) => ({
+        x: camdenData.education[i],
+        y: camdenData.diabetes[i],
+        neighborhood: name
+    }));
+
+    // 2. Create Chart
     educationHealthChart = new Chart(ctx, {
-        type: 'line',
+        type: 'scatter',
         data: {
-            labels: sortedEducation.map(edu => edu + '%'),
             datasets: [{
-                label: 'Diabetes Rate',
-                data: sortedDiabetes,
+                label: 'Neighborhoods',
+                data: scatterData,
+                backgroundColor: 'rgba(13, 202, 240, 0.6)', // Cyan/Info theme
                 borderColor: 'rgba(13, 202, 240, 1)',
-                backgroundColor: 'rgba(13, 202, 240, 0.1)',
-                borderWidth: 3,
-                pointBackgroundColor: 'rgba(13, 202, 240, 1)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
+                borderWidth: 1,
                 pointRadius: 6,
-                tension: 0.4,
-                fill: true
+                pointHoverRadius: 9
             }]
         },
         options: {
@@ -259,15 +253,26 @@ function createEducationHealthChart() {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Higher Education Levels Lead to Better Health Outcomes',
+                    text: 'Correlation: Education & Diabetes Rates',
                     font: { size: 16, weight: 'bold' }
-                }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw.neighborhood}: Grad Rate ${context.raw.x}%, Diabetes ${context.raw.y}%`;
+                        }
+                    }
+                },
+                legend: { display: false }
             },
             scales: {
-                x: { title: { display: true, text: 'High School Graduation Rate' } },
-                y: { 
-                    title: { display: true, text: 'Diabetes Rate (%)' },
-                    reverse: true // Show improvement as line goes down
+                x: {
+                    title: { display: true, text: 'High School Graduation Rate (%)' },
+                    min: 20,
+                    max: 100
+                },
+                y: {
+                    title: { display: true, text: 'Diabetes Rate (%)' }
                 }
             }
         }
