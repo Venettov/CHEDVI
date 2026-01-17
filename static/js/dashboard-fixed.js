@@ -477,13 +477,20 @@ function initializeMaps() {
 function createPopupContent(n, metric) {
     let contentBody = '';
 
-    if (metric && n.data[metric] !== undefined) {
-        // CASE A: Metric Selected - Show ONLY that metric
+    // STRICT CHECK: If a metric string is provided (e.g. "diabetes"), show ONLY that.
+    if (metric && metric !== "") {
         const label = getMetricLabel(metric);
-        const value = formatValue(n.data[metric], metric);
-        contentBody = `<div style="font-size: 1.1rem; color: #d35400;"><strong>${label}:</strong> ${value}</div>`;
+        let valueFormatted = "N/A";
+
+        // Check if data exists for this metric
+        if (n.data && n.data[metric] !== undefined) {
+            valueFormatted = formatValue(n.data[metric], metric);
+        }
+
+        // Single Metric View
+        contentBody = `<div style="font-size: 1.1rem; color: #1e8449;"><strong>${label}:</strong> ${valueFormatted}</div>`;
     } else {
-        // CASE B: Initial Load / No Selection - Show Summary
+        // Default Summary View (Initial Load)
         contentBody = `
             <strong>Diabetes:</strong> ${n.data.diabetes}%<br>
             <strong>Obesity:</strong> ${n.data.obesity}%<br>
@@ -535,7 +542,8 @@ function loadInitialData() {
 
 // Update Left Map (Updates Popup Content, Keeps Map Blue)
 function updateLeftMap(metric) {
-    if (!leftMap || !metric) return;
+    console.log("Updating Left Map for metric:", metric);
+    if (!leftMap) return;
     
     // Clear old layers
     leftPolygons.forEach(p => leftMap.removeLayer(p));
@@ -560,7 +568,8 @@ function updateLeftMap(metric) {
 
 // Update Right Map (Updates Popup Content, Keeps Map Blue)
 function updateRightMap(metric) {
-    if (!rightMap || !metric) return;
+    console.log("Updating Right Map for metric:", metric);
+    if (!rightMap) return;
     
     rightPolygons.forEach(p => rightMap.removeLayer(p));
     rightPolygons = [];
@@ -584,15 +593,21 @@ function updateRightMap(metric) {
 
 // Event Listeners
 function setupEventListeners() {
+    // Check IDs carefully - ensure these match your HTML
     const leftSelector = document.getElementById('leftMapSelector');
     const rightSelector = document.getElementById('rightMapSelector');
     const overlayToggle = document.getElementById('overlayToggle'); 
     
     if (leftSelector) {
         leftSelector.addEventListener('change', function() { updateLeftMap(this.value); updateMetrics(); });
+    } else {
+        console.warn("Left Map Selector ID 'leftMapSelector' not found.");
     }
+
     if (rightSelector) {
         rightSelector.addEventListener('change', function() { updateRightMap(this.value); updateMetrics(); });
+    } else {
+        console.warn("Right Map Selector ID 'rightMapSelector' not found.");
     }
 
     // Sync Logic
@@ -620,26 +635,6 @@ function setupEventListeners() {
 
 // --- HELPER FUNCTIONS ---
 
-function getColorForValue(value, metric) {
-    // This function is kept for chart logic, but NOT used for map color anymore
-    const values = camdenNeighborhoods.map(n => n.data[metric]).filter(v => v !== undefined);
-    const min = Math.min(...values);
-    const max = Math.max(...values);
-    const normalized = (value - min) / (max - min);
-    
-    const isGoodMetric = ['income', 'education', 'food_access', 'healthcare_access', 'visited_dentist'].includes(metric);
-
-    let red, green;
-    if (isGoodMetric) {
-        red = Math.floor(255 * (1 - normalized));
-        green = Math.floor(255 * normalized);
-    } else {
-        red = Math.floor(255 * normalized);
-        green = Math.floor(255 * (1 - normalized));
-    }
-    return `rgb(${red}, ${green}, 0)`;
-}
-
 function getMetricLabel(metric) {
     const labels = {
         diabetes: 'Diabetes Rate', obesity: 'Obesity Rate', asthma: 'Asthma Rate',
@@ -653,22 +648,31 @@ function getMetricLabel(metric) {
 }
 
 function formatValue(value, metric) {
+    if (typeof value !== 'number') return value;
     if (metric === 'income') return `$${value.toLocaleString()}`;
+    if (metric === 'food_access') return value.toFixed(1); // Score
     return `${value.toFixed(1)}%`;
 }
 
+// Update metrics logic
 function updateMetrics(selectedNeighborhoodName) {
+    // Basic recalculation of disparity based on selectors
     const leftMetric = document.getElementById('leftMapSelector')?.value || 'diabetes';
     const rightMetric = document.getElementById('rightMapSelector')?.value || 'income';
     
-    const leftValues = camdenNeighborhoods.map(n => n.data[leftMetric]).filter(v => v !== undefined);
-    const rightValues = camdenNeighborhoods.map(n => n.data[rightMetric]).filter(v => v !== undefined);
+    // Only attempt calculations if data exists
+    const leftValues = camdenNeighborhoods.map(n => n.data ? n.data[leftMetric] : undefined).filter(v => v !== undefined);
+    const rightValues = camdenNeighborhoods.map(n => n.data ? n.data[rightMetric] : undefined).filter(v => v !== undefined);
     
     if (leftValues.length === 0 || rightValues.length === 0) return;
     
-    const leftMean = leftValues.reduce((a, b) => a + b) / leftValues.length;
-    const leftStd = Math.sqrt(leftValues.reduce((sum, val) => sum + Math.pow(val - leftMean, 2), 0) / leftValues.length);
-    const disparityIndex = leftMean === 0 ? 0 : (leftStd / leftMean * 100);
+    const leftMean = leftValues.reduce((a, b) => a + b, 0) / leftValues.length;
+    
+    let disparityIndex = 0;
+    if (leftMean > 0) {
+        const leftStd = Math.sqrt(leftValues.reduce((sum, val) => sum + Math.pow(val - leftMean, 2), 0) / leftValues.length);
+        disparityIndex = (leftStd / leftMean * 100);
+    }
     
     const correlation = calculateCorrelation(leftValues, rightValues);
     const equityGap = Math.max(...leftValues) - Math.min(...leftValues);
@@ -679,6 +683,7 @@ function updateMetrics(selectedNeighborhoodName) {
 }
 
 function calculateCorrelation(x, y) {
+    if (x.length !== y.length || x.length === 0) return 0;
     const n = x.length;
     const sumX = x.reduce((a, b) => a + b, 0);
     const sumY = y.reduce((a, b) => a + b, 0);
@@ -700,7 +705,7 @@ function initializeAllCharts() {
     const neighborhoodCanvas = document.getElementById('neighborhoodChart');
     if (neighborhoodCanvas) {
         const ctx = neighborhoodCanvas.getContext('2d');
-        const sorted = [...camdenNeighborhoods].sort((a, b) => b.data.diabetes - a.data.diabetes).slice(0, 10);
+        const sorted = [...camdenNeighborhoods].sort((a, b) => (b.data.diabetes || 0) - (a.data.diabetes || 0)).slice(0, 10);
         new Chart(ctx, {
             type: 'bar',
             data: {
@@ -762,10 +767,10 @@ function initializeAllCharts() {
     if (sdohCanvas) {
         const ctx = sdohCanvas.getContext('2d');
         const avgs = {
-            pov: camdenNeighborhoods.reduce((s, n) => s + n.data.poverty_rate, 0) / 19,
-            unemp: camdenNeighborhoods.reduce((s, n) => s + n.data.unemployment, 0) / 19,
-            edu: camdenNeighborhoods.reduce((s, n) => s + n.data.education, 0) / 19,
-            ins: camdenNeighborhoods.reduce((s, n) => s + n.data.lack_health_insurance, 0) / 19
+            pov: camdenNeighborhoods.reduce((s, n) => s + (n.data.poverty_rate || 0), 0) / 19,
+            unemp: camdenNeighborhoods.reduce((s, n) => s + (n.data.unemployment || 0), 0) / 19,
+            edu: camdenNeighborhoods.reduce((s, n) => s + (n.data.education || 0), 0) / 19,
+            ins: camdenNeighborhoods.reduce((s, n) => s + (n.data.lack_health_insurance || 0), 0) / 19
         };
         new Chart(ctx, {
             type: 'radar',
