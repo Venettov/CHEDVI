@@ -814,15 +814,19 @@ function initializeDashboardExplorer() {
     const xSelect = document.getElementById('dashXVariable');
     const ySelect = document.getElementById('dashYVariable');
     const ctx = document.getElementById('dashCorrelationChart');
+    
+    // OPTIONAL: Try to find the table (it's okay if it's missing)
     const tableBody = document.getElementById('dashTableBody');
 
-    // Only run if elements exist (safety check)
-    if (!xSelect || !ySelect || !ctx || !tableBody) return;
+    // Safety Check: We ONLY need the dropdowns and the chart canvas to proceed
+    if (!xSelect || !ySelect || !ctx) return;
 
     let dashChart = null;
 
-    // 1. Render Table
+    // 1. Render Table (Only runs if table exists)
     function renderTable() {
+        if (!tableBody) return; // Skip if table was deleted
+        
         tableBody.innerHTML = '';
         camdenNeighborhoods.forEach(n => {
             const tr = document.createElement('tr');
@@ -896,7 +900,8 @@ function initializeDashboardExplorer() {
     // Initialize
     xSelect.addEventListener('change', renderChart);
     ySelect.addEventListener('change', renderChart);
-    renderTable();
+    
+    renderTable(); // This will safely do nothing if table is missing
     renderChart();
 }
 
