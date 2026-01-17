@@ -3,33 +3,38 @@
 {% block title %}Neighborhoods - Camden Health Equity Data Visualization Initiative{% endblock %}
 
 {% block content %}
-<section class="py-4 bg-light">
+<section class="py-5 bg-light border-bottom">
     <div class="container">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h1 class="display-5 fw-bold mb-3">Neighborhood Profiles</h1>
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-5 fw-bold mb-2">Neighborhood Profiles</h1>
                 <p class="lead text-muted">
-                    Explore detailed health and demographic profiles for each Camden neighborhood
+                    Detailed health, economic, and social profiles for Camden's 19 neighborhoods.
                 </p>
-                <p class="text-muted small">
-                    <i class="fas fa-chart-area me-2"></i>2022 Census and health outcome data
-                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="d-inline-flex align-items-center gap-2 text-muted small bg-white px-3 py-2 rounded shadow-sm">
+                    <i class="fas fa-database text-primary"></i>
+                    <span>Data Source: 2022 Census & CDC PLACES</span>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-<section class="py-4">
+<section class="py-5">
     <div class="container">
-        <div class="row mb-4">
-            <div class="col-lg-8 mx-auto">
-                <div class="card shadow-sm border-0 bg-primary text-white">
-                    <div class="card-body p-4">
-                        <h5 class="card-title mb-3">
-                            <i class="fas fa-search-location me-2"></i>Select a Neighborhood to Analyze
-                        </h5>
-                        <select class="form-select form-select-lg border-0 shadow-none text-dark" id="neighborhood-selector" style="background-color: rgba(255,255,255,0.9);">
-                            <option value="">Choose a neighborhood...</option>
+        
+        <div class="row mb-5">
+            <div class="col-lg-10 mx-auto">
+                <div class="card shadow border-0 overflow-hidden">
+                    <div class="card-header bg-primary text-white p-4">
+                        <h4 class="mb-0"><i class="fas fa-search-location me-2"></i>Neighborhood Selector</h4>
+                    </div>
+                    <div class="card-body p-4 bg-light">
+                        <label class="form-label fw-bold text-uppercase small text-muted">Choose a neighborhood to view full report:</label>
+                        <select class="form-select form-select-lg shadow-sm border-0" id="neighborhood-selector">
+                            <option value="">Select a Neighborhood...</option>
                             {% for n in neighborhood_data %}
                             <option value="{{ loop.index0 }}">{{ n.name }}</option>
                             {% endfor %}
@@ -43,87 +48,75 @@
             
             <div class="row mb-4">
                 <div class="col-12">
-                    <div class="card shadow-sm border-0">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-center flex-wrap">
-                                <div>
-                                    <h2 class="display-6 fw-bold mb-0 text-primary" id="profile-name">Neighborhood Name</h2>
-                                    <p class="text-muted mb-0">Camden, New Jersey</p>
-                                </div>
-                                <div class="d-flex gap-4 text-muted mt-3 mt-md-0">
-                                    <div class="text-center">
-                                        <i class="fas fa-users fa-2x mb-2 text-info"></i>
-                                        <div class="small fw-bold">POPULATION</div>
-                                        <div id="profile-pop" class="lead">--</div>
-                                    </div>
-                                    <div class="text-center">
-                                        <i class="fas fa-map-marked-alt fa-2x mb-2 text-warning"></i>
-                                        <div class="small fw-bold">COORDINATES</div>
-                                        <div id="profile-coords" class="lead">--</div>
-                                    </div>
-                                </div>
+                    <div class="d-flex flex-wrap justify-content-between align-items-end border-bottom pb-3">
+                        <div>
+                            <span class="badge bg-secondary mb-2">Camden, NJ</span>
+                            <h2 class="display-4 fw-bold text-dark mb-0" id="profile-name">Neighborhood Name</h2>
+                        </div>
+                        <div class="d-flex gap-4 text-end mt-3 mt-lg-0">
+                            <div>
+                                <small class="text-muted fw-bold d-block text-uppercase">Population</small>
+                                <span class="h4 mb-0" id="profile-pop">--</span>
+                            </div>
+                            <div>
+                                <small class="text-muted fw-bold d-block text-uppercase">Coordinates</small>
+                                <span class="h4 mb-0" id="profile-coords">--</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row g-4 mb-4">
-                <div class="col-md-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="icon-circle bg-success text-white mx-auto mb-3" style="width: 50px; height: 50px; line-height: 50px; border-radius: 50%;">
-                                <i class="fas fa-wallet"></i>
+            <div class="row g-4 mb-5">
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm hover-card">
+                        <div class="card-body p-4 text-center position-relative overflow-hidden">
+                            <div class="position-absolute top-0 end-0 p-3 opacity-10">
+                                <i class="fas fa-wallet fa-5x text-success"></i>
                             </div>
-                            <h6 class="text-muted text-uppercase fw-bold mb-2">Median Income</h6>
-                            <h3 class="display-6 fw-bold text-dark" id="profile-income">$0</h3>
-                            <div class="d-flex justify-content-center gap-2 mt-3">
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success p-2">
+                            <h6 class="text-muted text-uppercase fw-bold mb-3">Median Income</h6>
+                            <h3 class="display-5 fw-bold text-success mb-2" id="profile-income">$0</h3>
+                            <div class="d-flex justify-content-center align-items-center gap-2">
+                                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill">
                                     Rank #<span id="rank-income">--</span>
                                 </span>
-                                <span class="badge bg-light text-muted border p-2">
-                                    Top <span id="percentile-income">--</span>%
-                                </span>
+                                <small class="text-muted" id="income-context">--</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="icon-circle bg-danger text-white mx-auto mb-3" style="width: 50px; height: 50px; line-height: 50px; border-radius: 50%;">
-                                <i class="fas fa-heartbeat"></i>
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm hover-card">
+                        <div class="card-body p-4 text-center position-relative overflow-hidden">
+                            <div class="position-absolute top-0 end-0 p-3 opacity-10">
+                                <i class="fas fa-heartbeat fa-5x text-danger"></i>
                             </div>
-                            <h6 class="text-muted text-uppercase fw-bold mb-2">Diabetes Rate</h6>
-                            <h3 class="display-6 fw-bold text-dark" id="profile-diabetes">0%</h3>
-                            <div class="d-flex justify-content-center gap-2 mt-3">
-                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger p-2">
+                            <h6 class="text-muted text-uppercase fw-bold mb-3">Diabetes Prevalence</h6>
+                            <h3 class="display-5 fw-bold text-danger mb-2" id="profile-diabetes">0%</h3>
+                            <div class="d-flex justify-content-center align-items-center gap-2">
+                                <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill">
                                     Rank #<span id="rank-diabetes">--</span>
                                 </span>
-                                <span class="badge bg-light text-muted border p-2">
-                                    <span id="diabetes-status">High Risk</span>
-                                </span>
+                                <small class="text-muted" id="health-context">--</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="icon-circle bg-warning text-white mx-auto mb-3" style="width: 50px; height: 50px; line-height: 50px; border-radius: 50%;">
-                                <i class="fas fa-home"></i>
+                <div class="col-lg-4 col-md-12">
+                    <div class="card h-100 border-0 shadow-sm hover-card">
+                        <div class="card-body p-4 text-center position-relative overflow-hidden">
+                            <div class="position-absolute top-0 end-0 p-3 opacity-10">
+                                <i class="fas fa-home fa-5x text-warning"></i>
                             </div>
-                            <h6 class="text-muted text-uppercase fw-bold mb-2">Poverty Rate</h6>
-                            <h3 class="display-6 fw-bold text-dark" id="profile-poverty">0%</h3>
-                            <div class="d-flex justify-content-center gap-2 mt-3">
-                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning p-2">
+                            <h6 class="text-muted text-uppercase fw-bold mb-3">Poverty Rate</h6>
+                            <h3 class="display-5 fw-bold text-warning mb-2" id="profile-poverty">0%</h3>
+                            <div class="d-flex justify-content-center align-items-center gap-2">
+                                <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 rounded-pill">
                                     Rank #<span id="rank-poverty">--</span>
                                 </span>
-                                <span class="badge bg-light text-muted border p-2">
-                                    <span id="poverty-status">--</span>
-                                </span>
+                                <small class="text-muted">of Households</small>
                             </div>
                         </div>
                     </div>
@@ -132,61 +125,72 @@
 
             <div class="row g-4">
                 
-                <div class="col-lg-6">
-                    <div class="card h-100 shadow-sm border-0">
-                        <div class="card-header bg-white py-3 border-bottom">
-                            <h5 class="mb-0 fw-bold text-primary">
-                                <i class="fas fa-info-circle me-2"></i>Neighborhood Context
+                <div class="col-lg-7">
+                    <div class="card shadow-sm border-0 h-100">
+                        <div class="card-header bg-white py-3 border-bottom-0">
+                            <h5 class="fw-bold mb-0 text-dark">
+                                <i class="fas fa-microscope me-2 text-primary"></i>Neighborhood Context
                             </h5>
                         </div>
-                        <div class="card-body p-4">
-                            <div id="context-paragraph" class="mb-4 text-muted">
-                                </div>
+                        <div class="card-body p-4 pt-0">
+                            <div class="alert alert-light border-start border-4 border-primary mb-4" role="alert">
+                                <div id="context-paragraph" class="text-muted">
+                                    </div>
+                            </div>
                             
-                            <h6 class="fw-bold text-dark mb-3 text-uppercase small">Key Health Challenges</h6>
-                            <div id="challenges-list">
+                            <h6 class="fw-bold text-uppercase small text-muted mb-3">Identified Health Challenges</h6>
+                            <ul class="list-group list-group-flush" id="challenges-list">
+                                </ul>
+
+                            <div class="mt-4 row align-items-center g-3">
+                                <div class="col-auto">
+                                    <div class="d-flex align-items-center text-muted small">
+                                        <i class="fas fa-exclamation-circle me-2"></i>
+                                        <span>Economic Strain Index:</span>
+                                    </div>
                                 </div>
-                            
-                            <div class="mt-4 p-3 bg-light rounded border">
-                                <h6 class="fw-bold small text-muted mb-2">DEMOGRAPHIC NOTE</h6>
-                                <p class="small mb-0 text-muted">
-                                    Data reflects 2022 Census estimates. This neighborhood represents a <span id="demographic-note" class="fw-bold text-dark">--</span> density area within Camden.
-                                </p>
+                                <div class="col">
+                                    <div class="progress" style="height: 8px;">
+                                        <div id="strain-bar" class="progress-bar bg-warning" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="col-lg-6">
-                    <div class="card h-100 shadow-sm border-0">
-                        <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0 fw-bold text-success">
-                                <i class="fas fa-clipboard-check me-2"></i>Action Plan
-                            </h5>
-                            <span class="badge bg-danger" id="priority-badge">HIGH PRIORITY</span>
+                <div class="col-lg-5">
+                    <div class="card shadow-lg border-0 h-100 bg-primary text-white position-relative overflow-hidden">
+                        <div class="position-absolute bottom-0 end-0 translate-middle-y p-3 opacity-10">
+                            <i class="fas fa-clipboard-check fa-8x text-white"></i>
                         </div>
-                        <div class="card-body p-4">
-                            <h6 class="fw-bold text-dark mb-3 text-uppercase small">Strategic Recommendations</h6>
-                            <div id="strategy-list" class="mb-4">
+
+                        <div class="card-header bg-transparent border-bottom border-white border-opacity-25 py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="fw-bold mb-0">Action Plan</h5>
+                                <span class="badge bg-white text-primary" id="priority-badge">--</span>
+                            </div>
+                        </div>
+
+                        <div class="card-body p-4 position-relative" style="z-index: 1;">
+                            <h6 class="text-white text-opacity-75 text-uppercase small fw-bold mb-3">Recommended Interventions</h6>
+                            
+                            <div id="strategy-list">
                                 </div>
 
-                            <h6 class="fw-bold text-dark mb-3 text-uppercase small">Resource Allocation</h6>
-                            <div class="progress mb-2" style="height: 25px;">
-                                <div id="resource-bar" class="progress-bar bg-success" role="progressbar" style="width: 0%">
-                                    <span id="resource-text" class="small fw-bold ps-2">Funding Priority</span>
-                                </div>
+                            <hr class="border-white border-opacity-25 my-4">
+
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-light fw-bold text-primary" onclick="window.location.href='{{ url_for('resources') }}'">
+                                    <i class="fas fa-search me-2"></i>Find Local Partners
+                                </button>
+                                <button class="btn btn-outline-light" onclick="window.print()">
+                                    <i class="fas fa-download me-2"></i>Download Profile
+                                </button>
                             </div>
-                            <small class="text-muted">Recommended allocation based on health disparity index.</small>
-                            
-                            <hr class="my-4">
-                            
-                            <a href="{{ url_for('resources') }}" class="btn btn-outline-primary w-100">
-                                <i class="fas fa-external-link-alt me-2"></i>Find Local Resources
-                            </a>
                         </div>
                     </div>
                 </div>
-
             </div>
 
         </div> </div>
@@ -201,110 +205,136 @@
         const selector = document.getElementById('neighborhood-selector');
         const profileDiv = document.getElementById('neighborhood-profile');
 
-        // --- 1. SORTING LOGIC FOR RANKINGS ---
-        // Create sorted arrays once to calculate accurate ranks
-        const sortedByIncome = [...realCamdenData].sort((a, b) => b.income - a.income); // High to Low
-        const sortedByHealth = [...realCamdenData].sort((a, b) => a.diabetes - b.diabetes); // Low to High (Best to Worst)
-        const sortedByPoverty = [...realCamdenData].sort((a, b) => a.poverty - b.poverty); // Low to High (Best to Worst)
+        // Verify data loaded
+        if (typeof realCamdenData === 'undefined') {
+            console.error("CRITICAL: realCamdenData not found. Check neighborhoods.js loading.");
+            return;
+        }
+
+        // --- RANKING ENGINE ---
+        // Pre-calculate sorted arrays for accurate ranking (1 = Best/Highest)
+        // Income: High is good (1 = Richest)
+        const sortedByIncome = [...realCamdenData].sort((a, b) => b.income - a.income);
+        // Health/Poverty: Low is good (1 = Lowest Rate)
+        const sortedByHealth = [...realCamdenData].sort((a, b) => a.diabetes - b.diabetes);
+        const sortedByPoverty = [...realCamdenData].sort((a, b) => a.poverty - b.poverty);
 
         function getRank(name, sortedArray) {
             return sortedArray.findIndex(n => n.name === name) + 1;
         }
 
-        // --- 2. UPDATE FUNCTION ---
+        // --- UPDATE HANDLER ---
         selector.addEventListener('change', function() {
-            const index = this.value;
-            if (index === "") {
+            const index = parseInt(this.value);
+
+            // Safety Check
+            if (isNaN(index) || index < 0 || index >= realCamdenData.length) {
                 profileDiv.style.display = "none";
                 return;
             }
 
-            // Get Data
+            // Get Target Data
             const n = realCamdenData[index];
-            if (!n) return;
-
             profileDiv.style.display = "block";
 
-            // A. Header Stats
+            // 1. Update Header Stats
             document.getElementById('profile-name').textContent = n.name;
             document.getElementById('profile-pop').textContent = n.population.toLocaleString();
-            document.getElementById('profile-coords').textContent = `${n.lat.toFixed(2)}, ${n.lng.toFixed(2)}`;
+            document.getElementById('profile-coords').textContent = `${n.lat.toFixed(3)}, ${n.lng.toFixed(3)}`;
 
-            // B. Rankings & Metrics
+            // 2. Update KPI Cards & Ranks
+            // Income
             document.getElementById('profile-income').textContent = "$" + n.income.toLocaleString();
-            document.getElementById('rank-income').textContent = getRank(n.name, sortedByIncome);
-            
-            document.getElementById('profile-diabetes').textContent = n.diabetes + "%";
-            const dRank = getRank(n.name, sortedByHealth);
-            document.getElementById('rank-diabetes').textContent = dRank;
-            document.getElementById('diabetes-status').textContent = dRank > 15 ? "Critical" : (dRank > 10 ? "Elevated" : "Stable");
+            const incomeRank = getRank(n.name, sortedByIncome);
+            document.getElementById('rank-income').textContent = incomeRank;
+            document.getElementById('income-context').textContent = incomeRank < 5 ? "High Tier" : (incomeRank > 14 ? "Low Tier" : "Mid Tier");
 
+            // Diabetes
+            document.getElementById('profile-diabetes').textContent = n.diabetes + "%";
+            const healthRank = getRank(n.name, sortedByHealth);
+            document.getElementById('rank-diabetes').textContent = healthRank;
+            document.getElementById('health-context').textContent = healthRank > 15 ? "Critical" : "Stable";
+
+            // Poverty
             document.getElementById('profile-poverty').textContent = n.poverty + "%";
             document.getElementById('rank-poverty').textContent = getRank(n.name, sortedByPoverty);
 
-            // C. Dynamic Context Generation
-            let context = `<strong>${n.name}</strong> is a residential community with a population of ${n.population.toLocaleString()}. `;
-            if (n.income < 25000) {
-                context += `It currently faces significant economic hurdles, with a median income well below the city average. `;
-            } else if (n.income > 45000) {
-                context += `It is one of the more economically stable areas in Camden, though health disparities persist. `;
-            }
+            // 3. Dynamic Context Generator
+            // We build a narrative paragraph based on the data
+            let narrative = `<strong>${n.name}</strong> is home to approx. ${n.population.toLocaleString()} residents. `;
+            
+            // Health Narrative
             if (n.diabetes > 20) {
-                context += `Public health data indicates a <strong>critical need</strong> for diabetes intervention programs.`;
+                narrative += `It faces <span class="text-danger fw-bold">severe health challenges</span>, with a diabetes rate (${n.diabetes}%) significantly above the city average. `;
+            } else if (n.diabetes < 16) {
+                narrative += `Health outcomes here are <span class="text-success fw-bold">comparatively better</span> than the rest of the city. `;
+            } else {
+                narrative += `Health metrics align with the city-wide baseline. `;
             }
-            document.getElementById('context-paragraph').innerHTML = context;
 
-            // D. Challenges List (Inferred from Data)
-            let challengesHTML = "<ul class='list-group list-group-flush'>";
-            if (n.poverty > 30) challengesHTML += `<li class='list-group-item bg-transparent px-0'><i class='fas fa-exclamation-circle text-danger me-2'></i>High Economic Insecurity</li>`;
-            if (n.diabetes > 18) challengesHTML += `<li class='list-group-item bg-transparent px-0'><i class='fas fa-notes-medical text-danger me-2'></i>Chronic Disease Prevalence</li>`;
-            if (n.obesity > 40) challengesHTML += `<li class='list-group-item bg-transparent px-0'><i class='fas fa-utensils text-warning me-2'></i>Limited Healthy Food Access</li>`;
-            if (n.population > 4000) challengesHTML += `<li class='list-group-item bg-transparent px-0'><i class='fas fa-users text-info me-2'></i>High Population Density</li>`;
-            challengesHTML += "</ul>";
-            document.getElementById('challenges-list').innerHTML = challengesHTML;
-
-            // E. Strategies List (Inferred from Data)
-            let strategiesHTML = "<ul class='list-unstyled'>";
-            let priorityScore = 0;
-
-            if (n.diabetes > 20) {
-                strategiesHTML += `<li class='mb-3 d-flex'><i class='fas fa-check-square text-success mt-1 me-3'></i><div><strong>Launch Mobile Clinics:</strong><br><small class='text-muted'>Deploy weekly screening vans to high-traffic areas.</small></div></li>`;
-                priorityScore += 2;
+            // Economic Narrative
+            if (n.income < 20000) {
+                narrative += `Economically, the area struggles with deep poverty (Median Income: $${n.income.toLocaleString()}), creating barriers to healthcare access.`;
+            } else if (n.income > 50000) {
+                narrative += `With a median income of $${n.income.toLocaleString()}, it is one of Camden's more economically resilient neighborhoods.`;
             }
+            document.getElementById('context-paragraph').innerHTML = narrative;
+
+            // 4. Challenges List
+            let challengesHTML = "";
+            let strainScore = 0; // 0-100
+
             if (n.poverty > 35) {
-                strategiesHTML += `<li class='mb-3 d-flex'><i class='fas fa-check-square text-success mt-1 me-3'></i><div><strong>Food Prescription Program:</strong><br><small class='text-muted'>Partner with local grocers to subsidize fresh produce.</small></div></li>`;
-                priorityScore += 2;
+                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-exclamation-triangle text-danger me-3"></i><div><strong>Severe Economic Hardship</strong><br><small class="text-muted">Poverty rate exceeds 35% threshold.</small></div></li>`;
+                strainScore += 40;
             }
-            if (n.income < 30000) {
-                strategiesHTML += `<li class='mb-3 d-flex'><i class='fas fa-check-square text-success mt-1 me-3'></i><div><strong>Financial Wellness Grants:</strong><br><small class='text-muted'>Connect residents with emergency assistance funds.</small></div></li>`;
-                priorityScore += 1;
+            if (n.diabetes > 19) {
+                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-procedures text-danger me-3"></i><div><strong>Chronic Disease Burden</strong><br><small class="text-muted">Diabetes prevalence is critical.</small></div></li>`;
+                strainScore += 30;
+            }
+            if (n.obesity > 42) {
+                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-utensils text-warning me-3"></i><div><strong>Nutritional Access</strong><br><small class="text-muted">High obesity suggests food desert conditions.</small></div></li>`;
+                strainScore += 20;
+            }
+            // Default if empty
+            if (challengesHTML === "") {
+                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-check-circle text-success me-3"></i><div><strong>Stable Indicators</strong><br><small class="text-muted">No critical alerts flagged.</small></div></li>`;
+                strainScore += 10;
+            }
+            
+            document.getElementById('challenges-list').innerHTML = challengesHTML;
+            document.getElementById('strain-bar').style.width = strainScore + "%";
+
+            // 5. Action Plan & Strategies
+            let strategiesHTML = "<ul class='list-unstyled'>";
+            let priorityLevel = "MONITOR";
+            let priorityClass = "bg-success";
+
+            // Strategy Logic
+            if (n.diabetes > 20) {
+                strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Mobile Screening Units</strong><br><small class="text-white text-opacity-50">Deploy bi-weekly A1C testing vans.</small></span></div></li>`;
+                priorityLevel = "URGENT";
+                priorityClass = "bg-danger";
+            }
+            if (n.poverty > 40) {
+                strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Food Prescription Rx</strong><br><small class="text-white text-opacity-50">Subsidize fresh produce for residents.</small></span></div></li>`;
+                priorityLevel = (priorityLevel === "URGENT") ? "CRITICAL" : "HIGH";
+            }
+            if (n.income < 25000) {
+                strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Medicaid Outreach</strong><br><small class="text-white text-opacity-50">Increase enrollment assistance.</small></span></div></li>`;
+            }
+            // Default
+            if (strategiesHTML === "<ul class='list-unstyled'>") {
+                strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Community Wellness</strong><br><small class="text-white text-opacity-50">Maintain current engagement programs.</small></span></div></li>`;
             }
             strategiesHTML += "</ul>";
-            document.getElementById('strategy-list').innerHTML = strategiesHTML;
 
-            // F. Priority Badge & Resource Bar
-            const priorityBadge = document.getElementById('priority-badge');
-            const resourceBar = document.getElementById('resource-bar');
+            document.getElementById('strategy-list').innerHTML = strategiesHTML;
             
-            if (priorityScore >= 4) {
-                priorityBadge.className = "badge bg-danger";
-                priorityBadge.textContent = "CRITICAL PRIORITY";
-                resourceBar.style.width = "90%";
-                resourceBar.className = "progress-bar bg-danger";
-                document.getElementById('resource-text').textContent = "High Funding Allocation";
-            } else if (priorityScore >= 2) {
-                priorityBadge.className = "badge bg-warning text-dark";
-                priorityBadge.textContent = "HIGH PRIORITY";
-                resourceBar.style.width = "65%";
-                resourceBar.className = "progress-bar bg-warning";
-                document.getElementById('resource-text').textContent = "Moderate Funding Allocation";
-            } else {
-                priorityBadge.className = "badge bg-success";
-                priorityBadge.textContent = "MONITORING";
-                resourceBar.style.width = "40%";
-                resourceBar.className = "progress-bar bg-success";
-                document.getElementById('resource-text').textContent = "Standard Funding Allocation";
-            }
+            const pBadge = document.getElementById('priority-badge');
+            pBadge.textContent = priorityLevel;
+            pBadge.className = `badge ${priorityClass} text-white`;
+
         });
     });
 </script>
