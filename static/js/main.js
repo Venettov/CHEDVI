@@ -477,39 +477,13 @@ window.CHEDVI = {
         }).join('');
     },
     
-    // --- UPDATED SEARCH FUNCTIONALITY ---
+    // Global search functionality
     initializeGlobalSearch: function() {
-        // Try to find the static search bar from base.html first
-        const searchForm = document.getElementById('globalSearchForm');
-        const searchInput = document.getElementById('globalSearchInput');
-
-        if (searchForm && searchInput) {
-            // WE HAVE THE STATIC BAR - Use the Redirect/Highlight Logic
-            searchForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const query = searchInput.value.trim();
-
-                if (query) {
-                    console.log("Global Search for:", query);
-                    if (window.location.pathname.includes('/dashboard')) {
-                        if (typeof window.highlightNeighborhood === 'function') {
-                            window.highlightNeighborhood(query);
-                        } else {
-                            console.warn("Map logic not loaded.");
-                        }
-                    } else {
-                        window.location.href = `/dashboard?search=${encodeURIComponent(query)}`;
-                    }
-                }
-            });
-        } else {
-            // Fallback: If static bar is missing, use the old dynamic widget logic (preserving your old code)
-            this.createSearchWidget();
-            this.initializeSearchFunctionality();
-        }
+        this.createSearchWidget();
+        this.initializeSearchFunctionality();
     },
     
-    // Create search widget (Legacy / Fallback)
+    // Create search widget
     createSearchWidget: function() {
         const navbar = document.querySelector('.navbar .container');
         if (!navbar) return;
@@ -537,7 +511,7 @@ window.CHEDVI = {
         }
     },
     
-    // Initialize search functionality (Legacy / Fallback)
+    // Initialize search functionality
     initializeSearchFunctionality: function() {
         const searchInput = document.getElementById('global-search-input');
         const searchResults = document.getElementById('search-results');
@@ -700,6 +674,12 @@ window.CHEDVI = {
         localStorage.setItem('chedvi-theme', theme);
     },
     
+
+    
+
+    
+
+    
     // Comparison tools
     initializeComparisonTools: function() {
         if (window.location.pathname === '/neighborhoods' || window.location.pathname === '/rankings') {
@@ -739,6 +719,11 @@ window.CHEDVI = {
         
         // Comparison selectors - placeholder for future implementation
     },
+    
+    // Quick actions
+
+    
+
     
     // Guided tour
     initializeGuidedTour: function() {
@@ -1151,6 +1136,602 @@ window.CHEDVI = {
     // Show loading state for specific element
     showLoadingState: function(message = 'Loading...') {
         this.showLoading(message);
+    },
+    
+    // Initialize accessibility features
+    initializeScreenReaderSupport: function() {
+        // Add screen reader announcements for page changes
+        const pageTitle = document.title;
+        this.announceToScreenReader(`Page loaded: ${pageTitle}`);
+    },
+    
+    // Initialize focus management
+    initializeFocusManagement: function() {
+        // Focus on first interactive element after page load
+        const firstInteractive = document.querySelector('input, button, select, textarea, a[href]');
+        if (firstInteractive) {
+            firstInteractive.focus();
+        }
+    },
+    
+    // Initialize text size controls
+    initializeTextSizeControls: function() {
+        // Text size controls are disabled for uniform design
+        this.config.textSize = 'medium';
+    },
+    
+    // Initialize high contrast mode
+    initializeHighContrastMode: function() {
+        if (this.config.highContrast) {
+            document.documentElement.classList.add('high-contrast');
+        }
+    },
+    
+    // Initialize enhanced navigation
+    initializeEnhancedNavigation: function() {
+        // Add navigation enhancements
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                this.announceToScreenReader(`Navigating to ${link.textContent.trim()}`);
+            });
+        });
+    },
+    
+    // Initialize global search
+    initializeGlobalSearch: function() {
+        const searchInput = document.getElementById('globalSearch');
+        if (searchInput && this.config.searchEnabled) {
+            // Add search functionality
+            searchInput.addEventListener('input', (e) => {
+                this.performGlobalSearch(e.target.value);
+            });
+            
+            // Add search form submit handler
+            const searchForm = searchInput.closest('form');
+            if (searchForm) {
+                searchForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.performGlobalSearch(searchInput.value);
+                });
+            }
+        }
+    },
+    
+    // Perform global search
+    performGlobalSearch: function(query) {
+        if (!query || query.length < 2) {
+            this.hideSearchResults();
+            return;
+        }
+        
+        const results = this.searchContent(query);
+        this.displaySearchResults(results);
+    },
+    
+    // Search content across the site
+    searchContent: function(query) {
+        const results = [];
+        query = query.toLowerCase();
+        
+        // Search neighborhoods
+        const neighborhoods = [
+            'Gateway', 'Bergen Square', 'Cooper Poynt', 'Pyne Point', 'Fairview',
+            'Centerville', 'Parkside', 'Cramer Hill', 'North Camden', 'Waterfront',
+            'Whitman Park', 'Stockton', 'Dudley', 'Marlton', 'Haddon Ave',
+            'Haddon Ave 2', 'Dudley 2', 'Stockton 2', 'Whitman Park 2'
+        ];
+        
+        neighborhoods.forEach(neighborhood => {
+            if (neighborhood.toLowerCase().includes(query)) {
+                results.push({
+                    type: 'neighborhood',
+                    title: neighborhood,
+                    description: 'Camden neighborhood',
+                    url: '/neighborhoods'
+                });
+            }
+        });
+        
+        // Search health metrics
+        const metrics = [
+            { name: 'Diabetes', page: 'dashboard' },
+            { name: 'Obesity', page: 'dashboard' },
+            { name: 'Asthma', page: 'dashboard' },
+            { name: 'Mental Health', page: 'insights' },
+            { name: 'Income', page: 'rankings' },
+            { name: 'Education', page: 'rankings' },
+            { name: 'Healthcare Access', page: 'resources' }
+        ];
+        
+        metrics.forEach(metric => {
+            if (metric.name.toLowerCase().includes(query)) {
+                results.push({
+                    type: 'metric',
+                    title: metric.name,
+                    description: 'Health equity metric',
+                    url: `/${metric.page}`
+                });
+            }
+        });
+        
+        // Search pages
+        const pages = [
+            { name: 'Dashboard', url: '/dashboard', desc: 'Interactive health data visualization' },
+            { name: 'Rankings', url: '/rankings', desc: 'Neighborhood health rankings' },
+            { name: 'Insights', url: '/insights', desc: 'Health equity analysis' },
+            { name: 'Resources', url: '/resources', desc: 'Community resources' },
+            { name: 'Policy', url: '/policy', desc: 'Policy recommendations' }
+        ];
+        
+        pages.forEach(page => {
+            if (page.name.toLowerCase().includes(query) || page.desc.toLowerCase().includes(query)) {
+                results.push({
+                    type: 'page',
+                    title: page.name,
+                    description: page.desc,
+                    url: page.url
+                });
+            }
+        });
+        
+        return results.slice(0, 10); // Limit to 10 results
+    },
+    
+    // Display search results
+    displaySearchResults: function(results) {
+        let searchResults = document.getElementById('searchResults');
+        if (!searchResults) {
+            searchResults = document.createElement('div');
+            searchResults.id = 'searchResults';
+            searchResults.className = 'search-results dropdown-menu show';
+            searchResults.style.cssText = 'position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; max-height: 400px; overflow-y: auto;';
+            
+            const searchInput = document.getElementById('globalSearch');
+            if (searchInput) {
+                searchInput.parentElement.style.position = 'relative';
+                searchInput.parentElement.appendChild(searchResults);
+            }
+        }
+        
+        if (results.length === 0) {
+            searchResults.innerHTML = '<div class="dropdown-item-text text-muted">No results found</div>';
+        } else {
+            searchResults.innerHTML = results.map(result => `
+                <a href="${result.url}" class="dropdown-item">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <i class="fas fa-${this.getSearchIcon(result.type)}"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold">${result.title}</div>
+                            <div class="text-muted small">${result.description}</div>
+                        </div>
+                    </div>
+                </a>
+            `).join('');
+        }
+    },
+    
+    // Get search icon based on type
+    getSearchIcon: function(type) {
+        const icons = {
+            neighborhood: 'map-marker-alt',
+            metric: 'chart-line',
+            page: 'file-alt'
+        };
+        return icons[type] || 'search';
+    },
+    
+    // Hide search results
+    hideSearchResults: function() {
+        const searchResults = document.getElementById('searchResults');
+        if (searchResults) {
+            searchResults.remove();
+        }
+    },
+    
+    // Initialize theme system
+    initializeThemeSystem: function() {
+        // Apply saved theme
+        this.applyTheme(this.config.theme);
+    },
+    
+    // Initialize comparison tools
+    initializeComparisonTools: function() {
+        this.comparisonData = [];
+        
+        const addBtn = document.getElementById('addToComparison');
+        const viewBtn = document.getElementById('viewComparison');
+        const clearBtn = document.getElementById('clearComparison');
+        
+        if (addBtn) {
+            addBtn.addEventListener('click', () => this.addToComparison());
+        }
+        
+        if (viewBtn) {
+            viewBtn.addEventListener('click', () => this.showComparisonModal());
+        }
+        
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => this.clearComparison());
+        }
+    },
+    
+    // Add item to comparison
+    addToComparison: function() {
+        // Get current selected neighborhood and metric
+        const selectedNeighborhood = this.getSelectedNeighborhood();
+        const selectedMetric = this.getSelectedMetric();
+        
+        if (selectedNeighborhood && selectedMetric) {
+            const item = {
+                neighborhood: selectedNeighborhood,
+                metric: selectedMetric,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Avoid duplicates
+            const exists = this.comparisonData.some(existing => 
+                existing.neighborhood === item.neighborhood && existing.metric === item.metric
+            );
+            
+            if (!exists) {
+                this.comparisonData.push(item);
+                this.updateComparisonUI();
+                this.announceToScreenReader(`Added ${selectedNeighborhood} ${selectedMetric} to comparison`);
+            }
+        }
+    },
+    
+    // Show comparison modal
+    showComparisonModal: function() {
+        if (this.comparisonData.length === 0) {
+            alert('Please add items to comparison first');
+            return;
+        }
+        
+        const modal = this.createComparisonModal();
+        document.body.appendChild(modal);
+        
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+        
+        // Clean up modal when closed
+        modal.addEventListener('hidden.bs.modal', () => {
+            document.body.removeChild(modal);
+        });
+    },
+    
+    // Create comparison modal
+    createComparisonModal: function() {
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Neighborhood Comparison</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="comparison-table-container">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Neighborhood</th>
+                                        <th>Metric</th>
+                                        <th>Value</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${this.comparisonData.map((item, index) => `
+                                        <tr>
+                                            <td>${item.neighborhood}</td>
+                                            <td>${item.metric}</td>
+                                            <td>${this.getMetricValue(item.neighborhood, item.metric)}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-danger" 
+                                                        onclick="CHEDVI.removeFromComparison(${index})">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" onclick="CHEDVI.exportComparison()">
+                            <i class="fas fa-download me-1"></i>Export Comparison
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        return modal;
+    },
+    
+    // Clear comparison
+    clearComparison: function() {
+        this.comparisonData = [];
+        this.updateComparisonUI();
+        this.announceToScreenReader('Comparison cleared');
+    },
+    
+    // Update comparison UI
+    updateComparisonUI: function() {
+        const countElement = document.getElementById('comparisonCount');
+        const viewBtn = document.getElementById('viewComparison');
+        const addBtn = document.getElementById('addToComparison');
+        
+        if (countElement) {
+            countElement.textContent = this.comparisonData.length;
+        }
+        
+        if (viewBtn) {
+            viewBtn.disabled = this.comparisonData.length === 0;
+        }
+        
+        if (addBtn) {
+            addBtn.disabled = false; // Enable when we have selection logic
+        }
+    },
+    
+    // Get selected neighborhood (placeholder)
+    getSelectedNeighborhood: function() {
+        return 'Gateway'; // Placeholder - would get from UI selection
+    },
+    
+    // Get selected metric (placeholder)
+    getSelectedMetric: function() {
+        const selector = document.getElementById('leftMapSelector');
+        return selector ? selector.options[selector.selectedIndex].text : 'Diabetes Rate';
+    },
+    
+    // Get metric value for neighborhood
+    getMetricValue: function(neighborhood, metric) {
+        // This would fetch from the actual data source
+        const mockValues = {
+            'Gateway': { 'Diabetes Rate (%)': '17.0%', 'Obesity Rate (%)': '43.9%' },
+            'Bergen Square': { 'Diabetes Rate (%)': '15.7%', 'Obesity Rate (%)': '47.6%' }
+        };
+        return mockValues[neighborhood]?.[metric] || 'N/A';
+    },
+    
+    // Initialize breadcrumbs
+    initializeBreadcrumbs: function() {
+        this.createBreadcrumbs();
+        this.updateBreadcrumbsBasedOnLocation();
+    },
+    
+    // Create breadcrumbs
+    createBreadcrumbs: function() {
+        const breadcrumbContainer = document.createElement('nav');
+        breadcrumbContainer.setAttribute('aria-label', 'breadcrumb');
+        breadcrumbContainer.innerHTML = `
+            <ol class="breadcrumb" id="dynamicBreadcrumbs">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+            </ol>
+        `;
+        
+        // Insert breadcrumbs after navigation
+        const navbar = document.querySelector('.navbar');
+        if (navbar) {
+            navbar.insertAdjacentElement('afterend', breadcrumbContainer);
+        }
+    },
+    
+    // Update breadcrumbs based on current location
+    updateBreadcrumbsBasedOnLocation: function() {
+        const breadcrumbs = document.getElementById('dynamicBreadcrumbs');
+        if (!breadcrumbs) return;
+        
+        const path = window.location.pathname;
+        const breadcrumbMap = {
+            '/dashboard': 'Dashboard',
+            '/neighborhoods': 'Neighborhoods',
+            '/rankings': 'Rankings',
+            '/insights': 'Insights',
+            '/policy': 'Policy',
+            '/resources': 'Resources',
+            '/about': 'About'
+        };
+        
+        // Clear existing breadcrumbs except home
+        const homeItem = breadcrumbs.querySelector('li');
+        breadcrumbs.innerHTML = '';
+        breadcrumbs.appendChild(homeItem);
+        
+        // Add current page
+        if (breadcrumbMap[path]) {
+            const li = document.createElement('li');
+            li.className = 'breadcrumb-item active';
+            li.setAttribute('aria-current', 'page');
+            li.textContent = breadcrumbMap[path];
+            breadcrumbs.appendChild(li);
+        }
+    },
+    
+    // User onboarding tour
+    initializeUserOnboarding: function() {
+        // Check if user has seen the tour
+        const hasSeenTour = localStorage.getItem('chedvi_tour_completed');
+        
+        if (!hasSeenTour && window.location.pathname === '/dashboard') {
+            setTimeout(() => {
+                this.showOnboardingTour();
+            }, 2000);
+        }
+        
+        // Add tour functionality
+        window.startTour = () => this.startGuidedTour();
+    },
+    
+    // Show onboarding tour
+    showOnboardingTour: function() {
+        const tourElement = document.getElementById('onboardingTour');
+        if (tourElement) {
+            tourElement.style.display = 'block';
+        }
+    },
+    
+    // Start guided tour
+    startGuidedTour: function() {
+        const tourSteps = [
+            {
+                element: '#leftMapSelector',
+                title: 'Select Health Metrics',
+                description: 'Choose different health outcomes to visualize on the map'
+            },
+            {
+                element: '#rightMapSelector',
+                title: 'Compare Social Determinants',
+                description: 'Select social factors to compare against health outcomes'
+            },
+            {
+                element: '#overlayToggle',
+                title: 'Overlay Analysis',
+                description: 'Enable overlay mode to see correlations between metrics'
+            },
+            {
+                element: '#exportDropdown',
+                title: 'Export Data',
+                description: 'Download your analysis as CSV, PDF, or image'
+            }
+        ];
+        
+        this.currentTourStep = 0;
+        this.showTourStep(tourSteps[this.currentTourStep]);
+    },
+    
+    // Show tour step
+    showTourStep: function(step) {
+        const element = document.querySelector(step.element);
+        if (!element) return;
+        
+        // Remove existing tooltip
+        const existingTooltip = document.querySelector('.tour-tooltip');
+        if (existingTooltip) {
+            existingTooltip.remove();
+        }
+        
+        // Create tooltip
+        const tooltip = document.createElement('div');
+        tooltip.className = 'tour-tooltip';
+        tooltip.innerHTML = `
+            <div class="tooltip-content">
+                <h6>${step.title}</h6>
+                <p>${step.description}</p>
+                <div class="tooltip-actions">
+                    <button class="btn btn-sm btn-outline-secondary" onclick="CHEDVI.skipTour()">Skip</button>
+                    <button class="btn btn-sm btn-primary" onclick="CHEDVI.nextTourStep()">Next</button>
+                </div>
+            </div>
+        `;
+        
+        // Position tooltip
+        const rect = element.getBoundingClientRect();
+        tooltip.style.cssText = `
+            position: fixed;
+            top: ${rect.bottom + 10}px;
+            left: ${rect.left}px;
+            z-index: 9999;
+            background: white;
+            border: 1px solid #ccc;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 300px;
+        `;
+        
+        document.body.appendChild(tooltip);
+        
+        // Highlight element
+        element.style.boxShadow = '0 0 0 3px rgba(0, 123, 255, 0.5)';
+        element.style.borderRadius = '0.25rem';
+    },
+    
+    // Next tour step
+    nextTourStep: function() {
+        // Implementation for next step
+        this.skipTour(); // For now, just skip
+    },
+    
+    // Skip tour
+    skipTour: function() {
+        const tooltip = document.querySelector('.tour-tooltip');
+        if (tooltip) {
+            tooltip.remove();
+        }
+        
+        // Remove highlights
+        document.querySelectorAll('[style*="box-shadow"]').forEach(el => {
+            el.style.boxShadow = '';
+        });
+        
+        // Mark tour as completed
+        localStorage.setItem('chedvi_tour_completed', 'true');
+        
+        // Hide onboarding banner
+        const tourElement = document.getElementById('onboardingTour');
+        if (tourElement) {
+            tourElement.style.display = 'none';
+        }
+    },
+    
+    // Apply theme
+    applyTheme: function(theme) {
+        document.body.className = document.body.className.replace(/theme-\w+/g, '');
+        document.body.classList.add(`theme-${theme}`);
+        this.config.theme = theme;
+    },
+    
+    // Toggle high contrast
+    toggleHighContrast: function(enabled) {
+        this.config.highContrast = enabled;
+        if (enabled) {
+            document.documentElement.classList.add('high-contrast');
+        } else {
+            document.documentElement.classList.remove('high-contrast');
+        }
+    },
+    
+    // Toggle reduced motion
+    toggleReducedMotion: function(enabled) {
+        this.config.animations = !enabled;
+        document.documentElement.classList.toggle('reduced-motion', enabled);
+    },
+    
+    // Set text size
+    setTextSize: function(size) {
+        // Text size is fixed for uniform design
+        this.config.textSize = 'medium';
+    },
+    
+    // Handle arrow key navigation
+    handleArrowKeyNavigation: function(e) {
+        // Arrow key navigation for tables and lists
+        const focusedElement = document.activeElement;
+        if (focusedElement.tagName === 'TR' || focusedElement.tagName === 'TD') {
+            // Table navigation logic
+            const table = focusedElement.closest('table');
+            if (table) {
+                const rows = table.querySelectorAll('tr');
+                const currentIndex = Array.from(rows).indexOf(focusedElement);
+                
+                if (e.key === 'ArrowUp' && currentIndex > 0) {
+                    e.preventDefault();
+                    rows[currentIndex - 1].focus();
+                } else if (e.key === 'ArrowDown' && currentIndex < rows.length - 1) {
+                    e.preventDefault();
+                    rows[currentIndex + 1].focus();
+                }
+            }
+        }
     }
 };
 
