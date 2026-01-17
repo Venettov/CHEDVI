@@ -524,7 +524,7 @@ function loadInitialData() {
     updateMetrics(); 
 }
 
-// Update Left Map (Only called when Dropdown changes)
+// Update Left Map (Modified to KEEP MAP BLUE)
 function updateLeftMap(metric) {
     if (!leftMap || !metric) return;
     
@@ -533,16 +533,15 @@ function updateLeftMap(metric) {
     leftPolygons = [];
 
     camdenNeighborhoods.forEach(n => {
-        const val = n.data[metric];
-        const color = getColorForValue(val, metric);
+        // We ignore the data color and force STYLE_BLUE
+        const style = STYLE_BLUE; 
         
-        // Define metric-specific style
-        const style = { color: '#ffffff', weight: 2, opacity: 0.8, fillColor: color, fillOpacity: 0.7 };
+        // We still generate the rich popup so you can see the data
         const popup = createPopupContent(n);
 
         const poly = L.polygon(n.bounds, style).addTo(leftMap).bindPopup(popup);
         
-        // Save this metric style as the new "default" so click resets to this, not blue
+        // Ensure the "reset" style is Blue, not the data color
         poly.defaultStyle = style; 
         poly.neighborhoodName = n.name;
         poly.on('click', (e) => handlePolygonClick(e, 'left'));
@@ -551,7 +550,7 @@ function updateLeftMap(metric) {
     });
 }
 
-// Update Right Map (Only called when Dropdown changes)
+// Update Right Map (Modified to KEEP MAP BLUE)
 function updateRightMap(metric) {
     if (!rightMap || !metric) return;
     
@@ -559,10 +558,8 @@ function updateRightMap(metric) {
     rightPolygons = [];
 
     camdenNeighborhoods.forEach(n => {
-        const val = n.data[metric];
-        const color = getColorForValue(val, metric);
-        
-        const style = { color: '#ffffff', weight: 2, opacity: 0.8, fillColor: color, fillOpacity: 0.7 };
+        // Force STYLE_BLUE
+        const style = STYLE_BLUE;
         const popup = createPopupContent(n);
 
         const poly = L.polygon(n.bounds, style).addTo(rightMap).bindPopup(popup);
