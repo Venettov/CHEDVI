@@ -39,6 +39,7 @@
                             <option value="{{ n.name }}">{{ n.name }}</option>
                             {% endfor %}
                         </select>
+                        <div id="data-source-indicator" class="mt-2 small text-muted fst-italic text-end"></div>
                     </div>
                 </div>
             </div>
@@ -124,7 +125,6 @@
             </div>
 
             <div class="row g-4">
-                
                 <div class="col-lg-7">
                     <div class="card shadow-sm border-0 h-100">
                         <div class="card-header bg-white py-3 border-bottom-0">
@@ -134,13 +134,11 @@
                         </div>
                         <div class="card-body p-4 pt-0">
                             <div class="alert alert-light border-start border-4 border-primary mb-4" role="alert">
-                                <div id="context-paragraph" class="text-muted">
-                                    </div>
+                                <div id="context-paragraph" class="text-muted"></div>
                             </div>
                             
                             <h6 class="fw-bold text-uppercase small text-muted mb-3">Identified Health Challenges</h6>
-                            <ul class="list-group list-group-flush" id="challenges-list">
-                                </ul>
+                            <ul class="list-group list-group-flush" id="challenges-list"></ul>
 
                             <div class="mt-4 row align-items-center g-3">
                                 <div class="col-auto">
@@ -174,12 +172,8 @@
 
                         <div class="card-body p-4 position-relative" style="z-index: 1;">
                             <h6 class="text-white text-opacity-75 text-uppercase small fw-bold mb-3">Strategic Recommendations</h6>
-                            
-                            <div id="strategy-list">
-                                </div>
-
+                            <div id="strategy-list"></div>
                             <hr class="border-white border-opacity-25 my-4">
-
                             <div class="d-grid gap-2">
                                 <button class="btn btn-light fw-bold text-primary" onclick="window.location.href='{{ url_for('resources') }}'">
                                     <i class="fas fa-search me-2"></i>Find Local Partners
@@ -192,8 +186,8 @@
                     </div>
                 </div>
             </div>
-
-        </div> </div>
+        </div>
+    </div>
 </section>
 {% endblock %}
 
@@ -201,133 +195,166 @@
 <script src="{{ url_for('static', filename='js/neighborhoods.js') }}"></script>
 
 <script>
+    // --- FALLBACK DATA: From your CSV ---
+    // This ensures that if the Database fails, we still have data to show.
+    const csvBackupData = [
+        { name: 'Gateway', diabetes: 17.0, obesity: 43.9, income: 26750, poverty: 30.78, population: 1693 },
+        { name: 'Bergen Square', diabetes: 15.7, obesity: 47.6, income: 12104, poverty: 54.36, population: 2766 },
+        { name: 'Cooper Poynt', diabetes: 18.9, obesity: 44.8, income: 29789, poverty: 36.71, population: 1338 },
+        { name: 'Pyne Point', diabetes: 21.4, obesity: 46.6, income: 19412, poverty: 39.82, population: 5211 },
+        { name: 'Cramer Hill', diabetes: 18.4, obesity: 44.8, income: 28198, poverty: 38.68, population: 3804 },
+        { name: 'Beideman', diabetes: 13.4, obesity: 40.2, income: 58983, poverty: 11.91, population: 5645 },
+        { name: 'Dudley', diabetes: 22.2, obesity: 41.8, income: 35491, poverty: 24.96, population: 3295 },
+        { name: 'Rosedale', diabetes: 16.9, obesity: 38.8, income: 51741, poverty: 19.22, population: 5044 },
+        { name: 'Stockton', diabetes: 17.9, obesity: 41.9, income: 44357, poverty: 20.17, population: 6529 },
+        { name: 'Marlton', diabetes: 19.2, obesity: 43.2, income: 31312, poverty: 30.43, population: 4726 },
+        { name: 'Parkside', diabetes: 15.0, obesity: 46.1, income: 45662, poverty: 19.40, population: 4181 },
+        { name: 'Whitman Park', diabetes: 21.5, obesity: 44.8, income: 31941, poverty: 28.40, population: 5394 },
+        { name: 'Liberty Park', diabetes: 23.1, obesity: 48.7, income: 29210, poverty: 26.21, population: 2401 },
+        { name: 'Centerville', diabetes: 14.7, obesity: 51.4, income: 22181, poverty: 42.97, population: 2805 },
+        { name: 'Waterfront South', diabetes: 20.3, obesity: 44.3, income: 54324, poverty: 40.45, population: 918 },
+        { name: 'Morgan Village', diabetes: 17.5, obesity: 45.7, income: 34796, poverty: 32.57, population: 2701 },
+        { name: 'Fairview', diabetes: 17.3, obesity: 43.6, income: 41840, poverty: 20.76, population: 6221 },
+        { name: 'Cooper Grant', diabetes: 19.4, obesity: 36.0, income: 51635, poverty: 41.01, population: 2274 },
+        { name: 'Lanning Square', diabetes: 18.0, obesity: 41.3, income: 38447, poverty: 18.62, population: 4853 }
+    ];
+
     document.addEventListener("DOMContentLoaded", function() {
         const selector = document.getElementById('neighborhood-selector');
         const profileDiv = document.getElementById('neighborhood-profile');
+        const sourceIndicator = document.getElementById('data-source-indicator');
 
-        // --- 1. DATA INJECTION & TRANSFORMATION ---
-        // Ingest Raw Database Data from Flask
-        const rawDbData = {{ neighborhood_data | tojson | safe }};
+        // --- 1. DATA INGESTION ---
+        let rawDbData = [];
+        let dataSource = "Database";
 
-        // Transform: Map DB columns (snake_case) to UI props (camelCase) & Merge Coordinates
-        // This ensures the JS has a clean 'realCamdenData' array to work with.
+        // Try to get data from Flask
+        try {
+            rawDbData = {{ neighborhood_data | tojson | safe }};
+        } catch (e) {
+            console.warn("Database data fetch failed, using CSV fallback.");
+        }
+
+        // Check if DB data is valid, if not, use backup
+        if (!rawDbData || rawDbData.length === 0) {
+            console.warn("Using Fallback CSV Data.");
+            rawDbData = csvBackupData;
+            dataSource = "Static CSV (Backup)";
+        } else {
+            console.log("Using Live Database Data.");
+        }
+        
+        if(sourceIndicator) sourceIndicator.innerText = `Source: ${dataSource}`;
+
+        // --- 2. DATA SANITIZER & TRANSFORMER ---
+        // Ensure all numbers are actually numbers, handle missing fields, trim strings
         const realCamdenData = rawDbData.map(d => {
-            // Get coordinates from the static JS file, default to 0,0 if missing
+            // Get coordinates from the static JS file (neighborhoods.js)
             const coords = (window.neighborhoodCoordinates && window.neighborhoodCoordinates[d.name]) 
                            ? window.neighborhoodCoordinates[d.name] 
                            : { lat: 0, lng: 0 };
             
+            // Helper to force number type
+            const num = (v) => parseFloat(v) || 0;
+
             return {
-                name: d.name,
-                income: d.median_income,          
-                diabetes: d.diabetes_rate,        
-                obesity: d.obesity_rate,          
-                poverty: d.poverty_rate,          
-                population: d.total_population,   
+                name: (d.name || "Unknown").trim(),
+                income: num(d.median_income || d.income), // Handle both naming conventions
+                diabetes: num(d.diabetes_rate || d.diabetes),
+                obesity: num(d.obesity_rate || d.obesity),
+                poverty: num(d.poverty_rate || d.poverty),
+                population: num(d.total_population || d.population),
                 lat: coords.lat,                  
                 lng: coords.lng                   
             };
         });
 
-        console.log("Loaded " + realCamdenData.length + " neighborhoods from Database.");
-
-        // --- 2. RANKING ENGINE ---
-        // Pre-calculate sorted arrays for accurate ranking (1 = Best/Highest)
-        const sortedByIncome = [...realCamdenData].sort((a, b) => (b.income || 0) - (a.income || 0));
-        const sortedByHealth = [...realCamdenData].sort((a, b) => (a.diabetes || 0) - (b.diabetes || 0));
-        const sortedByPoverty = [...realCamdenData].sort((a, b) => (a.poverty || 0) - (b.poverty || 0));
+        // --- 3. RANKING ENGINE ---
+        // Create sorted lists for accurate ranking (1 = Top/Best)
+        const sortedByIncome = [...realCamdenData].sort((a, b) => b.income - a.income); // High to Low
+        const sortedByHealth = [...realCamdenData].sort((a, b) => a.diabetes - b.diabetes); // Low to High
+        const sortedByPoverty = [...realCamdenData].sort((a, b) => a.poverty - b.poverty); // Low to High
 
         function getRank(name, sortedArray) {
             return sortedArray.findIndex(n => n.name === name) + 1;
         }
 
-        // --- 3. UPDATE HANDLER ---
+        // --- 4. UPDATE HANDLER ---
         selector.addEventListener('change', function() {
-            // Search by Name to avoid Index mismatch
-            const selectedName = this.value;
+            const selectedName = this.value.trim();
             
             if (!selectedName) {
                 profileDiv.style.display = "none";
                 return;
             }
 
-            // Find data by NAME
             const n = realCamdenData.find(item => item.name === selectedName);
 
             if (!n) {
-                console.error("Data not found for:", selectedName);
+                console.error("Data missing for:", selectedName);
                 return;
             }
 
             profileDiv.style.display = "block";
 
-            // --- SAFE DATA ACCESS HELPER ---
-            const safeVal = (val, suffix = "") => (val !== undefined && val !== null) ? val.toLocaleString() + suffix : "N/A";
-            const rawVal = (val) => (val !== undefined && val !== null) ? val : 0;
+            // Helpers
+            const safeVal = (val, suffix = "") => (val !== undefined && val !== null) ? val.toLocaleString() + suffix : "--";
 
-            // A. Update Header Stats
-            document.getElementById('profile-name').textContent = n.name || "Unknown";
+            // A. Header
+            document.getElementById('profile-name').textContent = n.name;
             document.getElementById('profile-pop').textContent = safeVal(n.population);
             
-            let coords = "N/A";
-            if(n.lat && n.lng) coords = `${n.lat.toFixed(3)}, ${n.lng.toFixed(3)}`;
+            let coords = (n.lat !== 0) ? `${n.lat.toFixed(3)}, ${n.lng.toFixed(3)}` : "N/A";
             document.getElementById('profile-coords').textContent = coords;
 
-            // B. Update KPI Cards & Ranks
-            // Income
+            // B. KPI Cards
             document.getElementById('profile-income').textContent = "$" + safeVal(n.income);
             const incomeRank = getRank(n.name, sortedByIncome);
             document.getElementById('rank-income').textContent = incomeRank;
             document.getElementById('income-context').textContent = incomeRank < 5 ? "Top Tier" : (incomeRank > 14 ? "Low Tier" : "Mid Tier");
 
-            // Diabetes
             document.getElementById('profile-diabetes').textContent = safeVal(n.diabetes, "%");
             const healthRank = getRank(n.name, sortedByHealth);
             document.getElementById('rank-diabetes').textContent = healthRank;
             document.getElementById('health-context').textContent = healthRank > 15 ? "Critical" : "Stable";
 
-            // Poverty
             document.getElementById('profile-poverty').textContent = safeVal(n.poverty, "%");
             document.getElementById('rank-poverty').textContent = getRank(n.name, sortedByPoverty);
 
-            // C. Dynamic Context Generator
+            // C. Dynamic Context
             let narrative = `<strong>${n.name}</strong> is a community of approx. ${safeVal(n.population)} residents. `;
             
-            const dVal = rawVal(n.diabetes);
-            const iVal = rawVal(n.income);
-
-            if (dVal > 20) {
-                narrative += `It faces <span class="text-danger fw-bold">severe health challenges</span>, with a diabetes rate (${dVal}%) significantly above the city average. `;
-            } else if (dVal > 0 && dVal < 16) {
+            if (n.diabetes > 20) {
+                narrative += `It faces <span class="text-danger fw-bold">severe health challenges</span>, with a diabetes rate (${n.diabetes}%) significantly above the city average. `;
+            } else if (n.diabetes < 16) {
                 narrative += `Health outcomes here are <span class="text-success fw-bold">comparatively better</span> than the rest of the city. `;
             } else {
                 narrative += `Health metrics align with the city-wide baseline. `;
             }
 
-            if (iVal < 20000 && iVal > 0) {
+            if (n.income < 20000) {
                 narrative += `Economically, the area struggles with deep poverty, creating barriers to healthcare access.`;
-            } else if (iVal > 50000) {
+            } else if (n.income > 50000) {
                 narrative += `With a median income of $${safeVal(n.income)}, it is one of Camden's more economically resilient neighborhoods.`;
             }
             document.getElementById('context-paragraph').innerHTML = narrative;
 
-            // D. Challenges List
+            // D. Challenges
             let challengesHTML = "";
-            let strainScore = 0; // 0-100
+            let strainScore = 0;
 
-            if (rawVal(n.poverty) > 35) {
+            if (n.poverty > 35) {
                 challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-exclamation-triangle text-danger me-3"></i><div><strong>Severe Economic Hardship</strong><br><small class="text-muted">Poverty rate exceeds 35% threshold.</small></div></li>`;
                 strainScore += 40;
             }
-            if (dVal > 19) {
+            if (n.diabetes > 19) {
                 challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-procedures text-danger me-3"></i><div><strong>Chronic Disease Burden</strong><br><small class="text-muted">Diabetes prevalence is critical.</small></div></li>`;
                 strainScore += 30;
             }
-            if (rawVal(n.obesity) > 42) {
+            if (n.obesity > 42) {
                 challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-utensils text-warning me-3"></i><div><strong>Nutritional Access</strong><br><small class="text-muted">High obesity suggests food desert conditions.</small></div></li>`;
                 strainScore += 20;
             }
-            // Default if empty
             if (challengesHTML === "") {
                 challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-check-circle text-success me-3"></i><div><strong>Stable Indicators</strong><br><small class="text-muted">No critical alerts flagged.</small></div></li>`;
                 strainScore += 10;
@@ -336,23 +363,22 @@
             document.getElementById('challenges-list').innerHTML = challengesHTML;
             document.getElementById('strain-bar').style.width = strainScore + "%";
 
-            // E. Action Plan & Strategies
+            // E. Action Plan
             let strategiesHTML = "<ul class='list-unstyled'>";
             let priorityLevel = "MONITOR";
-            let priorityClass = "bg-success"; // Green badge for low priority
+            let priorityClass = "bg-success"; 
 
-            // Strategy Logic
-            if (dVal > 20) {
+            if (n.diabetes > 20) {
                 strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Mobile Screening Units</strong><br><small class="text-white text-opacity-50">Deploy bi-weekly A1C testing vans.</small></span></div></li>`;
                 priorityLevel = "URGENT";
-                priorityClass = "bg-danger"; // Red badge
+                priorityClass = "bg-danger"; 
             }
-            if (rawVal(n.poverty) > 40) {
+            if (n.poverty > 40) {
                 strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Food Prescription Rx</strong><br><small class="text-white text-opacity-50">Subsidize fresh produce for residents.</small></span></div></li>`;
                 priorityLevel = (priorityLevel === "URGENT") ? "CRITICAL" : "HIGH";
-                if(priorityLevel === "HIGH") priorityClass = "bg-warning text-dark"; // Yellow badge
+                if(priorityLevel === "HIGH") priorityClass = "bg-warning text-dark"; 
             }
-            if (iVal < 25000 && iVal > 0) {
+            if (n.income < 25000) {
                 strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Medicaid Outreach</strong><br><small class="text-white text-opacity-50">Increase enrollment assistance.</small></span></div></li>`;
             }
             // Default
@@ -366,7 +392,6 @@
             const pBadge = document.getElementById('priority-badge');
             pBadge.textContent = priorityLevel;
             pBadge.className = `badge ${priorityClass}`; 
-
         });
     });
 </script>
