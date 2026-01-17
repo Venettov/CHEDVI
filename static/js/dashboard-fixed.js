@@ -759,6 +759,55 @@ function initializeAllCharts() {
     }
 }
 
+// --- SEARCH FUNCTIONALITY BRIDGE ---
+
+// 1. Define the function that main.js is trying to call
+window.highlightNeighborhood = function(query) {
+    if (!query) return;
+    
+    // Normalize text (lowercase, trim)
+    const searchTerm = query.toLowerCase().trim();
+    
+    // Find the neighborhood
+    const target = camdenNeighborhoods.find(n => n.name.toLowerCase() === searchTerm);
+    
+    if (target) {
+        console.log("Search found:", target.name);
+        
+        // Find the polygon on the map
+        const poly = leftPolygons.find(p => p.neighborhoodName === target.name);
+        
+        if (poly) {
+            // Trigger the click logic (turns it Green & Updates Stats)
+            poly.fire('click'); 
+            
+            // Zoom to it
+            leftMap.fitBounds(poly.getBounds());
+            rightMap.fitBounds(poly.getBounds());
+        }
+    } else {
+        alert("Neighborhood not found: " + query);
+    }
+};
+
+// 2. Check URL for search params (Handle redirect from other pages)
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    
+    if (searchParam) {
+        // Wait 1 second for maps to initialize, then search
+        setTimeout(() => {
+            window.highlightNeighborhood(searchParam);
+            
+            // Fill the search box so user sees what they searched
+            const searchBox = document.getElementById('globalSearchInput');
+            if(searchBox) searchBox.value = searchParam;
+            
+        }, 1000);
+    }
+});
+
 window.startTour = function() { alert('Welcome to the Camden Health Dashboard!'); };
 window.exportData = function(format) { alert(`Data export (${format}) coming soon.`); };
 
