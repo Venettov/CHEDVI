@@ -388,15 +388,26 @@ const camdenNeighborhoods = [
     }
 ];
 
+// --- GLOBAL STATE ---
+// Set your desired defaults here. These will apply immediately on load.
+let currentLeftMetric = 'diabetes';  
+let currentRightMetric = 'income';
+
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing Camden Health Dashboard with DEFAULT SELECTIONS...');
+    console.log('Initializing Camden Health Dashboard...');
     
     if (typeof L === 'undefined') {
         console.error('Leaflet library not loaded');
         return;
     }
     
+    // Set dropdowns to match our JS defaults (sync UI with Logic)
+    const leftSel = document.getElementById('leftMapSelector');
+    const rightSel = document.getElementById('rightMapSelector');
+    if(leftSel) leftSel.value = currentLeftMetric;
+    if(rightSel) rightSel.value = currentRightMetric;
+
     initializeMaps();
     setupEventListeners();
     loadInitialData();
@@ -425,59 +436,58 @@ function initializeMaps() {
         rightMap = L.map('rightMap', { zoomControl: true, scrollWheelZoom: false }).setView([39.9259, -75.1196], 11.5);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(rightMap);
 
-        // --- FIX: GET INITIAL DROPDOWN VALUES ---
-        const initialLeftMetric = document.getElementById('leftMapSelector')?.value || 'diabetes';
-        const initialRightMetric = document.getElementById('rightMapSelector')?.value || 'income';
+        // Render Initial Polygons using the Global Defaults
+        renderMapPolygons(leftMap, leftPolygons, 'left', currentLeftMetric);
+        renderMapPolygons(rightMap, rightPolygons, 'right', currentRightMetric);
 
-        // Add polygons with INITIAL METRIC POPUPS
-        camdenNeighborhoods.forEach(n => {
-            
-            // 1. Create Left Popup (Specific to Left Dropdown)
-            const leftPopup = createPopupContent(n, initialLeftMetric);
-            const leftPoly = L.polygon(n.bounds, STYLE_BLUE).addTo(leftMap).bindPopup(leftPopup);
-            
-            leftPoly.neighborhoodName = n.name;
-            leftPoly.defaultStyle = STYLE_BLUE; 
-            leftPoly.on('click', (e) => handlePolygonClick(e, 'left'));
-            leftPolygons.push(leftPoly);
-
-            // 2. Create Right Popup (Specific to Right Dropdown)
-            const rightPopup = createPopupContent(n, initialRightMetric);
-            const rightPoly = L.polygon(n.bounds, STYLE_BLUE).addTo(rightMap).bindPopup(rightPopup);
-            
-            rightPoly.neighborhoodName = n.name;
-            rightPoly.defaultStyle = STYLE_BLUE;
-            rightPoly.on('click', (e) => handlePolygonClick(e, 'right'));
-            rightPolygons.push(rightPoly);
-        });
-
-        console.log('Maps initialized with defaults:', initialLeftMetric, initialRightMetric);
+        console.log('Maps initialized with:', currentLeftMetric, currentRightMetric);
 
     } catch (error) { console.error('Error initializing maps:', error); }
 }
 
-// 4. CREATE POPUP CONTENT
+// 4. CORE RENDER FUNCTION
+function renderMapPolygons(mapInstance, polygonArray, mapSide, metric) {
+    // 1. Clear existing layers
+    polygonArray.forEach(p => mapInstance.removeLayer(p));
+    polygonArray.length = 0; 
+
+    // 2. Add new polygons
+    camdenNeighborhoods.forEach(n => {
+        const popupContent = createPopupContent(n, metric);
+        
+        const poly = L.polygon(n.bounds, STYLE_BLUE).addTo(mapInstance);
+        poly.bindPopup(popupContent);
+        
+        // Metadata
+        poly.neighborhoodName = n.name;
+        poly.defaultStyle = STYLE_BLUE; 
+        
+        // Click Event
+        poly.on('click', (e) => handlePolygonClick(e, mapSide));
+        
+        polygonArray.push(poly);
+    });
+}
+
+// 5. CREATE POPUP CONTENT
 function createPopupContent(n, metric) {
     let statsHtml = '';
 
-    // Check if metric exists and is valid
+    // If we have a valid metric, show ONLY that metric
     if (metric && metric !== "" && n.data[metric] !== undefined) {
         const label = getMetricLabel(metric);
         let value = n.data[metric];
         
-        // Format based on type
         if (typeof value === 'number') {
             value = (metric === 'income') ? `$${value.toLocaleString()}` : `${value.toFixed(1)}%`;
         } 
 
-        // SHOW ONLY THIS ONE METRIC
         statsHtml = `<div style="font-size: 1.1rem; color: #1e8449; margin-top:5px;">
                         <strong>${label}:</strong> ${value}
                      </div>`;
-    } 
-    // Fallback if something is wrong (shouldn't happen with the fix above)
-    else {
-        statsHtml = `<div style="color: #666;">Select a metric to view data</div>`;
+    } else {
+        // Fallback: This should rarely be seen if defaults are set correctly
+        statsHtml = `<div style="color:#666; font-style:italic;">Select a metric...</div>`;
     }
 
     return `
@@ -490,25 +500,6 @@ function createPopupContent(n, metric) {
     `;
 }
 
-// 5. UPDATE MAPS (Standard Update Logic)
-function renderMapPolygons(mapInstance, polygonArray, mapSide, metric) {
-    polygonArray.forEach(p => mapInstance.removeLayer(p));
-    polygonArray.length = 0; 
-
-    camdenNeighborhoods.forEach(n => {
-        const popupContent = createPopupContent(n, metric);
-        
-        const poly = L.polygon(n.bounds, STYLE_BLUE).addTo(mapInstance);
-        poly.bindPopup(popupContent);
-        
-        poly.neighborhoodName = n.name;
-        poly.defaultStyle = STYLE_BLUE; 
-        poly.on('click', (e) => handlePolygonClick(e, mapSide));
-        
-        polygonArray.push(poly);
-    });
-}
-
 // 6. EVENT LISTENERS
 function setupEventListeners() {
     const leftSelector = document.getElementById('leftMapSelector');
@@ -517,14 +508,16 @@ function setupEventListeners() {
 
     if (leftSelector) {
         leftSelector.addEventListener('change', function() {
-            renderMapPolygons(leftMap, leftPolygons, 'left', this.value);
+            currentLeftMetric = this.value; // Update global state
+            renderMapPolygons(leftMap, leftPolygons, 'left', currentLeftMetric);
             updateMetrics();
         });
     }
 
     if (rightSelector) {
         rightSelector.addEventListener('change', function() {
-            renderMapPolygons(rightMap, rightPolygons, 'right', this.value);
+            currentRightMetric = this.value; // Update global state
+            renderMapPolygons(rightMap, rightPolygons, 'right', currentRightMetric);
             updateMetrics();
         });
     }
@@ -556,9 +549,11 @@ function setupEventListeners() {
 function handlePolygonClick(e, sourceMap) {
     const targetName = e.target.neighborhoodName;
 
+    // Reset styles
     leftPolygons.forEach(p => p.setStyle(p.defaultStyle));
     rightPolygons.forEach(p => p.setStyle(p.defaultStyle));
 
+    // Highlight targets
     const leftTarget = leftPolygons.find(p => p.neighborhoodName === targetName);
     const rightTarget = rightPolygons.find(p => p.neighborhoodName === targetName);
 
@@ -591,11 +586,9 @@ function getMetricLabel(metric) {
 }
 
 function updateMetrics() {
-    const leftMetric = document.getElementById('leftMapSelector')?.value || 'diabetes';
-    const rightMetric = document.getElementById('rightMapSelector')?.value || 'income';
-    
-    const leftValues = camdenNeighborhoods.map(n => n.data[leftMetric]).filter(v => v !== undefined);
-    const rightValues = camdenNeighborhoods.map(n => n.data[rightMetric]).filter(v => v !== undefined);
+    // Use the GLOBAL variables instead of reading DOM to be safe
+    const leftValues = camdenNeighborhoods.map(n => n.data[currentLeftMetric]).filter(v => v !== undefined);
+    const rightValues = camdenNeighborhoods.map(n => n.data[currentRightMetric]).filter(v => v !== undefined);
     
     if (leftValues.length === 0 || rightValues.length === 0) return;
     
@@ -646,10 +639,9 @@ function initializeAllCharts() {
             options: { responsive: true, plugins: { title: { display: true, text: 'Top 10 Neighborhoods by Diabetes Rate' } } }
         });
     }
-    // Demographics and other charts remain standard...
 }
 
 window.startTour = function() { alert('Welcome to the Camden Health Dashboard!'); };
 window.exportData = function(format) { alert(`Data export (${format}) coming soon.`); };
 
-console.log('Dashboard script loaded with INITIAL DROPDOWN FIX');
+console.log('Dashboard script loaded with GLOBAL DEFAULTS');
