@@ -619,12 +619,19 @@ function calculateCorrelation(x, y) {
     return denominator === 0 ? 0 : (n * sumXY - sumX * sumY) / denominator;
 }
 
+// 8. INITIALIZE ALL CHARTS (Full Restoration)
 function initializeAllCharts() {
-    console.log('Initializing charts...');
+    console.log('Initializing all dashboard charts...');
+    
+    // 1. Neighborhood Chart (Bar: Top 10 Diabetes)
     const neighborhoodCanvas = document.getElementById('neighborhoodChart');
     if (neighborhoodCanvas) {
+        // Destroy existing chart if it exists to prevent overlap
+        if (Chart.getChart(neighborhoodCanvas)) Chart.getChart(neighborhoodCanvas).destroy();
+        
         const ctx = neighborhoodCanvas.getContext('2d');
         const sorted = [...camdenNeighborhoods].sort((a, b) => (b.data.diabetes || 0) - (a.data.diabetes || 0)).slice(0, 10);
+        
         new Chart(ctx, {
             type: 'bar',
             data: {
@@ -636,7 +643,118 @@ function initializeAllCharts() {
                     borderColor: 'rgba(108, 117, 125, 1)', borderWidth: 1
                 }]
             },
-            options: { responsive: true, plugins: { title: { display: true, text: 'Top 10 Neighborhoods by Diabetes Rate' } } }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, title: { display: true, text: 'Top 10 Neighborhoods by Diabetes Rate' } },
+                scales: { y: { beginAtZero: true, title: { display: true, text: 'Rate (%)' } } }
+            }
+        });
+    }
+    
+    // 2. Demographics Chart (Doughnut: Income Ranges)
+    const demographicsCanvas = document.getElementById('demographicsChart');
+    if (demographicsCanvas) {
+        if (Chart.getChart(demographicsCanvas)) Chart.getChart(demographicsCanvas).destroy();
+
+        const ctx = demographicsCanvas.getContext('2d');
+        const incomeRanges = [
+            { range: '< $25K', count: camdenNeighborhoods.filter(n => n.data.income < 25000).length },
+            { range: '$25K-35K', count: camdenNeighborhoods.filter(n => n.data.income >= 25000 && n.data.income < 35000).length },
+            { range: '$35K-45K', count: camdenNeighborhoods.filter(n => n.data.income >= 35000 && n.data.income < 45000).length },
+            { range: '$45K+', count: camdenNeighborhoods.filter(n => n.data.income >= 45000).length }
+        ];
+        
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: incomeRanges.map(r => r.range),
+                datasets: [{
+                    data: incomeRanges.map(r => r.count),
+                    backgroundColor: ['#dc3545', '#ffc107', '#17a2b8', '#28a745'],
+                    borderWidth: 1
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'right' }, title: { display: true, text: 'Neighborhoods by Income Level' } } 
+            }
+        });
+    }
+    
+    // 3. Trend Chart (Scatter: Income vs Diabetes)
+    const trendCanvas = document.getElementById('trendChart');
+    if (trendCanvas) {
+        if (Chart.getChart(trendCanvas)) Chart.getChart(trendCanvas).destroy();
+
+        const ctx = trendCanvas.getContext('2d');
+        new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Neighborhoods',
+                    data: camdenNeighborhoods.map(n => ({ x: n.data.income/1000, y: n.data.diabetes })),
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    title: { display: true, text: 'Correlation: Income vs Diabetes' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `Income: $${context.parsed.x}k, Diabetes: ${context.parsed.y}%`;
+                            }
+                        }
+                    }
+                },
+                scales: { 
+                    x: { title: { display: true, text: 'Median Income ($1k)' } }, 
+                    y: { title: { display: true, text: 'Diabetes Rate (%)' } } 
+                }
+            }
+        });
+    }
+    
+    // 4. SDOH Chart (Radar: City Averages)
+    const sdohCanvas = document.getElementById('sdohChart');
+    if (sdohCanvas) {
+        if (Chart.getChart(sdohCanvas)) Chart.getChart(sdohCanvas).destroy();
+
+        const ctx = sdohCanvas.getContext('2d');
+        const avgs = {
+            pov: camdenNeighborhoods.reduce((s, n) => s + (n.data.poverty_rate || 0), 0) / 19,
+            unemp: camdenNeighborhoods.reduce((s, n) => s + (n.data.unemployment || 0), 0) / 19,
+            edu: camdenNeighborhoods.reduce((s, n) => s + (n.data.education || 0), 0) / 19,
+            ins: camdenNeighborhoods.reduce((s, n) => s + (n.data.lack_health_insurance || 0), 0) / 19
+        };
+        
+        new Chart(ctx, {
+            type: 'radar',
+            data: {
+                labels: ['Poverty Rate', 'Unemployment', 'HS Diploma %', 'Uninsured %'],
+                datasets: [{
+                    label: 'City Average',
+                    data: [avgs.pov, avgs.unemp, avgs.edu, avgs.ins],
+                    backgroundColor: 'rgba(255, 159, 64, 0.2)', 
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    pointBackgroundColor: 'rgba(255, 159, 64, 1)',
+                    borderWidth: 2
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                scales: { r: { beginAtZero: true, suggestMax: 60 } },
+                plugins: { title: { display: true, text: 'Social Determinants Profile' } }
+            }
         });
     }
 }
