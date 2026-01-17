@@ -414,8 +414,9 @@ document.addEventListener('DOMContentLoaded', function() {
 // INITIALIZE MAPS & LAYERS
 function initializeMaps() {
     try {
-        console.log('Creating left map...');
-        // Zoom set to 11.5 for better city view, scrollWheelZoom disabled for usability
+        console.log('Creating maps with NEW COLOR SCHEME (Light Blue)...');
+        
+        // Initialize Left Map
         leftMap = L.map('leftMap', {
             zoomControl: true,
             scrollWheelZoom: false
@@ -425,7 +426,7 @@ function initializeMaps() {
             attribution: '© OpenStreetMap contributors'
         }).addTo(leftMap);
 
-        console.log('Creating right map...');
+        // Initialize Right Map
         rightMap = L.map('rightMap', {
             zoomControl: true,
             scrollWheelZoom: false
@@ -435,90 +436,92 @@ function initializeMaps() {
             attribution: '© OpenStreetMap contributors'
         }).addTo(rightMap);
 
-        // --- NEW STYLING LOGIC START ---
+        // --- NEW STYLING LOGIC ---
 
-        // 1. Define Map Styles
+        // 1. Define Styles
         const defaultStyle = {
-            color: "#2c3e50",       // Dark grey border
-            weight: 1,
+            color: "#2c3e50",       // Dark Grey Border
+            weight: 2,              // Slightly thicker border for visibility
             opacity: 1,
-            fillColor: "#87CEEB",   // LIGHT BLUE (SkyBlue) - Idle State
-            fillOpacity: 0.6
+            fillColor: "#87CEEB",   // SKY BLUE - Default Color
+            fillOpacity: 0.7        // Higher opacity to ensure color is visible
         };
 
         const activeStyle = {
-            color: "#d35400",       // Dark orange border
+            color: "#d35400",       // Orange Border
             weight: 3,
             opacity: 1,
-            fillColor: "#f39c12",   // ORANGE - Active/Selected State
-            fillOpacity: 0.7
+            fillColor: "#f39c12",   // ORANGE - Selected Color
+            fillOpacity: 0.8
         };
 
-        // 2. Add Neighborhood Polygons with Click Events
+        // 2. Loop through neighborhoods and add them to both maps
         camdenNeighborhoods.forEach(neighborhood => {
             
-            // --- Add to LEFT MAP ---
+            // --- LEFT MAP POLYGON ---
             const leftPoly = L.polygon(neighborhood.bounds, defaultStyle)
                 .addTo(leftMap)
                 .bindPopup(`<strong>${neighborhood.name}</strong>`);
             
-            // Tag object for reference
+            // Store reference
             leftPoly.neighborhoodName = neighborhood.name;
             leftPolygons.push(leftPoly);
 
-            // Left Map Click Handler
+            // Left Interaction
             leftPoly.on('click', function(e) {
-                // A. Reset ALL polygons on BOTH maps to default style
+                // Reset ALL to Blue
                 leftPolygons.forEach(p => p.setStyle(defaultStyle));
                 rightPolygons.forEach(p => p.setStyle(defaultStyle));
 
-                // B. Highlight THIS polygon (Left)
+                // Highlight THIS one (Orange)
                 e.target.setStyle(activeStyle);
                 e.target.openPopup();
 
-                // C. Highlight PARTNER polygon (Right)
+                // Sync Highlight on Right Map
                 const partner = rightPolygons.find(p => p.neighborhoodName === neighborhood.name);
                 if (partner) {
                     partner.setStyle(activeStyle);
-                    // partner.openPopup(); // Optional: Open popup on both?
                 }
 
-                // D. Update Dashboard Metrics
-                updateMetrics(neighborhood.name);
+                // Update Data
+                if (typeof updateMetrics === 'function') {
+                    updateMetrics(neighborhood.name);
+                }
             });
 
-            // --- Add to RIGHT MAP ---
+            // --- RIGHT MAP POLYGON ---
             const rightPoly = L.polygon(neighborhood.bounds, defaultStyle)
                 .addTo(rightMap)
                 .bindPopup(`<strong>${neighborhood.name}</strong>`);
 
-            // Tag object for reference
+            // Store reference
             rightPoly.neighborhoodName = neighborhood.name;
             rightPolygons.push(rightPoly);
 
-            // Right Map Click Handler
+            // Right Interaction
             rightPoly.on('click', function(e) {
-                // A. Reset ALL polygons on BOTH maps
+                // Reset ALL to Blue
                 leftPolygons.forEach(p => p.setStyle(defaultStyle));
                 rightPolygons.forEach(p => p.setStyle(defaultStyle));
 
-                // B. Highlight THIS polygon (Right)
+                // Highlight THIS one (Orange)
                 e.target.setStyle(activeStyle);
                 e.target.openPopup();
 
-                // C. Highlight PARTNER polygon (Left)
+                // Sync Highlight on Left Map
                 const partner = leftPolygons.find(p => p.neighborhoodName === neighborhood.name);
                 if (partner) {
                     partner.setStyle(activeStyle);
                 }
 
-                // D. Update Metrics
-                updateMetrics(neighborhood.name);
+                // Update Data
+                if (typeof updateMetrics === 'function') {
+                    updateMetrics(neighborhood.name);
+                }
             });
         });
-        // --- NEW STYLING LOGIC END ---
 
-        console.log('Maps initialized successfully with Light Blue styling.');
+        console.log('Maps initialized: Neighborhoods should be Light Blue.');
 
     } catch (error) {
         console.error('Error initializing maps:', error);
