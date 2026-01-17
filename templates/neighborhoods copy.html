@@ -36,7 +36,7 @@
                         <select class="form-select form-select-lg shadow-sm border-0" id="neighborhood-selector">
                             <option value="">Select a Neighborhood...</option>
                             {% for n in neighborhood_data %}
-                            <option value="{{ n.name }}">{{ n.name }}</option>
+                            <option value="{{ loop.index0 }}">{{ n.name }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -205,34 +205,14 @@
         const selector = document.getElementById('neighborhood-selector');
         const profileDiv = document.getElementById('neighborhood-profile');
 
-        // --- 1. DATA INJECTION & TRANSFORMATION ---
-        // Ingest Raw Database Data from Flask
-        const rawDbData = {{ neighborhood_data | tojson | safe }};
+        // Check if data loaded correctly
+        if (typeof realCamdenData === 'undefined') {
+            console.error("Data missing: realCamdenData is undefined. Check static/js/neighborhoods.js");
+            return;
+        }
 
-        // Transform: Map DB columns (snake_case) to UI props (camelCase) & Merge Coordinates
-        // This ensures the JS has a clean 'realCamdenData' array to work with.
-        const realCamdenData = rawDbData.map(d => {
-            // Get coordinates from the static JS file, default to 0,0 if missing
-            const coords = (window.neighborhoodCoordinates && window.neighborhoodCoordinates[d.name]) 
-                           ? window.neighborhoodCoordinates[d.name] 
-                           : { lat: 0, lng: 0 };
-            
-            return {
-                name: d.name,
-                income: d.median_income,          
-                diabetes: d.diabetes_rate,        
-                obesity: d.obesity_rate,          
-                poverty: d.poverty_rate,          
-                population: d.total_population,   
-                lat: coords.lat,                  
-                lng: coords.lng                   
-            };
-        });
-
-        console.log("Loaded " + realCamdenData.length + " neighborhoods from Database.");
-
-        // --- 2. RANKING ENGINE ---
-        // Pre-calculate sorted arrays for accurate ranking (1 = Best/Highest)
+        // --- RANKING ENGINE ---
+        // We clone and sort safely (handling missing data with || 0)
         const sortedByIncome = [...realCamdenData].sort((a, b) => (b.income || 0) - (a.income || 0));
         const sortedByHealth = [...realCamdenData].sort((a, b) => (a.diabetes || 0) - (b.diabetes || 0));
         const sortedByPoverty = [...realCamdenData].sort((a, b) => (a.poverty || 0) - (b.poverty || 0));
@@ -241,132 +221,135 @@
             return sortedArray.findIndex(n => n.name === name) + 1;
         }
 
-        // --- 3. UPDATE HANDLER ---
+        // --- UPDATE HANDLER ---
         selector.addEventListener('change', function() {
-            // Search by Name to avoid Index mismatch
-            const selectedName = this.value;
-            
-            if (!selectedName) {
-                profileDiv.style.display = "none";
-                return;
+            try {
+                const index = parseInt(this.value);
+
+                // Safety Check: If index is invalid, hide profile and stop
+                if (isNaN(index) || index < 0 || index >= realCamdenData.length) {
+                    profileDiv.style.display = "none";
+                    return;
+                }
+
+                // Get Target Data
+                const n = realCamdenData[index];
+                
+                // Show the section
+                profileDiv.style.display = "block";
+
+                // --- SAFE DATA ACCESS HELPER ---
+                // Prevents crashes if a value is null/undefined
+                const safeVal = (val, suffix = "") => (val !== undefined && val !== null) ? val.toLocaleString() + suffix : "N/A";
+                const rawVal = (val) => (val !== undefined && val !== null) ? val : 0;
+
+                // 1. Update Header Stats
+                document.getElementById('profile-name').textContent = n.name || "Unknown";
+                document.getElementById('profile-pop').textContent = safeVal(n.population);
+                
+                let coords = "N/A";
+                if(n.lat && n.lng) coords = `${n.lat.toFixed(3)}, ${n.lng.toFixed(3)}`;
+                document.getElementById('profile-coords').textContent = coords;
+
+                // 2. Update KPI Cards & Ranks
+                // Income
+                document.getElementById('profile-income').textContent = "$" + safeVal(n.income);
+                const incomeRank = getRank(n.name, sortedByIncome);
+                document.getElementById('rank-income').textContent = incomeRank;
+                document.getElementById('income-context').textContent = incomeRank < 5 ? "High Tier" : (incomeRank > 14 ? "Low Tier" : "Mid Tier");
+
+                // Diabetes
+                document.getElementById('profile-diabetes').textContent = safeVal(n.diabetes, "%");
+                const healthRank = getRank(n.name, sortedByHealth);
+                document.getElementById('rank-diabetes').textContent = healthRank;
+                document.getElementById('health-context').textContent = healthRank > 15 ? "Critical" : "Stable";
+
+                // Poverty
+                document.getElementById('profile-poverty').textContent = safeVal(n.poverty, "%");
+                document.getElementById('rank-poverty').textContent = getRank(n.name, sortedByPoverty);
+
+                // 3. Dynamic Context Generator
+                let narrative = `<strong>${n.name}</strong> is a community of approx. ${safeVal(n.population)} residents. `;
+                
+                const dVal = rawVal(n.diabetes);
+                const iVal = rawVal(n.income);
+
+                if (dVal > 20) {
+                    narrative += `It faces <span class="text-danger fw-bold">severe health challenges</span>, with a diabetes rate (${dVal}%) significantly above the city average. `;
+                } else if (dVal > 0 && dVal < 16) {
+                    narrative += `Health outcomes here are <span class="text-success fw-bold">comparatively better</span> than the rest of the city. `;
+                } else {
+                    narrative += `Health metrics align with the city-wide baseline. `;
+                }
+
+                if (iVal < 20000 && iVal > 0) {
+                    narrative += `Economically, the area struggles with deep poverty, creating barriers to healthcare access.`;
+                } else if (iVal > 50000) {
+                    narrative += `With a median income of $${safeVal(n.income)}, it is one of Camden's more economically resilient neighborhoods.`;
+                }
+                document.getElementById('context-paragraph').innerHTML = narrative;
+
+                // 4. Challenges List
+                let challengesHTML = "";
+                let strainScore = 0; // 0-100
+
+                if (rawVal(n.poverty) > 35) {
+                    challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-exclamation-triangle text-danger me-3"></i><div><strong>Severe Economic Hardship</strong><br><small class="text-muted">Poverty rate exceeds 35% threshold.</small></div></li>`;
+                    strainScore += 40;
+                }
+                if (dVal > 19) {
+                    challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-procedures text-danger me-3"></i><div><strong>Chronic Disease Burden</strong><br><small class="text-muted">Diabetes prevalence is critical.</small></div></li>`;
+                    strainScore += 30;
+                }
+                if (rawVal(n.obesity) > 42) {
+                    challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-utensils text-warning me-3"></i><div><strong>Nutritional Access</strong><br><small class="text-muted">High obesity suggests food desert conditions.</small></div></li>`;
+                    strainScore += 20;
+                }
+                // Default if empty
+                if (challengesHTML === "") {
+                    challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-check-circle text-success me-3"></i><div><strong>Stable Indicators</strong><br><small class="text-muted">No critical alerts flagged.</small></div></li>`;
+                    strainScore += 10;
+                }
+                
+                document.getElementById('challenges-list').innerHTML = challengesHTML;
+                document.getElementById('strain-bar').style.width = strainScore + "%";
+
+                // 5. Action Plan & Strategies
+                let strategiesHTML = "<ul class='list-unstyled'>";
+                let priorityLevel = "MONITOR";
+                let priorityClass = "bg-success"; // Green badge for low priority
+                // The card background is always primary (Blue), we change the badge color
+
+                // Strategy Logic
+                if (dVal > 20) {
+                    strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Mobile Screening Units</strong><br><small class="text-white text-opacity-50">Deploy bi-weekly A1C testing vans.</small></span></div></li>`;
+                    priorityLevel = "URGENT";
+                    priorityClass = "bg-danger"; // Red badge
+                }
+                if (rawVal(n.poverty) > 40) {
+                    strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Food Prescription Rx</strong><br><small class="text-white text-opacity-50">Subsidize fresh produce for residents.</small></span></div></li>`;
+                    priorityLevel = (priorityLevel === "URGENT") ? "CRITICAL" : "HIGH";
+                    if(priorityLevel === "HIGH") priorityClass = "bg-warning text-dark"; // Yellow badge
+                }
+                if (iVal < 25000 && iVal > 0) {
+                    strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Medicaid Outreach</strong><br><small class="text-white text-opacity-50">Increase enrollment assistance.</small></span></div></li>`;
+                }
+                // Default
+                if (strategiesHTML === "<ul class='list-unstyled'>") {
+                    strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Community Wellness</strong><br><small class="text-white text-opacity-50">Maintain current engagement programs.</small></span></div></li>`;
+                }
+                strategiesHTML += "</ul>";
+
+                document.getElementById('strategy-list').innerHTML = strategiesHTML;
+                
+                const pBadge = document.getElementById('priority-badge');
+                pBadge.textContent = priorityLevel;
+                // Important: Remove old classes properly
+                pBadge.className = `badge ${priorityClass}`; 
+
+            } catch (err) {
+                console.error("Error rendering profile:", err);
             }
-
-            // Find data by NAME
-            const n = realCamdenData.find(item => item.name === selectedName);
-
-            if (!n) {
-                console.error("Data not found for:", selectedName);
-                return;
-            }
-
-            profileDiv.style.display = "block";
-
-            // --- SAFE DATA ACCESS HELPER ---
-            const safeVal = (val, suffix = "") => (val !== undefined && val !== null) ? val.toLocaleString() + suffix : "N/A";
-            const rawVal = (val) => (val !== undefined && val !== null) ? val : 0;
-
-            // A. Update Header Stats
-            document.getElementById('profile-name').textContent = n.name || "Unknown";
-            document.getElementById('profile-pop').textContent = safeVal(n.population);
-            
-            let coords = "N/A";
-            if(n.lat && n.lng) coords = `${n.lat.toFixed(3)}, ${n.lng.toFixed(3)}`;
-            document.getElementById('profile-coords').textContent = coords;
-
-            // B. Update KPI Cards & Ranks
-            // Income
-            document.getElementById('profile-income').textContent = "$" + safeVal(n.income);
-            const incomeRank = getRank(n.name, sortedByIncome);
-            document.getElementById('rank-income').textContent = incomeRank;
-            document.getElementById('income-context').textContent = incomeRank < 5 ? "Top Tier" : (incomeRank > 14 ? "Low Tier" : "Mid Tier");
-
-            // Diabetes
-            document.getElementById('profile-diabetes').textContent = safeVal(n.diabetes, "%");
-            const healthRank = getRank(n.name, sortedByHealth);
-            document.getElementById('rank-diabetes').textContent = healthRank;
-            document.getElementById('health-context').textContent = healthRank > 15 ? "Critical" : "Stable";
-
-            // Poverty
-            document.getElementById('profile-poverty').textContent = safeVal(n.poverty, "%");
-            document.getElementById('rank-poverty').textContent = getRank(n.name, sortedByPoverty);
-
-            // C. Dynamic Context Generator
-            let narrative = `<strong>${n.name}</strong> is a community of approx. ${safeVal(n.population)} residents. `;
-            
-            const dVal = rawVal(n.diabetes);
-            const iVal = rawVal(n.income);
-
-            if (dVal > 20) {
-                narrative += `It faces <span class="text-danger fw-bold">severe health challenges</span>, with a diabetes rate (${dVal}%) significantly above the city average. `;
-            } else if (dVal > 0 && dVal < 16) {
-                narrative += `Health outcomes here are <span class="text-success fw-bold">comparatively better</span> than the rest of the city. `;
-            } else {
-                narrative += `Health metrics align with the city-wide baseline. `;
-            }
-
-            if (iVal < 20000 && iVal > 0) {
-                narrative += `Economically, the area struggles with deep poverty, creating barriers to healthcare access.`;
-            } else if (iVal > 50000) {
-                narrative += `With a median income of $${safeVal(n.income)}, it is one of Camden's more economically resilient neighborhoods.`;
-            }
-            document.getElementById('context-paragraph').innerHTML = narrative;
-
-            // D. Challenges List
-            let challengesHTML = "";
-            let strainScore = 0; // 0-100
-
-            if (rawVal(n.poverty) > 35) {
-                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-exclamation-triangle text-danger me-3"></i><div><strong>Severe Economic Hardship</strong><br><small class="text-muted">Poverty rate exceeds 35% threshold.</small></div></li>`;
-                strainScore += 40;
-            }
-            if (dVal > 19) {
-                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-procedures text-danger me-3"></i><div><strong>Chronic Disease Burden</strong><br><small class="text-muted">Diabetes prevalence is critical.</small></div></li>`;
-                strainScore += 30;
-            }
-            if (rawVal(n.obesity) > 42) {
-                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-utensils text-warning me-3"></i><div><strong>Nutritional Access</strong><br><small class="text-muted">High obesity suggests food desert conditions.</small></div></li>`;
-                strainScore += 20;
-            }
-            // Default if empty
-            if (challengesHTML === "") {
-                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-check-circle text-success me-3"></i><div><strong>Stable Indicators</strong><br><small class="text-muted">No critical alerts flagged.</small></div></li>`;
-                strainScore += 10;
-            }
-            
-            document.getElementById('challenges-list').innerHTML = challengesHTML;
-            document.getElementById('strain-bar').style.width = strainScore + "%";
-
-            // E. Action Plan & Strategies
-            let strategiesHTML = "<ul class='list-unstyled'>";
-            let priorityLevel = "MONITOR";
-            let priorityClass = "bg-success"; // Green badge for low priority
-
-            // Strategy Logic
-            if (dVal > 20) {
-                strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Mobile Screening Units</strong><br><small class="text-white text-opacity-50">Deploy bi-weekly A1C testing vans.</small></span></div></li>`;
-                priorityLevel = "URGENT";
-                priorityClass = "bg-danger"; // Red badge
-            }
-            if (rawVal(n.poverty) > 40) {
-                strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Food Prescription Rx</strong><br><small class="text-white text-opacity-50">Subsidize fresh produce for residents.</small></span></div></li>`;
-                priorityLevel = (priorityLevel === "URGENT") ? "CRITICAL" : "HIGH";
-                if(priorityLevel === "HIGH") priorityClass = "bg-warning text-dark"; // Yellow badge
-            }
-            if (iVal < 25000 && iVal > 0) {
-                strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Medicaid Outreach</strong><br><small class="text-white text-opacity-50">Increase enrollment assistance.</small></span></div></li>`;
-            }
-            // Default
-            if (strategiesHTML === "<ul class='list-unstyled'>") {
-                strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Community Wellness</strong><br><small class="text-white text-opacity-50">Maintain current engagement programs.</small></span></div></li>`;
-            }
-            strategiesHTML += "</ul>";
-
-            document.getElementById('strategy-list').innerHTML = strategiesHTML;
-            
-            const pBadge = document.getElementById('priority-badge');
-            pBadge.textContent = priorityLevel;
-            pBadge.className = `badge ${priorityClass}`; 
-
         });
     });
 </script>
