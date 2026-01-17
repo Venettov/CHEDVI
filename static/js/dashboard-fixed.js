@@ -412,6 +412,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     loadInitialData();
     initializeAllCharts();
+    initializeDashboardExplorer();
 });
 
 // --- STYLING ---
@@ -807,6 +808,97 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 1000);
     }
 });
+
+// --- NEW FUNCTION: INTERACTIVE DATA EXPLORER ---
+function initializeDashboardExplorer() {
+    const xSelect = document.getElementById('dashXVariable');
+    const ySelect = document.getElementById('dashYVariable');
+    const ctx = document.getElementById('dashCorrelationChart');
+    const tableBody = document.getElementById('dashTableBody');
+
+    // Only run if elements exist (safety check)
+    if (!xSelect || !ySelect || !ctx || !tableBody) return;
+
+    let dashChart = null;
+
+    // 1. Render Table
+    function renderTable() {
+        tableBody.innerHTML = '';
+        camdenNeighborhoods.forEach(n => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${n.name}</strong></td>
+                <td>$${(n.data.income || 0).toLocaleString()}</td>
+                <td>${(n.data.poverty_rate || 0)}%</td>
+                <td>${(n.data.diabetes || 0)}%</td>
+                <td>${(n.data.obesity || 0)}%</td>
+                <td>${(n.data.asthma || 0)}%</td>
+                <td>${(n.data.mental_distress || 0)}%</td>
+            `;
+            tableBody.appendChild(tr);
+        });
+    }
+
+    // 2. Render Chart
+    function renderChart() {
+        const xVar = xSelect.value;
+        const yVar = ySelect.value;
+        const xLabel = xSelect.options[xSelect.selectedIndex].text;
+        const yLabel = ySelect.options[ySelect.selectedIndex].text;
+
+        const chartData = camdenNeighborhoods.map(n => ({
+            x: n.data[xVar] || 0,
+            y: n.data[yVar] || 0,
+            name: n.name
+        }));
+
+        if (dashChart) dashChart.destroy();
+
+        dashChart = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Neighborhoods',
+                    data: chartData,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: { display: true, text: `${yLabel} vs ${xLabel}` },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.raw.name}: (${context.parsed.x}, ${context.parsed.y})`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: xLabel } },
+                    y: { title: { display: true, text: yLabel } }
+                }
+            }
+        });
+
+        // Update Context Text
+        const contextBox = document.getElementById('dash-correlation-context');
+        if (contextBox) {
+            contextBox.innerHTML = `Analyzing <strong>${yLabel}</strong> relative to <strong>${xLabel}</strong> across all ${camdenNeighborhoods.length} neighborhoods.`;
+        }
+    }
+
+    // Initialize
+    xSelect.addEventListener('change', renderChart);
+    ySelect.addEventListener('change', renderChart);
+    renderTable();
+    renderChart();
+}
 
 window.startTour = function() { alert('Welcome to the Camden Health Dashboard!'); };
 window.exportData = function(format) { alert(`Data export (${format}) coming soon.`); };

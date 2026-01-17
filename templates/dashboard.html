@@ -368,6 +368,84 @@
         </div>
     </section>
 
+    <section class="py-5 bg-white border-top border-bottom">
+        <div class="container">
+            <div class="row mb-4">
+                <div class="col-12 text-center">
+                    <h2 class="fw-bold mb-2">Interactive Data Exploration</h2>
+                    <p class="text-muted">Analyze correlations between social determinants and health outcomes directly on the dashboard</p>
+                </div>
+            </div>
+
+            <div class="row mb-4 justify-content-center">
+                <div class="col-md-4">
+                    <div class="card bg-light border-0">
+                        <div class="card-body">
+                            <label class="form-label fw-bold small text-uppercase text-muted">X-Axis (Social Factor)</label>
+                            <select id="dashXVariable" class="form-select shadow-sm">
+                                <option value="income">Median Income ($)</option>
+                                <option value="poverty_rate">Poverty Rate (%)</option>
+                                <option value="unemployment">Unemployment Rate (%)</option>
+                                <option value="education">Education Level (%)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light border-0">
+                        <div class="card-body">
+                            <label class="form-label fw-bold small text-uppercase text-muted">Y-Axis (Health Outcome)</label>
+                            <select id="dashYVariable" class="form-select shadow-sm">
+                                <option value="diabetes">Diabetes Rate (%)</option>
+                                <option value="obesity">Obesity Rate (%)</option>
+                                <option value="asthma">Asthma Rate (%)</option>
+                                <option value="mental_distress">Mental Health Distress (%)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mb-5">
+                <div class="col-lg-10 mx-auto">
+                    <div class="card shadow border-0">
+                        <div class="card-body p-4">
+                            <div style="position: relative; height: 400px; width: 100%;">
+                                <canvas id="dashCorrelationChart"></canvas>
+                            </div>
+                            <div class="mt-3 text-center p-3 bg-light rounded text-muted small" id="dash-correlation-context">
+                                Select variables above to view analysis.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <h5 class="fw-bold mb-3 px-2 border-start border-4 border-primary">Underlying Data Table</h5>
+                    <div class="table-responsive shadow-sm bg-white rounded border" style="max-height: 400px; overflow-y: auto;">
+                        <table class="table table-hover mb-0 table-striped">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th>Neighborhood</th>
+                                    <th>Income</th>
+                                    <th>Poverty</th>
+                                    <th>Diabetes</th>
+                                    <th>Obesity</th>
+                                    <th>Asthma</th>
+                                    <th>Mental Distress</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashTableBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <section class="py-5 bg-white">
         <div class="container">
             <div class="row">
