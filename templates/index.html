@@ -5,6 +5,9 @@
 {% block body_class %}home-page{% endblock %}
 
 {% block content %}
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 <!-- Hero Section -->
 <section class="hero-section bg-primary text-white">
     <div class="container">
@@ -320,40 +323,47 @@
 
 <div class="modal fade" id="welcomeModal" tabindex="-1" aria-labelledby="welcomeModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-primary text-white">
+        <div class="modal-content border-0 shadow-lg overflow-hidden position-relative">
+            <div class="modal-header bg-primary text-white border-0">
                 <h5 class="modal-title fw-bold" id="welcomeModalLabel">
-                    <i class="fas fa-hand-holding-heart me-2"></i>Welcome to CHEDVI!
+                    <i class="fas fa-rocket me-2"></i>Welcome to CHEDVI
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-4">
-                <p class="lead mb-3">Welcome to the Camden Health Equity Data Visualization Initiative.</p>
-                <p class="text-muted mb-4">This platform empowers you to explore real health disparities across Camden's neighborhoods using verified census and CDC data.</p>
+            
+            <div class="modal-body p-4 text-center">
+                <p class="lead fw-bold text-primary mb-2">Ready to explore Camden's health data?</p>
+                <p class="text-muted small mb-4">Select a specific tool below or launch the full experience.</p>
                 
                 <div class="row g-3 mb-4">
-                    <div class="col-4 text-center">
-                        <div class="p-3 bg-light rounded">
-                            <i class="fas fa-map-marked-alt fa-2x text-primary mb-2"></i>
-                            <div class="small fw-bold">Maps</div>
-                        </div>
+                    <div class="col-4">
+                        <a href="{{ url_for('dashboard') }}" class="text-decoration-none">
+                            <div class="p-3 bg-light rounded border hover-shadow transition-all h-100">
+                                <i class="fas fa-map-marked-alt fa-2x text-primary mb-2"></i>
+                                <div class="small fw-bold text-dark">Maps</div>
+                            </div>
+                        </a>
                     </div>
-                    <div class="col-4 text-center">
-                        <div class="p-3 bg-light rounded">
-                            <i class="fas fa-chart-pie fa-2x text-success mb-2"></i>
-                            <div class="small fw-bold">Data</div>
-                        </div>
+                    <div class="col-4">
+                        <a href="{{ url_for('neighborhoods') }}" class="text-decoration-none">
+                            <div class="p-3 bg-light rounded border hover-shadow transition-all h-100">
+                                <i class="fas fa-database fa-2x text-success mb-2"></i>
+                                <div class="small fw-bold text-dark">Data</div>
+                            </div>
+                        </a>
                     </div>
-                    <div class="col-4 text-center">
-                        <div class="p-3 bg-light rounded">
-                            <i class="fas fa-lightbulb fa-2x text-warning mb-2"></i>
-                            <div class="small fw-bold">Insights</div>
-                        </div>
+                    <div class="col-4">
+                        <a href="{{ url_for('insights') }}" class="text-decoration-none">
+                            <div class="p-3 bg-light rounded border hover-shadow transition-all h-100">
+                                <i class="fas fa-lightbulb fa-2x text-warning mb-2"></i>
+                                <div class="small fw-bold text-dark">Insights</div>
+                            </div>
+                        </a>
                     </div>
                 </div>
 
                 <div class="d-grid">
-                    <button type="button" class="btn btn-primary btn-lg" data-bs-dismiss="modal">
+                    <button type="button" class="btn btn-primary btn-lg shadow fw-bold" onclick="CHEDVI.launchExperience()">
                         Start Exploring <i class="fas fa-arrow-right ms-2"></i>
                     </button>
                 </div>
