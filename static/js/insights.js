@@ -522,13 +522,11 @@ function createHousingHealthChart() {
     const selector = document.getElementById('housingOutcomeSelector');
     let outcomeKey = selector ? selector.value : 'asthma';
 
-    // Handle "Lead Risk" proxy (using age of housing proxy or poverty as correlation)
-    // Since we don't have explicit lead data, we'll use a proxy combining poverty + old housing logic
-    // For this viz, we will map 'leadRisk' to 'poverty' but label it as Risk Index for demonstration
+    // Handle "Lead Risk" proxy
     let yDataKey = outcomeKey;
     if (outcomeKey === 'leadRisk') yDataKey = 'poverty'; 
 
-    // --- A. EXPLANATION LIBRARY ---
+    // --- A. EXPANDED EXPLANATION LIBRARY ---
     const explanations = {
         'asthma': {
             title: 'Housing & Asthma',
@@ -542,13 +540,23 @@ function createHousingHealthChart() {
         },
         'mentalDistress': {
             title: 'Housing & Mental Health',
-            main: 'Housing instability is a massive stressor. You can see that neighborhoods with housing quality issues report significantly higher mental distress.',
+            main: 'Housing instability is a massive stressor. Neighborhoods with housing quality issues report significantly higher mental distress.',
             detail: 'The constant anxiety of unsafe living conditions, eviction risk, or overcrowding directly impacts mental wellbeing, creating a cycle of stress and poor health.'
         },
         'diabetes': {
-            title: 'Housing & Chronic Disease',
+            title: 'Housing & Diabetes',
             main: 'While less direct than asthma, housing problems correlate with diabetes management issues.',
-            detail: 'Lack of safe storage for medication, no space for exercise, and the stress of unstable housing all make managing complex chronic conditions like diabetes much harder.'
+            detail: 'Lack of safe storage for medication (like insulin), no space for indoor exercise, and the stress of unstable housing all make managing complex chronic conditions much harder.'
+        },
+        'obesity': {
+            title: 'Housing & Obesity',
+            main: 'Poor housing conditions often exist in neighborhoods lacking safe outdoor spaces or parks, limiting physical activity.',
+            detail: 'When residents don’t feel safe exercising in their neighborhood or lack space at home, sedentary behaviors increase, contributing to higher obesity rates.'
+        },
+        'highBloodPressure': {
+            title: 'Housing & Hypertension',
+            main: 'The stress of living in distressed housing is physically toxic. There is a clear link between housing problems and high blood pressure.',
+            detail: 'Crowding, noise pollution, and financial strain trigger the body’s "fight or flight" response. Chronic activation of this stress response drives up blood pressure permanently.'
         }
     };
 
@@ -568,7 +576,7 @@ function createHousingHealthChart() {
     const bubbleData = camdenData.neighborhoods.map((name, i) => ({
         x: camdenData.housing[i], // X = Housing Problems %
         y: camdenData[yDataKey] ? camdenData[yDataKey][i] : 0, // Y = Health Outcome
-        r: camdenData.poverty[i] / 4, // Radius = Poverty scaled down to look good
+        r: camdenData.poverty[i] / 4, // Radius = Poverty scaled down
         name: name,
         poverty: camdenData.poverty[i]
     }));
@@ -577,7 +585,9 @@ function createHousingHealthChart() {
         'asthma': 'Asthma Rate (%)',
         'leadRisk': 'Lead Exposure Risk Index',
         'mentalDistress': 'Mental Distress (%)',
-        'diabetes': 'Diabetes Rate (%)'
+        'diabetes': 'Diabetes Rate (%)',
+        'obesity': 'Obesity Rate (%)',
+        'highBloodPressure': 'High Blood Pressure (%)'
     };
 
     // --- D. DRAW CHART ---
@@ -587,8 +597,8 @@ function createHousingHealthChart() {
             datasets: [{
                 label: `Housing Problems vs ${labels[outcomeKey]}`,
                 data: bubbleData,
-                backgroundColor: 'rgba(255, 193, 7, 0.6)', // Warning Yellow (Transparent)
-                borderColor: 'rgba(255, 193, 7, 1)',     // Warning Yellow (Solid)
+                backgroundColor: 'rgba(255, 193, 7, 0.6)', // Warning Yellow
+                borderColor: 'rgba(255, 193, 7, 1)',
                 borderWidth: 1,
                 hoverBackgroundColor: 'rgba(255, 193, 7, 0.9)'
             }]
