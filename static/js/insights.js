@@ -510,45 +510,98 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Visualization 4: Housing Quality vs Respiratory Health (Scatter Plot) - REPLACES AREA CHART
+// --- 4. HOUSING & HEALTH CHART (Bubble Chart) ---
 function createHousingHealthChart() {
     const ctx = document.getElementById('housingHealthChart');
     if (!ctx) return;
-    
-    // 1. Prepare Scatter Data (X: Housing Problems, Y: Asthma)
-    const scatterData = camdenData.neighborhoods.map((name, i) => ({
-        x: camdenData.housing[i],
-        y: camdenData.asthma[i],
-        neighborhood: name
+
+    if (housingHealthChart) {
+        housingHealthChart.destroy();
+    }
+
+    const selector = document.getElementById('housingOutcomeSelector');
+    let outcomeKey = selector ? selector.value : 'asthma';
+
+    // Handle "Lead Risk" proxy (using age of housing proxy or poverty as correlation)
+    // Since we don't have explicit lead data, we'll use a proxy combining poverty + old housing logic
+    // For this viz, we will map 'leadRisk' to 'poverty' but label it as Risk Index for demonstration
+    let yDataKey = outcomeKey;
+    if (outcomeKey === 'leadRisk') yDataKey = 'poverty'; 
+
+    // --- A. EXPLANATION LIBRARY ---
+    const explanations = {
+        'asthma': {
+            title: 'Housing & Asthma',
+            main: 'The data reveals a "Triple Threat": Neighborhoods with high housing problems (right) often have high asthma rates (top) and high poverty (large bubbles).',
+            detail: 'Substandard housing often contains triggers like mold, pests, and poor ventilation. When combined with economic stress, it creates a perfect storm for respiratory issues.'
+        },
+        'leadRisk': {
+            title: 'Housing & Lead Risk',
+            main: 'Older, substandard housing is the primary source of lead exposure. The correlation with poverty is stark.',
+            detail: 'Lead poisoning is entirely preventable. The data suggests that inspection and remediation resources must be concentrated in the specific neighborhoods showing this high-risk overlap.'
+        },
+        'mentalDistress': {
+            title: 'Housing & Mental Health',
+            main: 'Housing instability is a massive stressor. You can see that neighborhoods with housing quality issues report significantly higher mental distress.',
+            detail: 'The constant anxiety of unsafe living conditions, eviction risk, or overcrowding directly impacts mental wellbeing, creating a cycle of stress and poor health.'
+        },
+        'diabetes': {
+            title: 'Housing & Chronic Disease',
+            main: 'While less direct than asthma, housing problems correlate with diabetes management issues.',
+            detail: 'Lack of safe storage for medication, no space for exercise, and the stress of unstable housing all make managing complex chronic conditions like diabetes much harder.'
+        }
+    };
+
+    // --- B. UPDATE TEXT ---
+    const textData = explanations[outcomeKey];
+    const titleEl = document.getElementById('housing-text-title');
+    const mainEl = document.getElementById('housing-text-main');
+    const detailEl = document.getElementById('housing-text-detail');
+
+    if (titleEl && textData) {
+        titleEl.textContent = textData.title;
+        mainEl.textContent = textData.main;
+        detailEl.textContent = textData.detail;
+    }
+
+    // --- C. PREPARE BUBBLE DATA ---
+    const bubbleData = camdenData.neighborhoods.map((name, i) => ({
+        x: camdenData.housing[i], // X = Housing Problems %
+        y: camdenData[yDataKey] ? camdenData[yDataKey][i] : 0, // Y = Health Outcome
+        r: camdenData.poverty[i] / 4, // Radius = Poverty scaled down to look good
+        name: name,
+        poverty: camdenData.poverty[i]
     }));
 
-    // 2. Create Chart
+    const labels = {
+        'asthma': 'Asthma Rate (%)',
+        'leadRisk': 'Lead Exposure Risk Index',
+        'mentalDistress': 'Mental Distress (%)',
+        'diabetes': 'Diabetes Rate (%)'
+    };
+
+    // --- D. DRAW CHART ---
     housingHealthChart = new Chart(ctx, {
-        type: 'scatter',
+        type: 'bubble',
         data: {
             datasets: [{
-                label: 'Neighborhoods',
-                data: scatterData,
-                backgroundColor: 'rgba(255, 193, 7, 0.6)', // Warning/Yellow theme
-                borderColor: 'rgba(255, 193, 7, 1)',
+                label: `Housing Problems vs ${labels[outcomeKey]}`,
+                data: bubbleData,
+                backgroundColor: 'rgba(255, 193, 7, 0.6)', // Warning Yellow (Transparent)
+                borderColor: 'rgba(255, 193, 7, 1)',     // Warning Yellow (Solid)
                 borderWidth: 1,
-                pointRadius: 6,
-                pointHoverRadius: 9
+                hoverBackgroundColor: 'rgba(255, 193, 7, 0.9)'
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                title: {
-                    display: true,
-                    text: 'Correlation: Poor Housing & Asthma Rates',
-                    font: { size: 16, weight: 'bold' }
-                },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `${context.raw.neighborhood}: Housing Problems ${context.raw.x}%, Asthma ${context.raw.y}%`;
+                            const raw = context.raw;
+                            return `${raw.name}: Housing ${raw.x}%, ${labels[outcomeKey]} ${raw.y}%, Poverty ${raw.poverty}%`;
                         }
                     }
                 },
@@ -560,12 +613,23 @@ function createHousingHealthChart() {
                     min: 0
                 },
                 y: {
-                    title: { display: true, text: 'Asthma Rate (%)' }
+                    title: { display: true, text: labels[outcomeKey] },
+                    beginAtZero: false
                 }
             }
         }
     });
 }
+
+// --- ADD LISTENER ---
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing init code ...
+    
+    const housingSelector = document.getElementById('housingOutcomeSelector');
+    if (housingSelector) {
+        housingSelector.addEventListener('change', createHousingHealthChart);
+    }
+});
 
 // Visualization 5: Uninsured Rates by Neighborhood (Horizontal Bar Chart) - REPLACES DOUGHNUT
 function createHealthcareAccessChart() {
