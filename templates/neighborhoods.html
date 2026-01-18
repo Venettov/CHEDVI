@@ -3,6 +3,36 @@
 {% block title %}Neighborhoods - Camden Health Equity Data Visualization Initiative{% endblock %}
 
 {% block content %}
+<style>
+    :root {
+        --main-theme-color: #2c3e50; /* Dark Slate Blue */
+    }
+
+    .bg-theme {
+        background-color: var(--main-theme-color) !important;
+        color: white !important;
+    }
+    
+    .text-theme {
+        color: var(--main-theme-color) !important;
+    }
+    
+    .border-theme {
+        border-color: var(--main-theme-color) !important;
+    }
+
+    .btn-theme {
+        background-color: white;
+        color: var(--main-theme-color);
+        border: 1px solid white;
+    }
+    
+    .btn-theme:hover {
+        background-color: rgba(255, 255, 255, 0.9);
+        color: var(--main-theme-color);
+    }
+</style>
+
 <section class="py-5 bg-light border-bottom">
     <div class="container">
         <div class="row align-items-center">
@@ -28,7 +58,7 @@
         <div class="row mb-5">
             <div class="col-lg-10 mx-auto">
                 <div class="card shadow border-0 overflow-hidden">
-                    <div class="card-header bg-primary text-white p-4">
+                    <div class="card-header bg-theme p-4">
                         <h4 class="mb-0"><i class="fas fa-search-location me-2"></i>Neighborhood Selector</h4>
                     </div>
                     <div class="card-body p-4 bg-light">
@@ -58,6 +88,10 @@
                             <div>
                                 <small class="text-muted fw-bold d-block text-uppercase">Population</small>
                                 <span class="h4 mb-0" id="profile-pop">--</span>
+                            </div>
+                            <div>
+                                <small class="text-muted fw-bold d-block text-uppercase">Coordinates</small>
+                                <span class="h4 mb-0" id="profile-coords">--</span>
                             </div>
                         </div>
                     </div>
@@ -121,15 +155,16 @@
             </div>
 
             <div class="row g-4">
+                
                 <div class="col-lg-7">
                     <div class="card shadow-sm border-0 h-100">
                         <div class="card-header bg-white py-3 border-bottom-0">
-                            <h5 class="fw-bold mb-0 text-dark">
-                                <i class="fas fa-microscope me-2 text-primary"></i>Neighborhood Context
+                            <h5 class="fw-bold mb-0 text-theme">
+                                <i class="fas fa-microscope me-2"></i>Neighborhood Context
                             </h5>
                         </div>
                         <div class="card-body p-4 pt-0">
-                            <div class="alert alert-light border-start border-4 border-primary mb-4" role="alert">
+                            <div class="alert alert-light border-start border-4 border-theme mb-4" role="alert">
                                 <div id="context-paragraph" class="text-muted"></div>
                             </div>
                             
@@ -154,7 +189,7 @@
                 </div>
 
                 <div class="col-lg-5">
-                    <div class="card shadow-lg border-0 h-100 bg-primary text-white position-relative overflow-hidden">
+                    <div class="card shadow-lg border-0 h-100 bg-theme position-relative overflow-hidden">
                         <div class="position-absolute bottom-0 end-0 translate-middle-y p-3 opacity-10">
                             <i class="fas fa-clipboard-check fa-8x text-white"></i>
                         </div>
@@ -162,27 +197,28 @@
                         <div class="card-header bg-transparent border-bottom border-white border-opacity-25 py-3">
                             <div class="d-flex justify-content-between align-items-center">
                                 <h5 class="fw-bold mb-0">Action Plan</h5>
-                                <span class="badge bg-white text-primary" id="priority-badge">--</span>
+                                <span class="badge bg-white text-theme" id="priority-badge">--</span>
                             </div>
                         </div>
 
                         <div class="card-body p-4 position-relative" style="z-index: 1;">
                             <h6 class="text-white text-opacity-75 text-uppercase small fw-bold mb-3">Strategic Recommendations</h6>
+                            
                             <div id="strategy-list"></div>
+
                             <hr class="border-white border-opacity-25 my-4">
+
                             <div class="d-grid gap-2">
-                                <button class="btn btn-light fw-bold text-primary" onclick="window.location.href='{{ url_for('resources') }}'">
+                                <button class="btn btn-theme fw-bold" onclick="window.location.href='{{ url_for('resources') }}'">
                                     <i class="fas fa-search me-2"></i>Find Local Partners
-                                </button>
-                                <button class="btn btn-outline-light" onclick="window.print()">
-                                    <i class="fas fa-download me-2"></i>Download Profile
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+        </div> 
     </div>
 </section>
 {% endblock %}
@@ -191,28 +227,27 @@
 <script src="{{ url_for('static', filename='js/neighborhoods.js') }}"></script>
 
 <script>
-    // --- FALLBACK DATA: From your CSV ---
-    // This ensures that if the Database fails, we still have data to show.
+    // --- 1. BACKUP DATA (Matches your Database Exact Values) ---
     const csvBackupData = [
-        { name: 'Gateway', diabetes: 17.0, obesity: 43.9, income: 26750, poverty: 30.78, population: 1693 },
-        { name: 'Bergen Square', diabetes: 15.7, obesity: 47.6, income: 12104, poverty: 54.36, population: 2766 },
-        { name: 'Cooper Poynt', diabetes: 18.9, obesity: 44.8, income: 29789, poverty: 36.71, population: 1338 },
-        { name: 'Pyne Point', diabetes: 21.4, obesity: 46.6, income: 19412, poverty: 39.82, population: 5211 },
-        { name: 'Cramer Hill', diabetes: 18.4, obesity: 44.8, income: 28198, poverty: 38.68, population: 3804 },
-        { name: 'Beideman', diabetes: 13.4, obesity: 40.2, income: 58983, poverty: 11.91, population: 5645 },
-        { name: 'Dudley', diabetes: 22.2, obesity: 41.8, income: 35491, poverty: 24.96, population: 3295 },
-        { name: 'Rosedale', diabetes: 16.9, obesity: 38.8, income: 51741, poverty: 19.22, population: 5044 },
-        { name: 'Stockton', diabetes: 17.9, obesity: 41.9, income: 44357, poverty: 20.17, population: 6529 },
-        { name: 'Marlton', diabetes: 19.2, obesity: 43.2, income: 31312, poverty: 30.43, population: 4726 },
-        { name: 'Parkside', diabetes: 15.0, obesity: 46.1, income: 45662, poverty: 19.40, population: 4181 },
-        { name: 'Whitman Park', diabetes: 21.5, obesity: 44.8, income: 31941, poverty: 28.40, population: 5394 },
-        { name: 'Liberty Park', diabetes: 23.1, obesity: 48.7, income: 29210, poverty: 26.21, population: 2401 },
-        { name: 'Centerville', diabetes: 14.7, obesity: 51.4, income: 22181, poverty: 42.97, population: 2805 },
-        { name: 'Waterfront South', diabetes: 20.3, obesity: 44.3, income: 54324, poverty: 40.45, population: 918 },
-        { name: 'Morgan Village', diabetes: 17.5, obesity: 45.7, income: 34796, poverty: 32.57, population: 2701 },
-        { name: 'Fairview', diabetes: 17.3, obesity: 43.6, income: 41840, poverty: 20.76, population: 6221 },
-        { name: 'Cooper Grant', diabetes: 19.4, obesity: 36.0, income: 51635, poverty: 41.01, population: 2274 },
-        { name: 'Lanning Square', diabetes: 18.0, obesity: 41.3, income: 38447, poverty: 18.62, population: 4853 }
+        { name: 'Gateway', median_income: 26750, poverty_rate: 30.78, diabetes_rate: 17.0, obesity_rate: 43.9, total_population: 1693, asthma_rate: 12.1, mental_distress_rate: 20.3, unemployment_rate: 28.59, lack_health_insurance: 22.7 },
+        { name: 'Bergen Square', median_income: 12104, poverty_rate: 54.36, diabetes_rate: 15.7, obesity_rate: 47.6, total_population: 2766, asthma_rate: 11.7, mental_distress_rate: 24.1, unemployment_rate: 34.22, lack_health_insurance: 29.8 },
+        { name: 'Cooper Poynt', median_income: 29789, poverty_rate: 36.71, diabetes_rate: 18.9, obesity_rate: 44.8, total_population: 1338, asthma_rate: 14.3, mental_distress_rate: 22.3, unemployment_rate: 11.43, lack_health_insurance: 32.2 },
+        { name: 'Pyne Point', median_income: 19412, poverty_rate: 39.82, diabetes_rate: 21.4, obesity_rate: 46.6, total_population: 5211, asthma_rate: 12.9, mental_distress_rate: 22.9, unemployment_rate: 14.21, lack_health_insurance: 36.1 },
+        { name: 'Cramer Hill', median_income: 28198, poverty_rate: 38.68, diabetes_rate: 18.4, obesity_rate: 44.8, total_population: 3804, asthma_rate: 14.1, mental_distress_rate: 25.6, unemployment_rate: 9.42, lack_health_insurance: 39.9 },
+        { name: 'Beideman', median_income: 58983, poverty_rate: 11.91, diabetes_rate: 13.4, obesity_rate: 40.2, total_population: 5645, asthma_rate: 13.0, mental_distress_rate: 19.1, unemployment_rate: 9.73, lack_health_insurance: 29.7 },
+        { name: 'Dudley', median_income: 35491, poverty_rate: 24.96, diabetes_rate: 22.2, obesity_rate: 41.8, total_population: 3295, asthma_rate: 12.4, mental_distress_rate: 20.9, unemployment_rate: 3.93, lack_health_insurance: 34.2 },
+        { name: 'Rosedale', median_income: 51741, poverty_rate: 19.22, diabetes_rate: 16.9, obesity_rate: 38.8, total_population: 5044, asthma_rate: 13.1, mental_distress_rate: 18.6, unemployment_rate: 13.15, lack_health_insurance: 28.7 },
+        { name: 'Stockton', median_income: 44357, poverty_rate: 20.17, diabetes_rate: 17.9, obesity_rate: 41.9, total_population: 6529, asthma_rate: 11.2, mental_distress_rate: 20.1, unemployment_rate: 5.94, lack_health_insurance: 27.4 },
+        { name: 'Marlton', median_income: 31312, poverty_rate: 30.43, diabetes_rate: 19.2, obesity_rate: 43.2, total_population: 4726, asthma_rate: 11.5, mental_distress_rate: 21.0, unemployment_rate: 16.67, lack_health_insurance: 28.6 },
+        { name: 'Parkside', median_income: 45662, poverty_rate: 19.40, diabetes_rate: 15.0, obesity_rate: 46.1, total_population: 4181, asthma_rate: 10.6, mental_distress_rate: 21.9, unemployment_rate: 26.16, lack_health_insurance: 19.4 },
+        { name: 'Whitman Park', median_income: 31941, poverty_rate: 28.40, diabetes_rate: 21.5, obesity_rate: 44.8, total_population: 5394, asthma_rate: 10.6, mental_distress_rate: 22.0, unemployment_rate: 18.81, lack_health_insurance: 21.8 },
+        { name: 'Liberty Park', median_income: 29210, poverty_rate: 26.21, diabetes_rate: 23.1, obesity_rate: 48.7, total_population: 2401, asthma_rate: 11.0, mental_distress_rate: 24.9, unemployment_rate: 11.37, lack_health_insurance: 25.4 },
+        { name: 'Centerville', median_income: 22181, poverty_rate: 42.97, diabetes_rate: 14.7, obesity_rate: 51.4, total_population: 2805, asthma_rate: 13.4, mental_distress_rate: 25.5, unemployment_rate: 25.90, lack_health_insurance: 26.9 },
+        { name: 'Waterfront South', median_income: 54324, poverty_rate: 40.45, diabetes_rate: 20.3, obesity_rate: 44.3, total_population: 918, asthma_rate: 10.4, mental_distress_rate: 22.1, unemployment_rate: 8.51, lack_health_insurance: 24.6 },
+        { name: 'Morgan Village', median_income: 34796, poverty_rate: 32.57, diabetes_rate: 17.5, obesity_rate: 45.7, total_population: 2701, asthma_rate: 11.3, mental_distress_rate: 22.4, unemployment_rate: 9.16, lack_health_insurance: 21.9 },
+        { name: 'Fairview', median_income: 41840, poverty_rate: 20.76, diabetes_rate: 17.3, obesity_rate: 43.6, total_population: 6221, asthma_rate: 12.7, mental_distress_rate: 20.9, unemployment_rate: 24.87, lack_health_insurance: 19.3 },
+        { name: 'Cooper Grant', median_income: 51635, poverty_rate: 41.01, diabetes_rate: 19.4, obesity_rate: 36.0, total_population: 2274, asthma_rate: 12.3, mental_distress_rate: 19.2, unemployment_rate: 14.15, lack_health_insurance: 14.7 },
+        { name: 'Lanning Square', median_income: 38447, poverty_rate: 18.62, diabetes_rate: 18.0, obesity_rate: 41.3, total_population: 4853, asthma_rate: 13.4, mental_distress_rate: 21.0, unemployment_rate: 8.24, lack_health_insurance: 22.2 }
     ];
 
     document.addEventListener("DOMContentLoaded", function() {
@@ -220,56 +255,64 @@
         const profileDiv = document.getElementById('neighborhood-profile');
         const sourceIndicator = document.getElementById('data-source-indicator');
 
-        // --- 1. DATA INGESTION ---
+        // --- 2. DATA INGESTION & SANITIZATION ---
         let rawDbData = [];
         let dataSource = "Database";
 
-        // Try to get data from Flask
         try {
+            // Attempt to load from Flask Backend
             rawDbData = {{ neighborhood_data | tojson | safe }};
         } catch (e) {
-            console.warn("Database data fetch failed, using CSV fallback.");
+            console.warn("Backend data missing, using backup.");
         }
 
-        // Check if DB data is valid, if not, use backup
+        // Safety Switch: If DB data is empty or invalid, switch to Backup
         if (!rawDbData || rawDbData.length === 0) {
             console.warn("Using Fallback CSV Data.");
             rawDbData = csvBackupData;
-            dataSource = "Static CSV (Backup)";
+            dataSource = "Static Data (Backup Mode)";
         } else {
             console.log("Using Live Database Data.");
         }
         
         if(sourceIndicator) sourceIndicator.innerText = `Source: ${dataSource}`;
 
-        // --- 2. DATA SANITIZER & TRANSFORMER ---
-        // Ensure all numbers are actually numbers, handle missing fields, trim strings
+        // Transform Data (Normalize Keys & Types)
         const realCamdenData = rawDbData.map(d => {
-            // Get coordinates from the static JS file (neighborhoods.js)
+            // Merge Static Coordinates
             const coords = (window.neighborhoodCoordinates && window.neighborhoodCoordinates[d.name]) 
                            ? window.neighborhoodCoordinates[d.name] 
                            : { lat: 0, lng: 0 };
             
-            // Helper to force number type
-            const num = (v) => parseFloat(v) || 0;
+            // Helper: Force to Number
+            const num = (v) => {
+                if (v === undefined || v === null) return 0;
+                return parseFloat(v) || 0;
+            };
 
             return {
                 name: (d.name || "Unknown").trim(),
-                income: num(d.median_income || d.income), // Handle both naming conventions
+                // Check BOTH potential key names (DB snake_case vs JS camelCase)
+                income: num(d.median_income || d.income), 
                 diabetes: num(d.diabetes_rate || d.diabetes),
                 obesity: num(d.obesity_rate || d.obesity),
                 poverty: num(d.poverty_rate || d.poverty),
                 population: num(d.total_population || d.population),
+                // Extra fields from your Database
+                asthma: num(d.asthma_rate || d.asthma),
+                mental: num(d.mental_distress_rate || d.mental),
+                unemployment: num(d.unemployment_rate || d.unemployment),
+                insurance: num(d.lack_health_insurance || d.insurance),
+                
                 lat: coords.lat,                  
                 lng: coords.lng                   
             };
         });
 
         // --- 3. RANKING ENGINE ---
-        // Create sorted lists for accurate ranking (1 = Top/Best)
-        const sortedByIncome = [...realCamdenData].sort((a, b) => b.income - a.income); // High to Low
-        const sortedByHealth = [...realCamdenData].sort((a, b) => a.diabetes - b.diabetes); // Low to High
-        const sortedByPoverty = [...realCamdenData].sort((a, b) => a.poverty - b.poverty); // Low to High
+        const sortedByIncome = [...realCamdenData].sort((a, b) => b.income - a.income);
+        const sortedByHealth = [...realCamdenData].sort((a, b) => a.diabetes - b.diabetes);
+        const sortedByPoverty = [...realCamdenData].sort((a, b) => a.poverty - b.poverty);
 
         function getRank(name, sortedArray) {
             return sortedArray.findIndex(n => n.name === name) + 1;
@@ -293,7 +336,6 @@
 
             profileDiv.style.display = "block";
 
-            // Helpers
             const safeVal = (val, suffix = "") => (val !== undefined && val !== null) ? val.toLocaleString() + suffix : "--";
 
             // A. Header
@@ -335,59 +377,69 @@
             }
             document.getElementById('context-paragraph').innerHTML = narrative;
 
-            // D. Challenges
+            // D. Challenges (Using ALL DB Fields)
             let challengesHTML = "";
             let strainScore = 0;
 
             if (n.poverty > 35) {
-                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-exclamation-triangle text-danger me-3"></i><div><strong>Severe Economic Hardship</strong><br><small class="text-muted">Poverty rate exceeds 35% threshold.</small></div></li>`;
-                strainScore += 40;
-            }
-            if (n.diabetes > 19) {
-                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-procedures text-danger me-3"></i><div><strong>Chronic Disease Burden</strong><br><small class="text-muted">Diabetes prevalence is critical.</small></div></li>`;
+                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-exclamation-triangle text-danger me-3"></i><div><strong>Severe Economic Hardship</strong><br><small class="text-muted">Poverty rate (${n.poverty}%) exceeds 35% threshold.</small></div></li>`;
                 strainScore += 30;
             }
-            if (n.obesity > 42) {
-                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-utensils text-warning me-3"></i><div><strong>Nutritional Access</strong><br><small class="text-muted">High obesity suggests food desert conditions.</small></div></li>`;
+            if (n.diabetes > 19) {
+                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-procedures text-danger me-3"></i><div><strong>Chronic Disease Burden</strong><br><small class="text-muted">Diabetes prevalence (${n.diabetes}%) is critical.</small></div></li>`;
+                strainScore += 25;
+            }
+            if (n.unemployment > 15) {
+                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-briefcase text-warning me-3"></i><div><strong>High Unemployment</strong><br><small class="text-muted">Unemployment rate is ${n.unemployment}%, indicating job market stress.</small></div></li>`;
                 strainScore += 20;
             }
+            if (n.asthma > 13) {
+                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-lungs text-warning me-3"></i><div><strong>Respiratory Health</strong><br><small class="text-muted">Asthma rate (${n.asthma}%) suggests environmental factors.</small></div></li>`;
+                strainScore += 15;
+            }
+            if (n.insurance > 25) {
+                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-user-shield text-danger me-3"></i><div><strong>Lack of Insurance</strong><br><small class="text-muted">${n.insurance}% of residents lack health coverage.</small></div></li>`;
+                strainScore += 10;
+            }
+
             if (challengesHTML === "") {
                 challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-check-circle text-success me-3"></i><div><strong>Stable Indicators</strong><br><small class="text-muted">No critical alerts flagged.</small></div></li>`;
-                strainScore += 10;
+                strainScore = 5;
             }
             
             document.getElementById('challenges-list').innerHTML = challengesHTML;
-            document.getElementById('strain-bar').style.width = strainScore + "%";
+            document.getElementById('strain-bar').style.width = Math.min(strainScore, 100) + "%";
 
             // E. Action Plan
             let strategiesHTML = "<ul class='list-unstyled'>";
             let priorityLevel = "MONITOR";
-            let priorityClass = "bg-success"; 
+            const pBadge = document.getElementById('priority-badge');
+            pBadge.className = "badge bg-white text-theme";
 
             if (n.diabetes > 20) {
                 strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Mobile Screening Units</strong><br><small class="text-white text-opacity-50">Deploy bi-weekly A1C testing vans.</small></span></div></li>`;
                 priorityLevel = "URGENT";
-                priorityClass = "bg-danger"; 
+                pBadge.className = "badge bg-danger text-white";
             }
             if (n.poverty > 40) {
                 strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Food Prescription Rx</strong><br><small class="text-white text-opacity-50">Subsidize fresh produce for residents.</small></span></div></li>`;
                 priorityLevel = (priorityLevel === "URGENT") ? "CRITICAL" : "HIGH";
-                if(priorityLevel === "HIGH") priorityClass = "bg-warning text-dark"; 
+                if(priorityLevel === "HIGH") pBadge.className = "badge bg-warning text-dark";
             }
             if (n.income < 25000) {
                 strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Medicaid Outreach</strong><br><small class="text-white text-opacity-50">Increase enrollment assistance.</small></span></div></li>`;
             }
-            // Default
+            if (n.unemployment > 20) {
+                strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Workforce Development</strong><br><small class="text-white text-opacity-50">Partner with local unions for job training.</small></span></div></li>`;
+            }
+
             if (strategiesHTML === "<ul class='list-unstyled'>") {
                 strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Community Wellness</strong><br><small class="text-white text-opacity-50">Maintain current engagement programs.</small></span></div></li>`;
             }
             strategiesHTML += "</ul>";
 
             document.getElementById('strategy-list').innerHTML = strategiesHTML;
-            
-            const pBadge = document.getElementById('priority-badge');
             pBadge.textContent = priorityLevel;
-            pBadge.className = `badge ${priorityClass}`; 
         });
     });
 </script>
