@@ -201,18 +201,27 @@
                             </div>
                         </div>
 
-                        <div class="card-body p-4 position-relative" style="z-index: 1;">
-                            <h6 class="text-white text-opacity-75 text-uppercase small fw-bold mb-3">Strategic Recommendations</h6>
+                        <div class="card-body p-4 position-relative d-flex flex-column" style="z-index: 1; min-height: 300px;">
                             
-                            <div id="strategy-list"></div>
+                            <h6 class="text-white text-opacity-75 text-uppercase small fw-bold mb-3">Strategic Recommendations</h6>
+                            <div id="strategy-list" class="flex-grow-1"></div>
 
-                            <hr class="border-white border-opacity-25 my-4">
-
-                            <div class="d-grid gap-2">
-                                <button class="btn btn-theme fw-bold" onclick="window.location.href='{{ url_for('resources') }}'">
-                                    <i class="fas fa-search me-2"></i>Find Local Partners
-                                </button>
+                            <div class="mt-4 pt-3 border-top border-white border-opacity-25">
+                                <div class="p-3 rounded bg-black bg-opacity-25 backdrop-blur">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <small class="text-white text-opacity-90 fw-bold text-uppercase">
+                                            <i class="fas fa-info-circle me-1"></i>Next Steps
+                                        </small>
+                                    </div>
+                                    <p class="small text-white text-opacity-75 mb-3 lh-sm">
+                                        Connect with local organizations already working on these challenges.
+                                    </p>
+                                    <button class="btn btn-light w-100 fw-bold text-theme shadow-lg py-2" onclick="window.location.href='{{ url_for('resources') }}'">
+                                        <i class="fas fa-handshake me-2"></i>Find Local Partners
+                                    </button>
+                                </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
