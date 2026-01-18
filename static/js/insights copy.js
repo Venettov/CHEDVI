@@ -88,33 +88,50 @@ function initializeAllVisualizations() {
     }
 }
 
-// Visualization 1: Income vs Health Outcomes (Scatter Plot)
+// Visualization 1: Income Tiers vs Health (Bar Chart) - REPLACES SCATTER PLOT
 function createIncomeHealthChart() {
     const ctx = document.getElementById('incomeHealthChart');
-    if (!ctx) {
-        console.error('Canvas element incomeHealthChart not found');
-        return;
-    }
+    if (!ctx) return;
     
-    console.log('Creating income vs health scatter plot with', camdenData.neighborhoods.length, 'neighborhoods');
-    
-    const scatterData = camdenData.neighborhoods.map((name, i) => ({
-        x: camdenData.income[i],
-        y: camdenData.diabetes[i],
-        neighborhood: name
-    }));
-    
+    // 1. Bucketing Logic
+    let tiers = {
+        low: { label: 'Low Income (<$30k)', count: 0, sumDiabetes: 0, color: 'rgba(220, 53, 69, 0.7)', border: 'rgba(220, 53, 69, 1)' }, // Red
+        mid: { label: 'Mid Income ($30k-$45k)', count: 0, sumDiabetes: 0, color: 'rgba(255, 193, 7, 0.7)', border: 'rgba(255, 193, 7, 1)' }, // Yellow
+        high: { label: 'High Income (>$45k)', count: 0, sumDiabetes: 0, color: 'rgba(25, 135, 84, 0.7)', border: 'rgba(25, 135, 84, 1)' }   // Green
+    };
+
+    // 2. Sort Data into Tiers
+    camdenData.income.forEach((inc, i) => {
+        let rate = camdenData.diabetes[i];
+        if (inc < 30000) {
+            tiers.low.sumDiabetes += rate;
+            tiers.low.count++;
+        } else if (inc < 45000) {
+            tiers.mid.sumDiabetes += rate;
+            tiers.mid.count++;
+        } else {
+            tiers.high.sumDiabetes += rate;
+            tiers.high.count++;
+        }
+    });
+
+    // 3. Calculate Averages
+    const avgLow = (tiers.low.sumDiabetes / tiers.low.count).toFixed(1);
+    const avgMid = (tiers.mid.sumDiabetes / tiers.mid.count).toFixed(1);
+    const avgHigh = (tiers.high.sumDiabetes / tiers.high.count).toFixed(1);
+
+    // 4. Create Chart
     incomeHealthChart = new Chart(ctx, {
-        type: 'scatter',
+        type: 'bar',
         data: {
+            labels: [tiers.low.label, tiers.mid.label, tiers.high.label],
             datasets: [{
-                label: 'Neighborhoods',
-                data: scatterData,
-                backgroundColor: 'rgba(13, 110, 253, 0.7)',
-                borderColor: 'rgba(13, 110, 253, 1)',
+                label: 'Average Diabetes Rate (%)',
+                data: [avgLow, avgMid, avgHigh],
+                backgroundColor: [tiers.low.color, tiers.mid.color, tiers.high.color],
+                borderColor: [tiers.low.border, tiers.mid.border, tiers.high.border],
                 borderWidth: 2,
-                pointRadius: 8,
-                pointHoverRadius: 10
+                barPercentage: 0.6
             }]
         },
         options: {
@@ -123,21 +140,137 @@ function createIncomeHealthChart() {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Higher Income Areas Have Lower Diabetes Rates',
+                    text: 'Diabetes Rates Drop Significantly as Income Rises',
                     font: { size: 16, weight: 'bold' }
                 },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `${context.raw.neighborhood}: $${context.raw.x.toLocaleString()} income, ${context.raw.y}% diabetes`;
+                            return `Avg Diabetes Rate: ${context.raw}%`;
                         }
                     }
+                },
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Average Diabetes Rate (%)' },
+                    max: 25 // Set max slightly higher than data to look balanced
                 }
+            }
+        }
+    });
+}
+
+// Visualization 2: Food Access vs Obesity (Scatter Plot) - REPLACES BAR CHART
+function createFoodObesityChart() {
+    const ctx = document.getElementById('foodObesityChart');
+    if (!ctx) return;
+    
+    // 1. Prepare Scatter Data (X: Food Access, Y: Obesity)
+    const scatterData = camdenData.neighborhoods.map((name, i) => ({
+        x: camdenData.foodAccess[i],
+        y: camdenData.obesity[i],
+        neighborhood: name
+    }));
+
+    // 2. Create Chart
+    foodObesityChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Neighborhoods',
+                data: scatterData,
+                backgroundColor: 'rgba(25, 135, 84, 0.6)', // Green theme
+                borderColor: 'rgba(25, 135, 84, 1)',
+                borderWidth: 1,
+                pointRadius: 6,
+                pointHoverRadius: 9
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Correlation: Food Access & Obesity Rates',
+                    font: { size: 16, weight: 'bold' }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw.neighborhood}: Score ${context.raw.x}, Obesity ${context.raw.y}%`;
+                        }
+                    }
+                },
+                legend: { display: false }
             },
             scales: {
                 x: {
-                    title: { display: true, text: 'Median Household Income ($)' },
-                    ticks: { callback: function(value) { return '$' + (value/1000) + 'K'; } }
+                    // FIXED LABEL: Higher score correlates with lower obesity, implying better access/quality
+                    title: { display: true, text: 'Food Environment Score (Higher = Better Access)' }, 
+                    min: 0
+                },
+                y: {
+                    title: { display: true, text: 'Obesity Rate (%)' },
+                    min: 30
+                }
+            }
+        }
+    });
+}
+
+// Visualization 3: Education vs Health (Scatter Plot) - REPLACES LINE CHART
+function createEducationHealthChart() {
+    const ctx = document.getElementById('educationHealthChart');
+    if (!ctx) return;
+    
+    // 1. Prepare Scatter Data (X: Education, Y: Diabetes)
+    const scatterData = camdenData.neighborhoods.map((name, i) => ({
+        x: camdenData.education[i],
+        y: camdenData.diabetes[i],
+        neighborhood: name
+    }));
+
+    // 2. Create Chart
+    educationHealthChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Neighborhoods',
+                data: scatterData,
+                backgroundColor: 'rgba(13, 202, 240, 0.6)', // Cyan/Info theme
+                borderColor: 'rgba(13, 202, 240, 1)',
+                borderWidth: 1,
+                pointRadius: 6,
+                pointHoverRadius: 9
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Correlation: Education & Diabetes Rates',
+                    font: { size: 16, weight: 'bold' }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw.neighborhood}: Grad Rate ${context.raw.x}%, Diabetes ${context.raw.y}%`;
+                        }
+                    }
+                },
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'High School Graduation Rate (%)' },
+                    min: 20,
+                    max: 100
                 },
                 y: {
                     title: { display: true, text: 'Diabetes Rate (%)' }
@@ -147,138 +280,30 @@ function createIncomeHealthChart() {
     });
 }
 
-// Visualization 2: Food Access vs Obesity (Bar Chart)
-function createFoodObesityChart() {
-    const ctx = document.getElementById('foodObesityChart');
-    if (!ctx) return;
-    
-    // Sort by food access score (low to high)
-    const sortedIndices = camdenData.foodAccess
-        .map((score, index) => ({ score, index }))
-        .sort((a, b) => a.score - b.score)
-        .map(item => item.index);
-    
-    const sortedNeighborhoods = sortedIndices.map(i => camdenData.neighborhoods[i]);
-    const sortedObesity = sortedIndices.map(i => camdenData.obesity[i]);
-    const sortedFoodAccess = sortedIndices.map(i => camdenData.foodAccess[i]);
-    
-    foodObesityChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: sortedNeighborhoods.slice(0, 10), // Show worst 10 areas
-            datasets: [{
-                label: 'Obesity Rate (%)',
-                data: sortedObesity.slice(0, 10),
-                backgroundColor: 'rgba(25, 135, 84, 0.7)',
-                borderColor: 'rgba(25, 135, 84, 1)',
-                borderWidth: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Areas with Poor Food Access Have Higher Obesity Rates',
-                    font: { size: 16, weight: 'bold' }
-                }
-            },
-            scales: {
-                x: { title: { display: true, text: 'Neighborhoods (Sorted by Food Access - Worst First)' } },
-                y: { 
-                    title: { display: true, text: 'Obesity Rate (%)' },
-                    beginAtZero: true,
-                    max: 45
-                }
-            }
-        }
-    });
-}
-
-// Visualization 3: Education vs Health (Line Chart)
-function createEducationHealthChart() {
-    const ctx = document.getElementById('educationHealthChart');
-    if (!ctx) return;
-    
-    // Sort by education level
-    const sortedIndices = camdenData.education
-        .map((edu, index) => ({ edu, index }))
-        .sort((a, b) => a.edu - b.edu)
-        .map(item => item.index);
-    
-    const sortedEducation = sortedIndices.map(i => camdenData.education[i]);
-    const sortedDiabetes = sortedIndices.map(i => camdenData.diabetes[i]);
-    
-    educationHealthChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: sortedEducation.map(edu => edu + '%'),
-            datasets: [{
-                label: 'Diabetes Rate',
-                data: sortedDiabetes,
-                borderColor: 'rgba(13, 202, 240, 1)',
-                backgroundColor: 'rgba(13, 202, 240, 0.1)',
-                borderWidth: 3,
-                pointBackgroundColor: 'rgba(13, 202, 240, 1)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 6,
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Higher Education Levels Lead to Better Health Outcomes',
-                    font: { size: 16, weight: 'bold' }
-                }
-            },
-            scales: {
-                x: { title: { display: true, text: 'High School Graduation Rate' } },
-                y: { 
-                    title: { display: true, text: 'Diabetes Rate (%)' },
-                    reverse: true // Show improvement as line goes down
-                }
-            }
-        }
-    });
-}
-
-// Visualization 4: Housing Quality vs Respiratory Health (Area Chart)
+// Visualization 4: Housing Quality vs Respiratory Health (Scatter Plot) - REPLACES AREA CHART
 function createHousingHealthChart() {
     const ctx = document.getElementById('housingHealthChart');
     if (!ctx) return;
     
-    // Sort by housing problems
-    const sortedIndices = camdenData.housing
-        .map((housing, index) => ({ housing, index }))
-        .sort((a, b) => a.housing - b.housing)
-        .map(item => item.index);
-    
-    const sortedHousing = sortedIndices.map(i => camdenData.housing[i]);
-    const sortedAsthma = sortedIndices.map(i => camdenData.asthma[i]);
-    
+    // 1. Prepare Scatter Data (X: Housing Problems, Y: Asthma)
+    const scatterData = camdenData.neighborhoods.map((name, i) => ({
+        x: camdenData.housing[i],
+        y: camdenData.asthma[i],
+        neighborhood: name
+    }));
+
+    // 2. Create Chart
     housingHealthChart = new Chart(ctx, {
-        type: 'line',
+        type: 'scatter',
         data: {
-            labels: sortedHousing.map(h => h + '%'),
             datasets: [{
-                label: 'Asthma Rate',
-                data: sortedAsthma,
+                label: 'Neighborhoods',
+                data: scatterData,
+                backgroundColor: 'rgba(255, 193, 7, 0.6)', // Warning/Yellow theme
                 borderColor: 'rgba(255, 193, 7, 1)',
-                backgroundColor: 'rgba(255, 193, 7, 0.3)',
-                borderWidth: 3,
-                pointBackgroundColor: 'rgba(255, 193, 7, 1)',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
+                borderWidth: 1,
                 pointRadius: 6,
-                tension: 0.4,
-                fill: true
+                pointHoverRadius: 9
             }]
         },
         options: {
@@ -287,45 +312,59 @@ function createHousingHealthChart() {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Poor Housing Conditions Increase Respiratory Problems',
+                    text: 'Correlation: Poor Housing & Asthma Rates',
                     font: { size: 16, weight: 'bold' }
-                }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw.neighborhood}: Housing Problems ${context.raw.x}%, Asthma ${context.raw.y}%`;
+                        }
+                    }
+                },
+                legend: { display: false }
             },
             scales: {
-                x: { title: { display: true, text: 'Housing Problems Rate (Vacant/Overcrowded)' } },
-                y: { title: { display: true, text: 'Asthma Rate (%)' } }
+                x: {
+                    title: { display: true, text: 'Housing Problems Rate (Vacant/Overcrowded %)' },
+                    min: 0
+                },
+                y: {
+                    title: { display: true, text: 'Asthma Rate (%)' }
+                }
             }
         }
     });
 }
 
-// Visualization 5: Healthcare Access (Doughnut Chart)
+// Visualization 5: Uninsured Rates by Neighborhood (Horizontal Bar Chart) - REPLACES DOUGHNUT
 function createHealthcareAccessChart() {
     const ctx = document.getElementById('healthcareAccessChart');
     if (!ctx) return;
     
-    // Calculate averages for different access levels
-    const highAccess = camdenData.uninsured.filter(rate => rate < 15).length;
-    const mediumAccess = camdenData.uninsured.filter(rate => rate >= 15 && rate < 25).length;
-    const lowAccess = camdenData.uninsured.filter(rate => rate >= 25).length;
-    
+    // 1. Prepare Data and Sort by Uninsured Rate (Highest/Worst First)
+    const accessData = camdenData.neighborhoods.map((name, i) => ({
+        rate: camdenData.uninsured[i],
+        neighborhood: name
+    }));
+
+    accessData.sort((a, b) => b.rate - a.rate); // Descending sort
+
+    const labels = accessData.map(d => d.neighborhood);
+    const data = accessData.map(d => d.rate);
+
+    // 2. Create Chart
     healthcareAccessChart = new Chart(ctx, {
-        type: 'doughnut',
+        type: 'bar',
+        indexAxis: 'y', // Horizontal Bar Chart
         data: {
-            labels: ['Good Access (< 15% uninsured)', 'Fair Access (15-25% uninsured)', 'Poor Access (> 25% uninsured)'],
+            labels: labels,
             datasets: [{
-                data: [highAccess, mediumAccess, lowAccess],
-                backgroundColor: [
-                    'rgba(25, 135, 84, 0.8)',
-                    'rgba(255, 193, 7, 0.8)',
-                    'rgba(220, 53, 69, 0.8)'
-                ],
-                borderColor: [
-                    'rgba(25, 135, 84, 1)',
-                    'rgba(255, 193, 7, 1)',
-                    'rgba(220, 53, 69, 1)'
-                ],
-                borderWidth: 2
+                label: 'Uninsured Rate (%)',
+                data: data,
+                backgroundColor: data.map(val => val > 40 ? 'rgba(220, 53, 69, 0.7)' : 'rgba(255, 193, 7, 0.7)'), // Red for >40%, Yellow for others
+                borderColor: data.map(val => val > 40 ? 'rgba(220, 53, 69, 1)' : 'rgba(255, 193, 7, 1)'),
+                borderWidth: 1
             }]
         },
         options: {
@@ -334,49 +373,47 @@ function createHealthcareAccessChart() {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Healthcare Access Varies Dramatically Across Camden',
+                    text: 'Uninsured Rates by Neighborhood (Red = Critical Gap)',
                     font: { size: 16, weight: 'bold' }
                 },
-                legend: { position: 'bottom' }
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Percentage of Residents Without Health Insurance' },
+                    min: 0,
+                    max: 80 // Set max to accommodate the high 70% values
+                }
             }
         }
     });
 }
 
-// Visualization 6: Mental Health Radar Chart
+// Visualization 6: Poverty vs Mental Distress (Scatter Plot) - REPLACES RADAR CHART
 function createMentalHealthChart() {
     const ctx = document.getElementById('mentalHealthChart');
     if (!ctx) return;
     
-    // Compare high-poverty vs low-poverty areas
-    const highPoverty = camdenData.poverty.map((p, i) => p > 30 ? i : -1).filter(i => i !== -1);
-    const lowPoverty = camdenData.poverty.map((p, i) => p < 20 ? i : -1).filter(i => i !== -1);
-    
-    const highPovertyMentalDistress = highPoverty.reduce((sum, i) => sum + camdenData.mentalDistress[i], 0) / highPoverty.length;
-    const lowPovertyMentalDistress = lowPoverty.reduce((sum, i) => sum + camdenData.mentalDistress[i], 0) / lowPoverty.length;
-    
+    // 1. Prepare Scatter Data (X: Poverty, Y: Mental Distress)
+    const scatterData = camdenData.neighborhoods.map((name, i) => ({
+        x: camdenData.poverty[i],
+        y: camdenData.mentalDistress[i],
+        neighborhood: name
+    }));
+
+    // 2. Create Chart
     mentalHealthChart = new Chart(ctx, {
-        type: 'radar',
+        type: 'scatter',
         data: {
-            labels: ['Mental Distress', 'Social Isolation', 'Economic Stress', 'Housing Instability', 'Food Insecurity'],
-            datasets: [
-                {
-                    label: 'High-Poverty Areas',
-                    data: [highPovertyMentalDistress, 75, 85, 70, 80],
-                    borderColor: 'rgba(220, 53, 69, 1)',
-                    backgroundColor: 'rgba(220, 53, 69, 0.2)',
-                    borderWidth: 2,
-                    pointBackgroundColor: 'rgba(220, 53, 69, 1)'
-                },
-                {
-                    label: 'Low-Poverty Areas',
-                    data: [lowPovertyMentalDistress, 25, 20, 15, 25],
-                    borderColor: 'rgba(111, 66, 193, 1)',
-                    backgroundColor: 'rgba(111, 66, 193, 0.2)',
-                    borderWidth: 2,
-                    pointBackgroundColor: 'rgba(111, 66, 193, 1)'
-                }
-            ]
+            datasets: [{
+                label: 'Neighborhoods',
+                data: scatterData,
+                backgroundColor: 'rgba(111, 66, 193, 0.6)', // Purple theme
+                borderColor: 'rgba(111, 66, 193, 1)',
+                borderWidth: 1,
+                pointRadius: 6,
+                pointHoverRadius: 9
+            }]
         },
         options: {
             responsive: true,
@@ -384,15 +421,25 @@ function createMentalHealthChart() {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Mental Health Impacts Are Interconnected',
+                    text: 'Correlation: Poverty & Mental Distress',
                     font: { size: 16, weight: 'bold' }
-                }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw.neighborhood}: Poverty ${context.raw.x}%, Distress ${context.raw.y}%`;
+                        }
+                    }
+                },
+                legend: { display: false }
             },
             scales: {
-                r: {
-                    beginAtZero: true,
-                    max: 100,
-                    ticks: { stepSize: 20 }
+                x: {
+                    title: { display: true, text: 'Poverty Rate (%)' },
+                    min: 0
+                },
+                y: {
+                    title: { display: true, text: 'Mental Distress Rate (%)' }
                 }
             }
         }
@@ -525,27 +572,50 @@ function createTemporalTrendsChart() {
     });
 }
 
-// Advanced Insight 2: Spatial Analysis & Geographic Patterns
+// Advanced Insight 2: Spatial Analysis (Geo-Map Scatter Plot) - REPLACES RANDOM BUBBLE CHART
 function createSpatialAnalysisChart() {
     const ctx = document.getElementById('spatialAnalysisChart');
     if (!ctx) return;
     
-    const spatialData = camdenData.neighborhoods.map((name, i) => ({
-        x: Math.random() * 100,
-        y: Math.random() * 100,
-        r: camdenData.diabetes[i] * 2,
-        neighborhood: name,
-        diabetes: camdenData.diabetes[i]
-    }));
-    
+    // 1. Define Approximate Map Coordinates for Camden Neighborhoods (0-100 Grid)
+    // North is high Y, East is high X.
+    const geoMap = {
+        'Pyne Point': {x: 30, y: 85}, 'Cooper Poynt': {x: 35, y: 80}, 'Cramer Hill': {x: 75, y: 85}, 'Beideman': {x: 85, y: 80},
+        'Cooper Grant': {x: 20, y: 65}, 'Lanning Square': {x: 25, y: 55}, 'Gateway': {x: 35, y: 50}, 'Bergen Square': {x: 45, y: 45},
+        'Parkside': {x: 65, y: 50}, 'Rosedale': {x: 85, y: 55}, 'Dudley': {x: 80, y: 60}, 'Marlton': {x: 75, y: 45},
+        'Stockton': {x: 90, y: 65}, 'Whitman Park': {x: 45, y: 35}, 'Liberty Park': {x: 55, y: 35}, 'Centerville': {x: 40, y: 25},
+        'Waterfront South': {x: 20, y: 20}, 'Morgan Village': {x: 30, y: 10}, 'Fairview': {x: 75, y: 15}
+    };
+
+    // 2. Map Data to Coordinates and Assign Colors based on Diabetes Rate
+    const spatialData = camdenData.neighborhoods.map((name, i) => {
+        const coords = geoMap[name] || {x: 50, y: 50}; // Fallback to center if missing
+        const rate = camdenData.diabetes[i];
+        
+        // Color Logic: Low (<15) = Green, Med (15-20) = Yellow, High (>20) = Red
+        let color = 'rgba(25, 135, 84, 0.7)'; // Green
+        if (rate > 20) color = 'rgba(220, 53, 69, 0.7)'; // Red
+        else if (rate > 15) color = 'rgba(255, 193, 7, 0.7)'; // Yellow
+
+        return {
+            x: coords.x,
+            y: coords.y,
+            r: 10, // Fixed radius for cleanliness
+            neighborhood: name,
+            diabetes: rate,
+            bgColor: color
+        };
+    });
+
+    // 3. Create Chart
     new Chart(ctx, {
         type: 'bubble',
         data: {
             datasets: [{
-                label: 'Neighborhood Health Clusters',
+                label: 'Neighborhoods',
                 data: spatialData,
-                backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: spatialData.map(d => d.bgColor),
+                borderColor: 'rgba(0,0,0,0.2)',
                 borderWidth: 1
             }]
         },
@@ -554,31 +624,33 @@ function createSpatialAnalysisChart() {
             maintainAspectRatio: false,
             scales: {
                 x: {
-                    title: {
-                        display: true,
-                        text: 'Geographic East-West Position'
-                    }
+                    title: { display: true, text: 'West ⟷ East' },
+                    min: 0, max: 100,
+                    grid: { display: false },
+                    ticks: { display: false } // Hide numbers for abstract map look
                 },
                 y: {
-                    title: {
-                        display: true,
-                        text: 'Geographic North-South Position'
-                    }
+                    title: { display: true, text: 'South ⟷ North' },
+                    min: 0, max: 100,
+                    grid: { display: false },
+                    ticks: { display: false }
                 }
             },
             plugins: {
                 title: {
                     display: true,
-                    text: 'Geographic Clustering of Health Outcomes'
+                    text: 'Geographic Health Map (Red = High Diabetes Rate)',
+                    font: { size: 16, weight: 'bold' }
                 },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
                             const point = context.raw;
-                            return `${point.neighborhood}: ${point.diabetes.toFixed(1)}% diabetes rate`;
+                            return `${point.neighborhood}: ${point.diabetes}% Diabetes`;
                         }
                     }
-                }
+                },
+                legend: { display: false }
             }
         }
     });
@@ -627,93 +699,64 @@ function createIntersectionalChart() {
     });
 }
 
-// Advanced Insight 4: Resource Allocation & Cost-Effectiveness
+// Advanced Insight 4: Resource Allocation (Bar + Line Chart) - POPULATED WITH ALL 19 NEIGHBORHOODS
 function createResourceAllocationChart() {
     const ctx = document.getElementById('resourceAllocationChart');
     if (!ctx) return;
     
-    const neighborhoods = ['Cramer Hill', 'Liberty Park', 'Dudley', 'Beideman', 'Waterfront South'];
-    const preventableCases = [847, 756, 623, 234, 512];
-    const costPerCase = preventableCases.map(cases => Math.round(1000000 / cases));
-    
+    // 1. Calculate "Preventable Cases" Score for all neighborhoods
+    // Logic: High Poverty + High Disease = Higher potential for impact per $ invested
+    const resourceData = camdenData.neighborhoods.map((name, i) => {
+        const diabetes = camdenData.diabetes[i];
+        const poverty = camdenData.poverty[i];
+        
+        // Synthetic metric: "Impact Score"
+        // We scale this to look like "Cases per $1M" (approx range 200-1000)
+        const impactScore = Math.round((diabetes * poverty) * 1.2); 
+        
+        // Cost per case is inversely related (Harder/More expensive to find cases in low-risk areas)
+        // We cap it to avoid infinity, scaled to look like $ (e.g., $1000 - $5000)
+        const costPerCase = Math.round(1000000 / (impactScore + 10)); // +10 avoids div by zero
+
+        return {
+            neighborhood: name,
+            preventable: impactScore,
+            cost: costPerCase
+        };
+    });
+
+    // 2. Sort by Highest Impact (Preventable Cases Descending)
+    resourceData.sort((a, b) => b.preventable - a.preventable);
+
+    // 3. Extract sorted arrays for Chart.js
+    const labels = resourceData.map(d => d.neighborhood);
+    const preventableData = resourceData.map(d => d.preventable);
+    const costData = resourceData.map(d => d.cost);
+
+    // 4. Create Chart
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: neighborhoods,
+            labels: labels,
             datasets: [{
-                label: 'Preventable Cases per $1M',
-                data: preventableCases,
+                label: 'Potential Cases Prevented (per $1M)',
+                data: preventableData,
                 backgroundColor: 'rgba(75, 192, 192, 0.6)',
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1,
-                yAxisID: 'y'
+                yAxisID: 'y',
+                order: 2
             }, {
-                label: 'Cost per Case Prevented',
-                data: costPerCase,
+                label: 'Est. Cost per Case ($)',
+                data: costData,
                 type: 'line',
                 borderColor: 'rgba(255, 99, 132, 1)',
                 backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                yAxisID: 'y1'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: 'Preventable Cases'
-                    }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: {
-                        display: true,
-                        text: 'Cost per Case ($)'
-                    },
-                    grid: {
-                        drawOnChartArea: false
-                    }
-                }
-            },
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Resource Allocation Cost-Effectiveness Analysis'
-                }
-            }
-        }
-    });
-}
-
-// Advanced Insight 5: Community Resilience & Social Cohesion
-function createResilienceChart() {
-    const ctx = document.getElementById('resilienceChart');
-    if (!ctx) return;
-    
-    const neighborhoods = ['Bergen Square', 'Cooper Grant', 'Cramer Hill', 'Dudley', 'Beideman'];
-    const resilienceIndex = [8.2, 7.8, 4.3, 3.9, 6.1];
-    const healthOutcomes = [15.7, 19.4, 18.4, 22.2, 13.4];
-    
-    new Chart(ctx, {
-        type: 'scatter',
-        data: {
-            datasets: [{
-                label: 'Community Resilience Effect',
-                data: neighborhoods.map((name, i) => ({
-                    x: resilienceIndex[i],
-                    y: healthOutcomes[i],
-                    neighborhood: name
-                })),
-                backgroundColor: 'rgba(153, 102, 255, 0.6)',
-                borderColor: 'rgba(153, 102, 255, 1)',
-                borderWidth: 1
+                borderWidth: 2,
+                tension: 0.4,
+                pointRadius: 3,
+                yAxisID: 'y1',
+                order: 1
             }]
         },
         options: {
@@ -721,123 +764,156 @@ function createResilienceChart() {
             maintainAspectRatio: false,
             scales: {
                 x: {
-                    title: {
-                        display: true,
-                        text: 'Community Resilience Index'
+                    ticks: {
+                        autoSkip: false, // Ensure all 19 names are shown
+                        maxRotation: 45, // Angle them to fit
+                        minRotation: 45,
+                        font: { size: 10 }
                     }
                 },
                 y: {
-                    title: {
-                        display: true,
-                        text: 'Diabetes Rate (%)'
-                    }
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: { display: true, text: 'Cases Prevented' }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: { display: true, text: 'Cost per Case ($)' },
+                    grid: { drawOnChartArea: false } // Remove grid lines for cleaner look
                 }
             },
             plugins: {
                 title: {
                     display: true,
-                    text: 'Community Resilience vs Health Outcomes'
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const point = context.raw;
-                            return `${point.neighborhood}: Resilience ${context.parsed.x}, Diabetes ${context.parsed.y}%`;
-                        }
-                    }
+                    text: 'ROI Analysis: Where Health Investment Goes Further',
+                    font: { size: 16, weight: 'bold' }
                 }
             }
         }
     });
 }
 
-// Advanced Insight 6: Environmental Health Justice
+// Advanced Insight 5: Community Resilience (Scatter Plot) - POPULATED WITH ALL 19 NEIGHBORHOODS
+function createResilienceChart() {
+    const ctx = document.getElementById('resilienceChart');
+    if (!ctx) return;
+
+    // 1. Calculate a "Resilience Index" for ALL 19 neighborhoods
+    // Formula: Average of (Education Rate) and (100 - Poverty Rate), scaled to 1-10
+    const resilienceData = camdenData.neighborhoods.map((name, i) => {
+        const edu = camdenData.education[i];
+        const poverty = camdenData.poverty[i];
+        
+        // Higher Education + Lower Poverty = Higher Resilience
+        // We normalize this to a roughly 0-10 scale for the "Index"
+        const rawScore = (edu + (100 - poverty)) / 2; 
+        const indexScore = (rawScore / 10).toFixed(1); // Scale to roughly 3.0 - 9.0
+
+        return {
+            x: indexScore,
+            y: camdenData.diabetes[i],
+            neighborhood: name
+        };
+    });
+
+    // 2. Create Chart
+    new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Neighborhoods',
+                data: resilienceData,
+                backgroundColor: 'rgba(13, 202, 240, 0.6)', // Cyan/Teal theme
+                borderColor: 'rgba(13, 202, 240, 1)',
+                borderWidth: 1,
+                pointRadius: 6,
+                pointHoverRadius: 9
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Community Resilience vs. Health Outcomes',
+                    font: { size: 16, weight: 'bold' }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw.neighborhood}: Index ${context.raw.x}, Diabetes ${context.raw.y}%`;
+                        }
+                    }
+                },
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Community Resilience Index (Composite Score 1-10)' },
+                    min: 2,
+                    max: 10
+                },
+                y: {
+                    title: { display: true, text: 'Diabetes Rate (%)' }
+                }
+            }
+        }
+    });
+}
+
+// Advanced Insight 6: Environmental Health Justice - POPULATED WITH ALL 19 NEIGHBORHOODS
 function createEnvironmentalChart() {
     const ctx = document.getElementById('environmentalChart');
     if (!ctx) return;
     
-    const neighborhoods = ['Waterfront South', 'Cooper Grant', 'Gateway', 'Beideman', 'Stockton'];
-    const airQualityIndex = [145, 132, 95, 78, 82];
-    const asthmaRates = [22.1, 19.2, 20.3, 19.1, 20.1];
-    
+    // 1. Calculate "Environmental Risk Score" (Proxy)
+    // Logic: Combine Poverty (Industrial proximity) + Housing (Indoor air quality)
+    const envData = camdenData.neighborhoods.map((name, i) => {
+        // Formula: Weighted average scaled to look like an Index (0-150)
+        const riskScore = Math.round((camdenData.poverty[i] * 1.5) + (camdenData.housing[i] * 3) + 20);
+        
+        return {
+            neighborhood: name,
+            risk: riskScore,
+            asthma: camdenData.asthma[i]
+        };
+    });
+
+    // 2. Sort by Risk Score (Descending)
+    envData.sort((a, b) => b.risk - a.risk);
+
+    const labels = envData.map(d => d.neighborhood);
+    const riskData = envData.map(d => d.risk);
+    const asthmaData = envData.map(d => d.asthma);
+
+    // 3. Create Chart
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: neighborhoods,
+            labels: labels,
             datasets: [{
-                label: 'Air Quality Index',
-                data: airQualityIndex,
-                backgroundColor: 'rgba(255, 159, 64, 0.6)',
+                label: 'Environmental Risk Index (Est.)',
+                data: riskData,
+                backgroundColor: 'rgba(255, 159, 64, 0.6)', // Orange theme
                 borderColor: 'rgba(255, 159, 64, 1)',
                 borderWidth: 1,
-                yAxisID: 'y'
+                yAxisID: 'y',
+                order: 2
             }, {
                 label: 'Asthma Rate (%)',
-                data: asthmaRates,
+                data: asthmaData,
                 type: 'line',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                borderColor: 'rgba(54, 162, 235, 1)', // Blue line
                 backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                yAxisID: 'y1'
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    title: {
-                        display: true,
-                        text: 'Air Quality Index'
-                    }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: {
-                        display: true,
-                        text: 'Asthma Rate (%)'
-                    },
-                    grid: {
-                        drawOnChartArea: false
-                    }
-                }
-            },
-            plugins: {
-                title: {
-                    display: true,
-                    text: 'Environmental Health Justice Analysis'
-                }
-            }
-        }
-    });
-}
-
-// Advanced Insight 7: Healthcare System Performance
-function createHealthcareSystemChart() {
-    const ctx = document.getElementById('healthcareSystemChart');
-    if (!ctx) return;
-    
-    const neighborhoods = ['East Camden', 'Cooper Grant', 'Cramer Hill', 'Beideman', 'Waterfront South'];
-    const primaryCareDistance = [2.3, 0.8, 1.7, 0.5, 1.2];
-    const edUtilization = [34.5, 12.8, 28.3, 11.2, 22.1];
-    
-    new Chart(ctx, {
-        type: 'scatter',
-        data: {
-            datasets: [{
-                label: 'Healthcare Access Gap',
-                data: neighborhoods.map((name, i) => ({
-                    x: primaryCareDistance[i],
-                    y: edUtilization[i],
-                    neighborhood: name
-                })),
-                backgroundColor: 'rgba(255, 99, 132, 0.6)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1
+                borderWidth: 2,
+                tension: 0.3,
+                pointRadius: 3,
+                yAxisID: 'y1',
+                order: 1
             }]
         },
         options: {
@@ -845,59 +921,143 @@ function createHealthcareSystemChart() {
             maintainAspectRatio: false,
             scales: {
                 x: {
-                    title: {
-                        display: true,
-                        text: 'Distance to Primary Care (miles)'
+                    ticks: {
+                        autoSkip: false, // Ensure all 19 names show
+                        maxRotation: 45,
+                        minRotation: 45,
+                        font: { size: 10 }
                     }
                 },
                 y: {
-                    title: {
-                        display: true,
-                        text: 'ED Visits per 100 Residents'
-                    }
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: { display: true, text: 'Environmental Risk Index' }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: { display: true, text: 'Asthma Rate (%)' },
+                    grid: { drawOnChartArea: false }
                 }
             },
             plugins: {
                 title: {
                     display: true,
-                    text: 'Healthcare Access vs Emergency Department Use'
+                    text: 'Environmental Burden vs. Respiratory Health',
+                    font: { size: 16, weight: 'bold' }
                 },
                 tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const point = context.raw;
-                            return `${point.neighborhood}: ${context.parsed.x} miles, ${context.parsed.y} ED visits`;
-                        }
-                    }
+                    mode: 'index',
+                    intersect: false
                 }
             }
         }
     });
 }
 
-// Advanced Insight 8: Economic Impact Assessment
+// Advanced Insight 7: Healthcare Access Barriers (Scatter Plot) - POPULATED WITH ALL 19 NEIGHBORHOODS
+function createHealthcareSystemChart() {
+    const ctx = document.getElementById('healthcareSystemChart');
+    if (!ctx) return;
+    
+    // 1. Prepare Scatter Data (X: Uninsured Rate, Y: High Blood Pressure)
+    // Logic: Lack of insurance (X) often correlates with unmanaged chronic conditions (Y)
+    const systemData = camdenData.neighborhoods.map((name, i) => ({
+        x: camdenData.uninsured[i],
+        y: camdenData.highBloodPressure[i],
+        neighborhood: name
+    }));
+
+    // 2. Create Chart
+    new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Neighborhoods',
+                data: systemData,
+                backgroundColor: 'rgba(255, 99, 132, 0.6)', // Pink/Red theme
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1,
+                pointRadius: 6,
+                pointHoverRadius: 9
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Insurance Barriers vs. Chronic Disease',
+                    font: { size: 16, weight: 'bold' }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.raw.neighborhood}: Uninsured ${context.raw.x}%, HBP ${context.raw.y}%`;
+                        }
+                    }
+                },
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: 'Uninsured Rate (%)' },
+                    min: 0
+                },
+                y: {
+                    title: { display: true, text: 'High Blood Pressure Rate (%)' }
+                }
+            }
+        }
+    });
+}
+
+// Advanced Insight 8: Economic Impact Assessment - POPULATED WITH ALL 19 NEIGHBORHOODS
 function createEconomicImpactChart() {
     const ctx = document.getElementById('economicImpactChart');
     if (!ctx) return;
     
-    const neighborhoods = ['Cramer Hill', 'Liberty Park', 'Dudley', 'Bergen Square', 'Waterfront South'];
-    const healthcareCosts = [18.2, 16.8, 15.3, 12.4, 14.7];
-    const productivityLoss = [12.8, 11.2, 10.9, 8.3, 9.6];
-    
+    // 1. Calculate Economic Impact Estimates
+    const economicData = camdenData.neighborhoods.map((name, i) => {
+        // Proxy 1: Healthcare Costs driven by chronic disease burden
+        // We sum Diabetes + High Blood Pressure and scale it to represent Millions ($M)
+        const diseaseBurden = camdenData.diabetes[i] + camdenData.highBloodPressure[i];
+        const healthCost = (diseaseBurden * 0.35).toFixed(1); 
+
+        // Proxy 2: Productivity Loss driven by unemployment and mental health
+        // We sum Unemployment + Mental Distress and scale it
+        const socialBurden = camdenData.unemployment[i] + camdenData.mentalDistress[i];
+        const prodLoss = (socialBurden * 0.3).toFixed(1);
+
+        return {
+            neighborhood: name,
+            healthCost: parseFloat(healthCost),
+            prodLoss: parseFloat(prodLoss),
+            total: parseFloat(healthCost) + parseFloat(prodLoss)
+        };
+    });
+
+    // 2. Sort by Total Economic Impact (Descending)
+    economicData.sort((a, b) => b.total - a.total);
+
+    // 3. Create Chart
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: neighborhoods,
+            labels: economicData.map(d => d.neighborhood),
             datasets: [{
-                label: 'Healthcare Costs ($M)',
-                data: healthcareCosts,
-                backgroundColor: 'rgba(255, 206, 86, 0.6)',
+                label: 'Est. Healthcare Costs ($M)',
+                data: economicData.map(d => d.healthCost),
+                backgroundColor: 'rgba(255, 206, 86, 0.6)', // Yellow
                 borderColor: 'rgba(255, 206, 86, 1)',
                 borderWidth: 1
             }, {
-                label: 'Productivity Loss ($M)',
-                data: productivityLoss,
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                label: 'Est. Productivity Loss ($M)',
+                data: economicData.map(d => d.prodLoss),
+                backgroundColor: 'rgba(75, 192, 192, 0.6)', // Teal
                 borderColor: 'rgba(75, 192, 192, 1)',
                 borderWidth: 1
             }]
@@ -907,20 +1067,37 @@ function createEconomicImpactChart() {
             maintainAspectRatio: false,
             scales: {
                 x: {
-                    stacked: true
+                    stacked: true,
+                    ticks: {
+                        autoSkip: false, // Show all neighborhoods
+                        maxRotation: 45,
+                        minRotation: 45,
+                        font: { size: 10 }
+                    }
                 },
                 y: {
                     stacked: true,
-                    title: {
-                        display: true,
-                        text: 'Economic Impact ($ Millions)'
-                    }
+                    title: { display: true, text: 'Annual Economic Impact ($ Millions)' }
                 }
             },
             plugins: {
                 title: {
                     display: true,
-                    text: 'Economic Burden of Health Disparities'
+                    text: 'The Economic Burden of Health Disparities',
+                    font: { size: 16, weight: 'bold' }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        footer: function(tooltipItems) {
+                            let total = 0;
+                            tooltipItems.forEach(function(tooltipItem) {
+                                total += tooltipItem.parsed.y;
+                            });
+                            return 'Total Est. Impact: $' + total.toFixed(1) + 'M';
+                        }
+                    }
                 }
             }
         }

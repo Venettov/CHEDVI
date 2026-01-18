@@ -163,64 +163,88 @@ function createIncomeHealthChart() {
     });
 }
 
-// Visualization 2: Food Access vs Obesity (Scatter Plot) - REPLACES BAR CHART
+// --- 2. FOOD ACCESS & HEALTH CHART (Dynamic) ---
 function createFoodObesityChart() {
     const ctx = document.getElementById('foodObesityChart');
     if (!ctx) return;
+
+    // Destroy existing chart if it exists to prevent overlap
+    if (foodObesityChart) {
+        foodObesityChart.destroy();
+    }
+
+    // Get current selection from dropdown
+    const outcomeKey = document.getElementById('foodOutcomeSelector').value;
     
-    // 1. Prepare Scatter Data (X: Food Access, Y: Obesity)
+    // Label Mapping for pretty titles
+    const labels = {
+        'obesity': 'Obesity Rate (%)',
+        'diabetes': 'Diabetes Rate (%)',
+        'highBloodPressure': 'High Blood Pressure (%)',
+        'mentalDistress': 'Mental Distress (%)',
+        'asthma': 'Asthma Rate (%)',
+        'poverty': 'Poverty Rate (%)'
+    };
+
+    // Prepare Data (Scatter Plot: X = Food Access, Y = Selected Outcome)
     const scatterData = camdenData.neighborhoods.map((name, i) => ({
         x: camdenData.foodAccess[i],
-        y: camdenData.obesity[i],
-        neighborhood: name
+        y: camdenData[outcomeKey][i], // Dynamic Y value
+        name: name
     }));
 
-    // 2. Create Chart
     foodObesityChart = new Chart(ctx, {
         type: 'scatter',
         data: {
             datasets: [{
-                label: 'Neighborhoods',
+                label: `Food Access vs. ${labels[outcomeKey]}`,
                 data: scatterData,
-                backgroundColor: 'rgba(25, 135, 84, 0.6)', // Green theme
-                borderColor: 'rgba(25, 135, 84, 1)',
+                backgroundColor: 'rgba(40, 167, 69, 0.6)', // Success Green
+                borderColor: 'rgba(40, 167, 69, 1)',
                 borderWidth: 1,
                 pointRadius: 6,
-                pointHoverRadius: 9
+                pointHoverRadius: 8
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                title: {
-                    display: true,
-                    text: 'Correlation: Food Access & Obesity Rates',
-                    font: { size: 16, weight: 'bold' }
-                },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `${context.raw.neighborhood}: Score ${context.raw.x}, Obesity ${context.raw.y}%`;
+                            return `${context.raw.name}: Food Score ${context.raw.x}, ${labels[outcomeKey]} ${context.raw.y}%`;
                         }
                     }
                 },
-                legend: { display: false }
+                legend: { position: 'bottom' }
             },
             scales: {
                 x: {
-                    // FIXED LABEL: Higher score correlates with lower obesity, implying better access/quality
-                    title: { display: true, text: 'Food Environment Score (Higher = Better Access)' }, 
-                    min: 0
+                    title: { display: true, text: 'Food Access Score (Higher is Better)' },
+                    min: 0,
+                    max: 10
                 },
                 y: {
-                    title: { display: true, text: 'Obesity Rate (%)' },
-                    min: 30
+                    title: { display: true, text: labels[outcomeKey] },
+                    beginAtZero: false
                 }
             }
         }
     });
 }
+
+// --- ADD EVENT LISTENER ---
+// Place this at the bottom of the file, inside the init() function or where other listeners are
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing init code ...
+    
+    // Listener for the new Food Dropdown
+    const foodSelector = document.getElementById('foodOutcomeSelector');
+    if (foodSelector) {
+        foodSelector.addEventListener('change', createFoodObesityChart);
+    }
+});
 
 // Visualization 3: Education vs Health (Scatter Plot) - REPLACES LINE CHART
 function createEducationHealthChart() {
