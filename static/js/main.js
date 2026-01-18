@@ -742,7 +742,7 @@ window.CHEDVI = {
         if (welcomeModalElement) {
             // Check if user has seen this version (v1) of the modal
             // Change 'v1' to 'v2' if you ever want to force it to show again for everyone
-            const hasSeenModal = localStorage.getItem('chedvi_welcome_seen_v1');
+            // const hasSeenModal = localStorage.getItem('chedvi_welcome_seen_v1');
             
             if (!hasSeenModal) {
                 // Show the modal
