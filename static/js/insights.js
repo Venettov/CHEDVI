@@ -100,7 +100,7 @@ function createIncomeHealthChart() {
     const selector = document.getElementById('incomeOutcomeSelector');
     const outcomeKey = selector ? selector.value : 'diabetes';
     
-    // --- A. TEXT UPDATES (Same as before) ---
+    // --- A. TEXT UPDATES (Updated with Poverty) ---
     const explanations = {
         'diabetes': {
             title: 'Income & Diabetes',
@@ -127,10 +127,11 @@ function createIncomeHealthChart() {
             main: 'Lower-income neighborhoods often face higher asthma rates due to environmental housing factors.',
             detail: 'Substandard housing in poorer areas is more likely to have mold, pests, and poor ventilation, which are primary triggers for asthma attacks.'
         },
-        'lifeExpectancy': {
-            title: 'Income & Life Expectancy',
-            main: 'Wealth is health: looking at the data, a $20k difference in median income can equate to several years of additional life expectancy.',
-            detail: 'Cumulative access to better healthcare, safer environments, and lower stress over a lifetime results in significantly longer lifespans for wealthier residents.'
+        // NEW POVERTY EXPLANATION
+        'poverty': {
+            title: 'Income & Poverty Gap',
+            main: 'The data reveals a stark divide: as median income drops, the percentage of residents trapped in poverty skyrockets.',
+            detail: 'In the most distressed neighborhoods, over 50% of families live below the poverty line, creating a cycle where essential health resources become unaffordable luxuries.'
         }
     };
 
@@ -146,17 +147,15 @@ function createIncomeHealthChart() {
     }
 
     // --- B. PREPARE SORTED DATA ---
-    // 1. Combine arrays into objects so we can sort them together
     let combinedData = camdenData.neighborhoods.map((name, i) => ({
         name: name,
         income: camdenData.income[i],
         health: camdenData[outcomeKey] ? camdenData[outcomeKey][i] : 0
     }));
 
-    // 2. Sort by Income (Lowest to Highest)
+    // Sort by Income (Lowest to Highest)
     combinedData.sort((a, b) => a.income - b.income);
 
-    // 3. Separate back into arrays for the chart
     const labels = combinedData.map(d => d.name);
     const incomeData = combinedData.map(d => d.income);
     const healthData = combinedData.map(d => d.health);
@@ -167,7 +166,7 @@ function createIncomeHealthChart() {
         'highBloodPressure': 'High Blood Pressure (%)',
         'mentalDistress': 'Mental Distress (%)',
         'asthma': 'Asthma Rate (%)',
-        'lifeExpectancy': 'Life Expectancy (Years)'
+        'poverty': 'Poverty Rate (%)' // Updated Label
     };
 
     // --- C. DRAW COMBO CHART ---
@@ -177,14 +176,14 @@ function createIncomeHealthChart() {
             labels: labels,
             datasets: [
                 {
-                    label: healthLabels[outcomeKey], // The Line (Health)
+                    label: healthLabels[outcomeKey], // The Line (Health/Poverty)
                     data: healthData,
                     type: 'line',
-                    borderColor: '#dc3545', // Red line for "Health Risk"
+                    borderColor: '#dc3545', 
                     backgroundColor: 'rgba(220, 53, 69, 0.1)',
                     borderWidth: 3,
-                    yAxisID: 'yHealth', // Bind to Right Axis
-                    tension: 0.3, // Curvy line
+                    yAxisID: 'yHealth', 
+                    tension: 0.3, 
                     pointRadius: 4,
                     pointBackgroundColor: '#fff',
                     pointBorderColor: '#dc3545'
@@ -192,10 +191,10 @@ function createIncomeHealthChart() {
                 {
                     label: 'Median Income ($)', // The Bars (Income)
                     data: incomeData,
-                    backgroundColor: 'rgba(54, 162, 235, 0.7)', // Blue bars
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)', 
                     borderColor: 'rgba(54, 162, 235, 1)',
                     borderWidth: 1,
-                    yAxisID: 'yIncome', // Bind to Left Axis
+                    yAxisID: 'yIncome', 
                     borderRadius: 4
                 }
             ]
@@ -224,24 +223,22 @@ function createIncomeHealthChart() {
             },
             scales: {
                 x: {
-                    ticks: {
-                        display: false // Hide neighborhood names if too crowded, or set to true
-                    },
+                    ticks: { display: false },
                     grid: { display: false }
                 },
-                yIncome: { // Left Axis (Income)
+                yIncome: { 
                     type: 'linear',
                     display: true,
                     position: 'left',
                     title: { display: true, text: 'Median Income ($)', color: '#36a2eb' },
                     grid: { display: false }
                 },
-                yHealth: { // Right Axis (Health %)
+                yHealth: { 
                     type: 'linear',
                     display: true,
                     position: 'right',
                     title: { display: true, text: healthLabels[outcomeKey], color: '#dc3545' },
-                    grid: { color: 'rgba(0,0,0,0.05)' } // Light grid lines for health
+                    grid: { color: 'rgba(0,0,0,0.05)' } 
                 }
             }
         }
