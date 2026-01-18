@@ -262,17 +262,56 @@
                             <div class="tab-pane fade" id="education" role="tabpanel">
                                 <div class="row align-items-center">
                                     <div class="col-lg-8">
-                                        <div class="chart-container" style="height: 400px;">
-                                            <canvas id="educationHealthChart"></canvas>
+                                        <div class="card shadow-sm border-0 h-100">
+                                            <div class="card-body p-4">
+                                                
+                                                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                                                    <h5 class="card-title fw-bold text-info mb-0">
+                                                        <i class="fas fa-graduation-cap me-2"></i>Education Correlations
+                                                    </h5>
+                                                    
+                                                    <select class="form-select form-select-sm w-auto shadow-sm border-info bg-light" id="educationOutcomeSelector" style="min-width: 200px;">
+                                                        <option value="diabetes" selected>vs. Diabetes Rate</option>
+                                                        <option value="obesity">vs. Obesity Rate</option>
+                                                        <option value="poverty">vs. Poverty Rate</option>
+                                                        <option value="mentalDistress">vs. Mental Distress</option>
+                                                        <option value="income">vs. Median Income</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="chart-container" style="position: relative; height: 350px;">
+                                                    <canvas id="educationHealthChart"></canvas>
+                                                </div>
+                                                
+                                                <div class="mt-3 text-center">
+                                                    <span class="badge bg-info bg-opacity-10 text-info border border-info px-3 py-2 rounded-pill">
+                                                        <i class="fas fa-user-graduate me-1"></i>
+                                                        High School Graduation Rate (%)
+                                                    </span>
+                                                </div>
+                                                <p class="card-text text-muted small mt-3 text-center">
+                                                    Comparing neighborhood education levels against health and economic outcomes.<br>
+                                                    <em>Higher education rates strongly correlate with better health and higher income.</em>
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-lg-4">
-                                        <div class="alert alert-info bg-light border-0">
-                                            <h4 class="alert-heading text-info mb-3">Education as a Health Shield</h4>
-                                            <p class="lead">This scatter plot illustrates a clear pattern: neighborhoods with higher graduation rates (further right) tend to have lower diabetes rates (lower down).</p>
+                                        <div class="alert alert-info bg-light border-0 h-100">
+                                            <h4 class="alert-heading text-info mb-3" id="edu-text-title">
+                                                Education as a Health Shield
+                                            </h4>
+                                            
+                                            <p class="lead" id="edu-text-main">
+                                                This data illustrates a clear pattern: neighborhoods with higher graduation rates consistently show lower rates of diabetes and other chronic conditions.
+                                            </p>
+                                            
                                             <hr>
+                                            
                                             <h6 class="fw-bold">Why This Matters:</h6>
-                                            <p class="mb-0 small">Education empowers residents to navigate the healthcare system, understand medical advice, and secure better-paying jobs. Improving educational outcomes is a long-term strategy for community health.</p>
+                                            <p class="mb-0 small" id="edu-text-detail">
+                                                Education empowers residents to navigate the healthcare system, understand medical advice, and secure better-paying jobs. Improving educational outcomes is a long-term strategy for community health.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>

@@ -381,49 +381,103 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Visualization 3: Education vs Health (Scatter Plot) - REPLACES LINE CHART
+// --- 3. EDUCATION & HEALTH CHART (Dynamic) ---
 function createEducationHealthChart() {
     const ctx = document.getElementById('educationHealthChart');
     if (!ctx) return;
-    
-    // 1. Prepare Scatter Data (X: Education, Y: Diabetes)
+
+    if (educationHealthChart) {
+        educationHealthChart.destroy();
+    }
+
+    const selector = document.getElementById('educationOutcomeSelector');
+    const outcomeKey = selector ? selector.value : 'diabetes';
+
+    // --- A. EXPLANATION LIBRARY ---
+    const explanations = {
+        'diabetes': {
+            title: 'Education & Diabetes',
+            main: 'There is a strong correlation: neighborhoods with higher high school graduation rates tend to have significantly lower diabetes rates.',
+            detail: 'Education improves "Health Literacy"—the ability to understand medical instructions, nutrition labels, and manage complex conditions like diabetes effectively.'
+        },
+        'obesity': {
+            title: 'Education & Obesity',
+            main: 'Higher education levels are associated with lower obesity rates across Camden neighborhoods.',
+            detail: 'Schools provide critical physical education and nutrition knowledge. Additionally, higher education often leads to jobs with better work-life balance, allowing time for exercise and healthy cooking.'
+        },
+        'poverty': {
+            title: 'The Education-Poverty Cycle',
+            main: 'This is the strongest correlation in our dataset. Low graduation rates are almost perfectly mirrored by high poverty rates.',
+            detail: 'Without a high school diploma, residents are often locked out of the living-wage job market, creating a generational cycle of poverty that is difficult to break.'
+        },
+        'mentalDistress': {
+            title: 'Education & Mental Health',
+            main: 'Neighborhoods with lower educational attainment report higher levels of frequent mental distress.',
+            detail: 'Education provides social capital and problem-solving skills. The stress of economic insecurity combined with limited career options weighs heavily on mental well-being.'
+        },
+        'income': {
+            title: 'Education & Income',
+            main: 'Education is the primary driver of income. As graduation rates rise, median neighborhood income increases sharply.',
+            detail: 'This chart validates the need for investment in Camden\'s schools. Every percentage point increase in graduation rates translates directly into economic growth for the community.'
+        }
+    };
+
+    // --- B. UPDATE TEXT ---
+    const textData = explanations[outcomeKey];
+    const titleEl = document.getElementById('edu-text-title');
+    const mainEl = document.getElementById('edu-text-main');
+    const detailEl = document.getElementById('edu-text-detail');
+
+    if (titleEl && textData) {
+        titleEl.textContent = textData.title;
+        mainEl.textContent = textData.main;
+        detailEl.textContent = textData.detail;
+    }
+
+    // --- C. DRAW CHART ---
+    const labels = {
+        'diabetes': 'Diabetes Rate (%)',
+        'obesity': 'Obesity Rate (%)',
+        'poverty': 'Poverty Rate (%)',
+        'mentalDistress': 'Mental Distress (%)',
+        'income': 'Median Income ($)'
+    };
+
     const scatterData = camdenData.neighborhoods.map((name, i) => ({
         x: camdenData.education[i],
-        y: camdenData.diabetes[i],
-        neighborhood: name
+        y: camdenData[outcomeKey][i], // Dynamic Y
+        name: name
     }));
 
-    // 2. Create Chart
     educationHealthChart = new Chart(ctx, {
         type: 'scatter',
         data: {
             datasets: [{
-                label: 'Neighborhoods',
+                label: `Education vs. ${labels[outcomeKey]}`,
                 data: scatterData,
-                backgroundColor: 'rgba(13, 202, 240, 0.6)', // Cyan/Info theme
+                backgroundColor: 'rgba(13, 202, 240, 0.6)', // Info Cyan
                 borderColor: 'rgba(13, 202, 240, 1)',
                 borderWidth: 1,
                 pointRadius: 6,
-                pointHoverRadius: 9
+                pointHoverRadius: 8
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                title: {
-                    display: true,
-                    text: 'Correlation: Education & Diabetes Rates',
-                    font: { size: 16, weight: 'bold' }
-                },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `${context.raw.neighborhood}: Grad Rate ${context.raw.x}%, Diabetes ${context.raw.y}%`;
+                            let yVal = context.raw.y;
+                            if (outcomeKey === 'income') yVal = '$' + yVal.toLocaleString();
+                            else yVal = yVal + '%';
+                            
+                            return `${context.raw.name}: Grad Rate ${context.raw.x}%, ${yVal}`;
                         }
                     }
                 },
-                legend: { display: false }
+                legend: { position: 'bottom' }
             },
             scales: {
                 x: {
@@ -432,12 +486,29 @@ function createEducationHealthChart() {
                     max: 100
                 },
                 y: {
-                    title: { display: true, text: 'Diabetes Rate (%)' }
+                    title: { display: true, text: labels[outcomeKey] },
+                    // Smart formatting for Income vs Percentages
+                    ticks: {
+                        callback: function(value) {
+                            return outcomeKey === 'income' ? '$' + value.toLocaleString() : value + '%';
+                        }
+                    }
                 }
             }
         }
     });
 }
+
+// --- ADD LISTENER ---
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing init code ...
+    
+    // Check if the selector exists before adding listener
+    const eduSelector = document.getElementById('educationOutcomeSelector');
+    if (eduSelector) {
+        eduSelector.addEventListener('change', createEducationHealthChart);
+    }
+});
 
 // Visualization 4: Housing Quality vs Respiratory Health (Scatter Plot) - REPLACES AREA CHART
 function createHousingHealthChart() {
