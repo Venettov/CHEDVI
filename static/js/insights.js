@@ -88,7 +88,7 @@ function initializeAllVisualizations() {
     }
 }
 
-// --- 1. INCOME & HEALTH CHART (Dynamic with Explanations) ---
+// --- 1. INCOME & HEALTH CHART (Revolutionary Combo Chart) ---
 function createIncomeHealthChart() {
     const ctx = document.getElementById('incomeHealthChart');
     if (!ctx) return;
@@ -97,11 +97,10 @@ function createIncomeHealthChart() {
         incomeHealthChart.destroy();
     }
 
-    // Get selection (Default to diabetes if null)
     const selector = document.getElementById('incomeOutcomeSelector');
     const outcomeKey = selector ? selector.value : 'diabetes';
     
-    // --- A. EXPLANATION LIBRARY ---
+    // --- A. TEXT UPDATES (Same as before) ---
     const explanations = {
         'diabetes': {
             title: 'Income & Diabetes',
@@ -135,7 +134,6 @@ function createIncomeHealthChart() {
         }
     };
 
-    // --- B. UPDATE TEXT ---
     const textData = explanations[outcomeKey];
     const titleEl = document.getElementById('income-text-title');
     const mainEl = document.getElementById('income-text-main');
@@ -147,65 +145,103 @@ function createIncomeHealthChart() {
         detailEl.textContent = textData.detail;
     }
 
-    // --- C. DRAW CHART ---
-    // Handle 'lifeExpectancy' which might not be in your dataset yet by falling back to a proxy or calculated value if needed
-    // For now assuming it exists or using a proxy like '100 - diabetes' just to show lines if data is missing.
-    // Ideally, ensure 'lifeExpectancy' is in your camdenData object.
-    
-    // Safety check for data existence
-    const yData = camdenData[outcomeKey] || camdenData.diabetes; 
+    // --- B. PREPARE SORTED DATA ---
+    // 1. Combine arrays into objects so we can sort them together
+    let combinedData = camdenData.neighborhoods.map((name, i) => ({
+        name: name,
+        income: camdenData.income[i],
+        health: camdenData[outcomeKey] ? camdenData[outcomeKey][i] : 0
+    }));
 
-    const labels = {
+    // 2. Sort by Income (Lowest to Highest)
+    combinedData.sort((a, b) => a.income - b.income);
+
+    // 3. Separate back into arrays for the chart
+    const labels = combinedData.map(d => d.name);
+    const incomeData = combinedData.map(d => d.income);
+    const healthData = combinedData.map(d => d.health);
+
+    const healthLabels = {
         'diabetes': 'Diabetes Rate (%)',
         'obesity': 'Obesity Rate (%)',
         'highBloodPressure': 'High Blood Pressure (%)',
         'mentalDistress': 'Mental Distress (%)',
         'asthma': 'Asthma Rate (%)',
-        'lifeExpectancy': 'Avg Life Expectancy (Years)'
+        'lifeExpectancy': 'Life Expectancy (Years)'
     };
 
-    const scatterData = camdenData.neighborhoods.map((name, i) => ({
-        x: camdenData.income[i],
-        y: yData[i],
-        name: name
-    }));
-
+    // --- C. DRAW COMBO CHART ---
     incomeHealthChart = new Chart(ctx, {
-        type: 'scatter',
+        type: 'bar',
         data: {
-            datasets: [{
-                label: `Income vs. ${labels[outcomeKey]}`,
-                data: scatterData,
-                backgroundColor: 'rgba(54, 162, 235, 0.6)', // Primary Blue
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1,
-                pointRadius: 6,
-                pointHoverRadius: 8
-            }]
+            labels: labels,
+            datasets: [
+                {
+                    label: healthLabels[outcomeKey], // The Line (Health)
+                    data: healthData,
+                    type: 'line',
+                    borderColor: '#dc3545', // Red line for "Health Risk"
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    borderWidth: 3,
+                    yAxisID: 'yHealth', // Bind to Right Axis
+                    tension: 0.3, // Curvy line
+                    pointRadius: 4,
+                    pointBackgroundColor: '#fff',
+                    pointBorderColor: '#dc3545'
+                },
+                {
+                    label: 'Median Income ($)', // The Bars (Income)
+                    data: incomeData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)', // Blue bars
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    yAxisID: 'yIncome', // Bind to Left Axis
+                    borderRadius: 4
+                }
+            ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
             plugins: {
+                legend: { position: 'bottom' },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `${context.raw.name}: $${context.raw.x.toLocaleString()}, ${labels[outcomeKey]} ${context.raw.y}`;
+                            let label = context.dataset.label || '';
+                            if (label) label += ': ';
+                            if (context.dataset.yAxisID === 'yIncome') {
+                                return label + '$' + context.raw.toLocaleString();
+                            }
+                            return label + context.raw + '%';
                         }
                     }
-                },
-                legend: { position: 'bottom' }
+                }
             },
             scales: {
                 x: {
-                    title: { display: true, text: 'Median Household Income ($)' },
                     ticks: {
-                        callback: function(value) { return '$' + value.toLocaleString(); }
-                    }
+                        display: false // Hide neighborhood names if too crowded, or set to true
+                    },
+                    grid: { display: false }
                 },
-                y: {
-                    title: { display: true, text: labels[outcomeKey] },
-                    beginAtZero: false
+                yIncome: { // Left Axis (Income)
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: { display: true, text: 'Median Income ($)', color: '#36a2eb' },
+                    grid: { display: false }
+                },
+                yHealth: { // Right Axis (Health %)
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: { display: true, text: healthLabels[outcomeKey], color: '#dc3545' },
+                    grid: { color: 'rgba(0,0,0,0.05)' } // Light grid lines for health
                 }
             }
         }
