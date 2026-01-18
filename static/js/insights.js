@@ -168,15 +168,60 @@ function createFoodObesityChart() {
     const ctx = document.getElementById('foodObesityChart');
     if (!ctx) return;
 
-    // Destroy existing chart if it exists to prevent overlap
     if (foodObesityChart) {
         foodObesityChart.destroy();
     }
 
-    // Get current selection from dropdown
     const outcomeKey = document.getElementById('foodOutcomeSelector').value;
     
-    // Label Mapping for pretty titles
+    // --- A. THE EXPLANATION LIBRARY ---
+    const explanations = {
+        'obesity': {
+            title: 'Food Access & Obesity',
+            main: 'Neighborhoods with lower food access scores consistently show higher rates of obesity, highlighting the impact of "food deserts."',
+            detail: 'Without easy access to fresh, nutritious food, residents often rely on processed options that are high in calories but low in nutrients, directly contributing to weight gain.'
+        },
+        'diabetes': {
+            title: 'Food Access & Diabetes',
+            main: 'There is a strong link between poor food access and high diabetes prevalence in Camden.',
+            detail: 'Managing diabetes requires a diet rich in fresh vegetables and low in simple sugars. In areas where corner stores replace grocery stores, following this diet becomes nearly impossible.'
+        },
+        'highBloodPressure': {
+            title: 'Food Access & Hypertension',
+            main: 'Limited access to fresh food is correlated with higher rates of high blood pressure across the city.',
+            detail: 'Processed and shelf-stable foods found in food deserts are typically loaded with sodium (salt), which is a primary driver of hypertension and heart strain.'
+        },
+        'mentalDistress': {
+            title: 'Food Access & Mental Health',
+            main: 'Food insecurity is a significant stressor that correlates with higher reports of mental distress.',
+            detail: 'The daily stress of not knowing where your next healthy meal comes from, combined with poor nutrition, can exacerbate anxiety and depression symptoms.'
+        },
+        'asthma': {
+            title: 'Food Access & Asthma',
+            main: 'While less direct, areas with poor food access often overlap with environmental triggers for asthma.',
+            detail: 'This correlation highlights "cumulative burden"—neighborhoods lacking grocery stores often also face higher pollution and poorer housing conditions that trigger asthma.'
+        },
+        'poverty': {
+            title: 'Food Access & Poverty',
+            main: 'Poverty is the root cause of food insecurity. The data shows an almost perfect match between low income and low food access.',
+            detail: 'Grocery chains rarely invest in high-poverty areas, forcing residents to pay higher prices for lower quality food at local convenience stores.'
+        }
+    };
+
+    // --- B. UPDATE THE TEXT ---
+    const textData = explanations[outcomeKey];
+    const titleEl = document.getElementById('food-text-title');
+    const mainEl = document.getElementById('food-text-main');
+    const detailEl = document.getElementById('food-text-detail');
+
+    // Check if elements exist before trying to update them
+    if (titleEl && textData) {
+        titleEl.textContent = textData.title;
+        mainEl.textContent = textData.main;
+        detailEl.textContent = textData.detail;
+    }
+
+    // --- C. DRAW THE CHART ---
     const labels = {
         'obesity': 'Obesity Rate (%)',
         'diabetes': 'Diabetes Rate (%)',
@@ -186,10 +231,9 @@ function createFoodObesityChart() {
         'poverty': 'Poverty Rate (%)'
     };
 
-    // Prepare Data (Scatter Plot: X = Food Access, Y = Selected Outcome)
     const scatterData = camdenData.neighborhoods.map((name, i) => ({
         x: camdenData.foodAccess[i],
-        y: camdenData[outcomeKey][i], // Dynamic Y value
+        y: camdenData[outcomeKey][i],
         name: name
     }));
 
@@ -199,7 +243,7 @@ function createFoodObesityChart() {
             datasets: [{
                 label: `Food Access vs. ${labels[outcomeKey]}`,
                 data: scatterData,
-                backgroundColor: 'rgba(40, 167, 69, 0.6)', // Success Green
+                backgroundColor: 'rgba(40, 167, 69, 0.6)',
                 borderColor: 'rgba(40, 167, 69, 1)',
                 borderWidth: 1,
                 pointRadius: 6,
@@ -213,7 +257,7 @@ function createFoodObesityChart() {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `${context.raw.name}: Food Score ${context.raw.x}, ${labels[outcomeKey]} ${context.raw.y}%`;
+                            return `${context.raw.name}: Score ${context.raw.x}, ${labels[outcomeKey]} ${context.raw.y}%`;
                         }
                     }
                 },
@@ -222,8 +266,7 @@ function createFoodObesityChart() {
             scales: {
                 x: {
                     title: { display: true, text: 'Food Access Score (Higher is Better)' },
-                    min: 0,
-                    max: 10
+                    min: 0, max: 10
                 },
                 y: {
                     title: { display: true, text: labels[outcomeKey] },
