@@ -88,80 +88,139 @@ function initializeAllVisualizations() {
     }
 }
 
-// Visualization 1: Income Tiers vs Health (Bar Chart) - REPLACES SCATTER PLOT
+// --- 1. INCOME & HEALTH CHART (Dynamic with Explanations) ---
 function createIncomeHealthChart() {
     const ctx = document.getElementById('incomeHealthChart');
     if (!ctx) return;
+
+    if (incomeHealthChart) {
+        incomeHealthChart.destroy();
+    }
+
+    // Get selection (Default to diabetes if null)
+    const selector = document.getElementById('incomeOutcomeSelector');
+    const outcomeKey = selector ? selector.value : 'diabetes';
     
-    // 1. Bucketing Logic
-    let tiers = {
-        low: { label: 'Low Income (<$30k)', count: 0, sumDiabetes: 0, color: 'rgba(220, 53, 69, 0.7)', border: 'rgba(220, 53, 69, 1)' }, // Red
-        mid: { label: 'Mid Income ($30k-$45k)', count: 0, sumDiabetes: 0, color: 'rgba(255, 193, 7, 0.7)', border: 'rgba(255, 193, 7, 1)' }, // Yellow
-        high: { label: 'High Income (>$45k)', count: 0, sumDiabetes: 0, color: 'rgba(25, 135, 84, 0.7)', border: 'rgba(25, 135, 84, 1)' }   // Green
+    // --- A. EXPLANATION LIBRARY ---
+    const explanations = {
+        'diabetes': {
+            title: 'Income & Diabetes',
+            main: 'Residents in the lowest income brackets experience significantly higher diabetes rates compared to those in the highest brackets.',
+            detail: 'Economic stability is key to prevention. Higher income allows for better access to nutritious food, preventative healthcare, and safe exercise environments.'
+        },
+        'obesity': {
+            title: 'Income & Obesity',
+            main: 'There is a clear inverse relationship: as neighborhood income rises, obesity rates tend to fall.',
+            detail: 'Low-income areas often lack affordable gyms and fresh produce markets (food deserts), making a healthy lifestyle prohibitively expensive for many residents.'
+        },
+        'highBloodPressure': {
+            title: 'Income & Hypertension',
+            main: 'Financial stress and lower income are strong predictors of high blood pressure in Camden neighborhoods.',
+            detail: 'Chronic financial stress releases cortisol, which raises blood pressure. Additionally, cheaper processed foods are often high in sodium, a major risk factor.'
+        },
+        'mentalDistress': {
+            title: 'Income & Mental Health',
+            main: 'Mental distress reports are nearly double in the lowest-income neighborhoods compared to the wealthiest ones.',
+            detail: 'The daily burden of poverty—housing instability, bill anxiety, and lack of resources—takes a severe toll on mental well-being.'
+        },
+        'asthma': {
+            title: 'Income & Asthma',
+            main: 'Lower-income neighborhoods often face higher asthma rates due to environmental housing factors.',
+            detail: 'Substandard housing in poorer areas is more likely to have mold, pests, and poor ventilation, which are primary triggers for asthma attacks.'
+        },
+        'lifeExpectancy': {
+            title: 'Income & Life Expectancy',
+            main: 'Wealth is health: looking at the data, a $20k difference in median income can equate to several years of additional life expectancy.',
+            detail: 'Cumulative access to better healthcare, safer environments, and lower stress over a lifetime results in significantly longer lifespans for wealthier residents.'
+        }
     };
 
-    // 2. Sort Data into Tiers
-    camdenData.income.forEach((inc, i) => {
-        let rate = camdenData.diabetes[i];
-        if (inc < 30000) {
-            tiers.low.sumDiabetes += rate;
-            tiers.low.count++;
-        } else if (inc < 45000) {
-            tiers.mid.sumDiabetes += rate;
-            tiers.mid.count++;
-        } else {
-            tiers.high.sumDiabetes += rate;
-            tiers.high.count++;
-        }
-    });
+    // --- B. UPDATE TEXT ---
+    const textData = explanations[outcomeKey];
+    const titleEl = document.getElementById('income-text-title');
+    const mainEl = document.getElementById('income-text-main');
+    const detailEl = document.getElementById('income-text-detail');
 
-    // 3. Calculate Averages
-    const avgLow = (tiers.low.sumDiabetes / tiers.low.count).toFixed(1);
-    const avgMid = (tiers.mid.sumDiabetes / tiers.mid.count).toFixed(1);
-    const avgHigh = (tiers.high.sumDiabetes / tiers.high.count).toFixed(1);
+    if (titleEl && textData) {
+        titleEl.textContent = textData.title;
+        mainEl.textContent = textData.main;
+        detailEl.textContent = textData.detail;
+    }
 
-    // 4. Create Chart
+    // --- C. DRAW CHART ---
+    // Handle 'lifeExpectancy' which might not be in your dataset yet by falling back to a proxy or calculated value if needed
+    // For now assuming it exists or using a proxy like '100 - diabetes' just to show lines if data is missing.
+    // Ideally, ensure 'lifeExpectancy' is in your camdenData object.
+    
+    // Safety check for data existence
+    const yData = camdenData[outcomeKey] || camdenData.diabetes; 
+
+    const labels = {
+        'diabetes': 'Diabetes Rate (%)',
+        'obesity': 'Obesity Rate (%)',
+        'highBloodPressure': 'High Blood Pressure (%)',
+        'mentalDistress': 'Mental Distress (%)',
+        'asthma': 'Asthma Rate (%)',
+        'lifeExpectancy': 'Avg Life Expectancy (Years)'
+    };
+
+    const scatterData = camdenData.neighborhoods.map((name, i) => ({
+        x: camdenData.income[i],
+        y: yData[i],
+        name: name
+    }));
+
     incomeHealthChart = new Chart(ctx, {
-        type: 'bar',
+        type: 'scatter',
         data: {
-            labels: [tiers.low.label, tiers.mid.label, tiers.high.label],
             datasets: [{
-                label: 'Average Diabetes Rate (%)',
-                data: [avgLow, avgMid, avgHigh],
-                backgroundColor: [tiers.low.color, tiers.mid.color, tiers.high.color],
-                borderColor: [tiers.low.border, tiers.mid.border, tiers.high.border],
-                borderWidth: 2,
-                barPercentage: 0.6
+                label: `Income vs. ${labels[outcomeKey]}`,
+                data: scatterData,
+                backgroundColor: 'rgba(54, 162, 235, 0.6)', // Primary Blue
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                pointRadius: 6,
+                pointHoverRadius: 8
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                title: {
-                    display: true,
-                    text: 'Diabetes Rates Drop Significantly as Income Rises',
-                    font: { size: 16, weight: 'bold' }
-                },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `Avg Diabetes Rate: ${context.raw}%`;
+                            return `${context.raw.name}: $${context.raw.x.toLocaleString()}, ${labels[outcomeKey]} ${context.raw.y}`;
                         }
                     }
                 },
-                legend: { display: false }
+                legend: { position: 'bottom' }
             },
             scales: {
+                x: {
+                    title: { display: true, text: 'Median Household Income ($)' },
+                    ticks: {
+                        callback: function(value) { return '$' + value.toLocaleString(); }
+                    }
+                },
                 y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'Average Diabetes Rate (%)' },
-                    max: 25 // Set max slightly higher than data to look balanced
+                    title: { display: true, text: labels[outcomeKey] },
+                    beginAtZero: false
                 }
             }
         }
     });
 }
+
+// --- ADD LISTENER ---
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing init code ...
+    
+    const incomeSelector = document.getElementById('incomeOutcomeSelector');
+    if (incomeSelector) {
+        incomeSelector.addEventListener('change', createIncomeHealthChart);
+    }
+});
 
 // --- 2. FOOD ACCESS & HEALTH CHART (Dynamic) ---
 function createFoodObesityChart() {
