@@ -734,26 +734,21 @@ window.CHEDVI = {
     },
 
 
-    // WELCOME MODAL LOGIC
+    // WELCOME MODAL LOGIC (Debug Version - Always Shows)
     initializeWelcomeModal: function() {
+        console.log("Attempting to show Welcome Modal..."); // Debug Log 1
+
         const welcomeModalElement = document.getElementById('welcomeModal');
         
-        // Only run if the modal exists on this page
         if (welcomeModalElement) {
-            // Check if user has seen this version (v1) of the modal
-            // Change 'v1' to 'v2' if you ever want to force it to show again for everyone
-            // const hasSeenModal = localStorage.getItem('chedvi_welcome_seen_v1');
+            console.log("Modal Element FOUND."); // Debug Log 2
             
-            if (!hasSeenModal) {
-                // Show the modal
-                const welcomeModal = new bootstrap.Modal(welcomeModalElement);
-                welcomeModal.show();
-                
-                // When closed, remember that the user has seen it
-                welcomeModalElement.addEventListener('hidden.bs.modal', function () {
-                    localStorage.setItem('chedvi_welcome_seen_v1', 'true');
-                });
-            }
+            // Logic check REMOVED for testing. It will now show every single time.
+            const welcomeModal = new bootstrap.Modal(welcomeModalElement);
+            welcomeModal.show();
+            
+        } else {
+            console.error("Modal Element NOT FOUND. Check index.html"); // Error Log
         }
     },
 
