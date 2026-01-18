@@ -405,20 +405,58 @@
                             <div class="tab-pane fade" id="mental" role="tabpanel">
                                 <div class="row align-items-center">
                                     <div class="col-lg-8">
-                                        <div class="chart-container" style="height: 400px;">
-                                            <canvas id="mentalHealthChart"></canvas>
+                                        <div class="card shadow-sm border-0 h-100">
+                                            <div class="card-body p-4">
+                                                
+                                                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                                                    <h5 class="card-title fw-bold mb-0" style="color: #6f42c1;">
+                                                        <i class="fas fa-brain me-2"></i>Stress Correlations
+                                                    </h5>
+                                                    
+                                                    <select class="form-select form-select-sm w-auto shadow-sm border-0 bg-light" id="socialOutcomeSelector" style="min-width: 200px; color: #6f42c1; font-weight: bold;">
+                                                        <option value="mentalDistress" selected>vs. Mental Distress</option>
+                                                        <option value="highBloodPressure">vs. High Blood Pressure</option>
+                                                        <option value="obesity">vs. Obesity Rate</option>
+                                                        <option value="diabetes">vs. Diabetes Rate</option>
+                                                        <option value="asthma">vs. Asthma Rate</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="chart-container" style="position: relative; height: 350px;">
+                                                    <canvas id="mentalHealthChart"></canvas>
+                                                </div>
+                                                
+                                                <div class="mt-3 text-center d-flex justify-content-center align-items-center gap-3">
+                                                    <span class="badge bg-opacity-10 text-dark px-3 py-2 rounded-pill" style="background-color: rgba(111, 66, 193, 0.1); border: 1px solid #6f42c1;">
+                                                        <i class="fas fa-percentage me-1"></i>
+                                                        Poverty Rate
+                                                    </span>
+                                                    <span class="small text-muted">
+                                                        <i class="fas fa-circle opacity-50" style="font-size: 0.8em; color: #6f42c1;"></i> Bubble Size = Unemployment Rate
+                                                    </span>
+                                                </div>
+                                                <p class="card-text text-muted small mt-3 text-center">
+                                                    Comparing poverty levels against stress-related health outcomes.<br>
+                                                    <em>Larger bubbles represent higher unemployment, showing total economic stress.</em>
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                     <div class="col-lg-4">
-                                        <div class="alert bg-light border-0" style="background-color: #f3f0fa !important;">
-                                            <h4 class="alert-heading mb-3" style="color: #6f42c1;">Financial Stress & Mental Health</h4>
-                                            <p class="lead">
-                                                <strong>A Consistent Pattern:</strong> While exceptions exist, neighborhoods with higher poverty rates (moving right) generally report higher levels of mental distress.
+                                        <div class="alert bg-light border-0 h-100" style="background-color: #f3f0fa !important;">
+                                            <h4 class="alert-heading mb-3" id="social-text-title" style="color: #6f42c1;">
+                                                Poverty & Mental Health
+                                            </h4>
+                                            
+                                            <p class="lead" id="social-text-main">
+                                                A Consistent Pattern: Neighborhoods with higher poverty rates (moving right) and higher unemployment (larger bubbles) report significantly higher levels of mental distress.
                                             </p>
+                                            
                                             <hr>
+                                            
                                             <h6 class="fw-bold">Why This Matters:</h6>
-                                            <p class="mb-0 small">
-                                                Mental health is often environmental. The data suggests that financial stress and lack of resources create a "tax" on mental wellbeing, making economic support a vital part of mental healthcare.
+                                            <p class="mb-0 small" id="social-text-detail">
+                                                Mental health is often environmental. The data suggests that financial stress and lack of resources create a "cognitive tax" on mental wellbeing, making economic support a vital part of mental healthcare.
                                             </p>
                                         </div>
                                     </div>

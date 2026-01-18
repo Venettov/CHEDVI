@@ -693,45 +693,98 @@ function createHealthcareAccessChart() {
     });
 }
 
-// Visualization 6: Poverty vs Mental Distress (Scatter Plot) - REPLACES RADAR CHART
+// --- 6. SOCIAL STRESSORS CHART (Bubble Chart: Poverty vs Health, Size=Unemployment) ---
 function createMentalHealthChart() {
     const ctx = document.getElementById('mentalHealthChart');
     if (!ctx) return;
-    
-    // 1. Prepare Scatter Data (X: Poverty, Y: Mental Distress)
-    const scatterData = camdenData.neighborhoods.map((name, i) => ({
-        x: camdenData.poverty[i],
-        y: camdenData.mentalDistress[i],
-        neighborhood: name
+
+    if (mentalHealthChart) {
+        mentalHealthChart.destroy();
+    }
+
+    const selector = document.getElementById('socialOutcomeSelector');
+    const outcomeKey = selector ? selector.value : 'mentalDistress';
+
+    // --- A. EXPLANATION LIBRARY ---
+    const explanations = {
+        'mentalDistress': {
+            title: 'Poverty & Mental Health',
+            main: 'A Consistent Pattern: Neighborhoods with higher poverty rates (right) and higher unemployment (large bubbles) report significantly higher levels of mental distress.',
+            detail: 'Financial instability acts as a chronic stressor. The "cognitive load" of worrying about bills, housing, and food directly contributes to anxiety and depression.'
+        },
+        'highBloodPressure': {
+            title: 'Stress & The Heart',
+            main: 'Chronic financial stress is physically toxic. High poverty rates strongly correlate with high blood pressure across Camden.',
+            detail: 'This is known as "Allostatic Load"—the wear and tear on the body caused by chronic stress. Living in poverty keeps the body in a constant "fight or flight" mode, damaging the cardiovascular system.'
+        },
+        'obesity': {
+            title: 'Stress & Nutrition',
+            main: 'High-poverty, high-unemployment areas show higher obesity rates, highlighting the link between stress and diet.',
+            detail: 'Stress triggers cortisol release, which increases appetite for high-calorie comfort foods. Combined with "food deserts" in poor areas, this creates a cycle of stress-induced weight gain.'
+        },
+        'diabetes': {
+            title: 'Stress & Diabetes',
+            main: 'Managing diabetes requires stability. The data shows that in high-stress (high poverty/unemployment) areas, diabetes rates climb.',
+            detail: 'The daily crisis management required by poverty leaves little mental bandwidth for the complex self-care (diet, monitoring, medication) that diabetes requires.'
+        },
+        'asthma': {
+            title: 'Stress & Inflammation',
+            main: 'While environmental, asthma is also stress-sensitive. High poverty areas show a clear overlap with higher asthma rates.',
+            detail: 'Psychological stress increases inflammation in the body, which can trigger or worsen asthma attacks, making the condition harder to control in distressed neighborhoods.'
+        }
+    };
+
+    // --- B. UPDATE TEXT ---
+    const textData = explanations[outcomeKey];
+    const titleEl = document.getElementById('social-text-title');
+    const mainEl = document.getElementById('social-text-main');
+    const detailEl = document.getElementById('social-text-detail');
+
+    if (titleEl && textData) {
+        titleEl.textContent = textData.title;
+        mainEl.textContent = textData.main;
+        detailEl.textContent = textData.detail;
+    }
+
+    // --- C. PREPARE BUBBLE DATA ---
+    const bubbleData = camdenData.neighborhoods.map((name, i) => ({
+        x: camdenData.poverty[i], // X = Poverty Rate (The Stressor)
+        y: camdenData[outcomeKey][i], // Y = Health Outcome
+        r: camdenData.unemployment[i] / 3, // Radius = Unemployment Rate (Scaled for visibility)
+        name: name,
+        unemployment: camdenData.unemployment[i]
     }));
 
-    // 2. Create Chart
+    const labels = {
+        'mentalDistress': 'Mental Distress (%)',
+        'highBloodPressure': 'High Blood Pressure (%)',
+        'obesity': 'Obesity Rate (%)',
+        'diabetes': 'Diabetes Rate (%)',
+        'asthma': 'Asthma Rate (%)'
+    };
+
+    // --- D. DRAW CHART ---
     mentalHealthChart = new Chart(ctx, {
-        type: 'scatter',
+        type: 'bubble',
         data: {
             datasets: [{
-                label: 'Neighborhoods',
-                data: scatterData,
-                backgroundColor: 'rgba(111, 66, 193, 0.6)', // Purple theme
-                borderColor: 'rgba(111, 66, 193, 1)',
+                label: `Poverty vs ${labels[outcomeKey]}`,
+                data: bubbleData,
+                backgroundColor: 'rgba(111, 66, 193, 0.6)', // Purple (Transparent)
+                borderColor: 'rgba(111, 66, 193, 1)',     // Purple (Solid)
                 borderWidth: 1,
-                pointRadius: 6,
-                pointHoverRadius: 9
+                hoverBackgroundColor: 'rgba(111, 66, 193, 0.9)'
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                title: {
-                    display: true,
-                    text: 'Correlation: Poverty & Mental Distress',
-                    font: { size: 16, weight: 'bold' }
-                },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `${context.raw.neighborhood}: Poverty ${context.raw.x}%, Distress ${context.raw.y}%`;
+                            const raw = context.raw;
+                            return `${raw.name}: Poverty ${raw.x}%, ${labels[outcomeKey]} ${raw.y}%, Unempl. ${raw.unemployment}%`;
                         }
                     }
                 },
@@ -743,12 +796,24 @@ function createMentalHealthChart() {
                     min: 0
                 },
                 y: {
-                    title: { display: true, text: 'Mental Distress Rate (%)' }
+                    title: { display: true, text: labels[outcomeKey] },
+                    beginAtZero: false
                 }
             }
         }
     });
 }
+
+// --- ADD LISTENER ---
+document.addEventListener('DOMContentLoaded', function() {
+    // ... existing init code ...
+    
+    // Social Stressors Listener
+    const socialSelector = document.getElementById('socialOutcomeSelector');
+    if (socialSelector) {
+        socialSelector.addEventListener('change', createMentalHealthChart);
+    }
+});
 
 // Initialize stat cards with animation
 function initializeStatCards() {
