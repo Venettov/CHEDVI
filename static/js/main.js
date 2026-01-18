@@ -759,18 +759,17 @@ window.CHEDVI = {
         const modal = bootstrap.Modal.getInstance(modalEl);
         if (modal) modal.hide();
 
-        // 2. Fire Confetti Cannon (The "Revolutionary" Part)
-        const duration = 2000; // 2 seconds
+        // 2. Fire Confetti Cannon
+        const duration = 2000;
         const end = Date.now() + duration;
 
         (function frame() {
-            // Launch confetti from left and right edges
             confetti({
                 particleCount: 5,
                 angle: 60,
                 spread: 55,
                 origin: { x: 0 },
-                colors: ['#2c3e50', '#27ae60', '#f39c12'] // Theme colors
+                colors: ['#2c3e50', '#27ae60', '#f39c12']
             });
             confetti({
                 particleCount: 5,
@@ -785,10 +784,13 @@ window.CHEDVI = {
             }
         }());
 
-        // 3. Redirect to Dashboard after 1 second (while confetti is falling)
+        // 3. CHANGED: Smooth Scroll to "Transforming Data" section
         setTimeout(() => {
-            window.location.href = "/dashboard";
-        }, 1200);
+            const targetSection = document.getElementById('transforming-data');
+            if (targetSection) {
+                targetSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }, 1000); // Wait 1s for confetti, then scroll
     },
 
     
