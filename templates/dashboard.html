@@ -612,6 +612,7 @@
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
 <script>
+    const dbPayload = {{ db_data | tojson | safe if db_data else 'null' }};
     const dashboardData = {{ dashboard_data | tojson | safe }};
 
     function exportData(type) {
