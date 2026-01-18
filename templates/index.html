@@ -317,4 +317,49 @@
         </div>
     </div>
 </section>
+
+<div class="modal fade" id="welcomeModal" tabindex="-1" aria-labelledby="welcomeModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold" id="welcomeModalLabel">
+                    <i class="fas fa-hand-holding-heart me-2"></i>Welcome to CHEDVI!
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="lead mb-3">Welcome to the Camden Health Equity Data Visualization Initiative.</p>
+                <p class="text-muted mb-4">This platform empowers you to explore real health disparities across Camden's neighborhoods using verified census and CDC data.</p>
+                
+                <div class="row g-3 mb-4">
+                    <div class="col-4 text-center">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-map-marked-alt fa-2x text-primary mb-2"></i>
+                            <div class="small fw-bold">Maps</div>
+                        </div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-chart-pie fa-2x text-success mb-2"></i>
+                            <div class="small fw-bold">Data</div>
+                        </div>
+                    </div>
+                    <div class="col-4 text-center">
+                        <div class="p-3 bg-light rounded">
+                            <i class="fas fa-lightbulb fa-2x text-warning mb-2"></i>
+                            <div class="small fw-bold">Insights</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <button type="button" class="btn btn-primary btn-lg" data-bs-dismiss="modal">
+                        Start Exploring <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

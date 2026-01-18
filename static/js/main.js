@@ -28,6 +28,7 @@ window.CHEDVI = {
         this.initializeBreadcrumbs();
 
         this.initializeGuidedTour();
+        this.initializeWelcomeModal();
         this.loadUserPreferences();
         this.addLoadingStates();
     },
@@ -731,6 +732,31 @@ window.CHEDVI = {
             this.offerGuidedTour();
         }
     },
+
+
+    // WELCOME MODAL LOGIC
+    initializeWelcomeModal: function() {
+        const welcomeModalElement = document.getElementById('welcomeModal');
+        
+        // Only run if the modal exists on this page
+        if (welcomeModalElement) {
+            // Check if user has seen this version (v1) of the modal
+            // Change 'v1' to 'v2' if you ever want to force it to show again for everyone
+            const hasSeenModal = localStorage.getItem('chedvi_welcome_seen_v1');
+            
+            if (!hasSeenModal) {
+                // Show the modal
+                const welcomeModal = new bootstrap.Modal(welcomeModalElement);
+                welcomeModal.show();
+                
+                // When closed, remember that the user has seen it
+                welcomeModalElement.addEventListener('hidden.bs.modal', function () {
+                    localStorage.setItem('chedvi_welcome_seen_v1', 'true');
+                });
+            }
+        }
+    },
+
     
     // Offer guided tour
     offerGuidedTour: function() {
