@@ -27,7 +27,7 @@ window.CHEDVI = {
         this.initializeComparisonTools();
         this.initializeBreadcrumbs();
 
-        this.initializeGuidedTour();
+        //this.initializeGuidedTour();
         this.initializeWelcomeModal();
         this.loadUserPreferences();
         this.addLoadingStates();
@@ -750,6 +750,45 @@ window.CHEDVI = {
         } else {
             console.error("Modal Element NOT FOUND. Check index.html"); // Error Log
         }
+    },
+
+    // REVOLUTIONARY LAUNCH SEQUENCE
+    launchExperience: function() {
+        // 1. Close the modal
+        const modalEl = document.getElementById('welcomeModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+
+        // 2. Fire Confetti Cannon (The "Revolutionary" Part)
+        const duration = 2000; // 2 seconds
+        const end = Date.now() + duration;
+
+        (function frame() {
+            // Launch confetti from left and right edges
+            confetti({
+                particleCount: 5,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#2c3e50', '#27ae60', '#f39c12'] // Theme colors
+            });
+            confetti({
+                particleCount: 5,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#2c3e50', '#27ae60', '#f39c12']
+            });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+
+        // 3. Redirect to Dashboard after 1 second (while confetti is falling)
+        setTimeout(() => {
+            window.location.href = "/dashboard";
+        }, 1200);
     },
 
     
