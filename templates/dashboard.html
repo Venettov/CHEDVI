@@ -257,16 +257,6 @@
                         <div class="card-header bg-white p-0">
                             <ul class="nav nav-tabs nav-fill card-header-tabs m-0" id="analyticsTabs" role="tablist">
                                 <li class="nav-item">
-                                    <button class="nav-link active py-3 fw-bold" id="comparison-tab" data-bs-toggle="tab" data-bs-target="#comparison" type="button">
-                                        <i class="fas fa-chart-bar text-primary me-2"></i>Neighborhood Comparison
-                                    </button>
-                                </li>
-                                <li class="nav-item">
-                                    <button class="nav-link py-3 fw-bold" id="trend-tab" data-bs-toggle="tab" data-bs-target="#trend" type="button">
-                                        <i class="fas fa-chart-line text-success me-2"></i>Trend Analysis
-                                    </button>
-                                </li>
-                                <li class="nav-item">
                                     <button class="nav-link py-3 fw-bold" id="demographics-tab" data-bs-toggle="tab" data-bs-target="#demographics" type="button">
                                         <i class="fas fa-users text-info me-2"></i>Demographics Overview
                                     </button>
@@ -281,42 +271,6 @@
 
                         <div class="card-body p-4">
                             <div class="tab-content" id="analyticsTabsContent">
-                                
-                                <div class="tab-pane fade show active" id="comparison" role="tabpanel">
-                                    <div class="row align-items-center">
-                                        <div class="col-lg-9">
-                                            <div class="chart-container" style="height: 400px; width: 100%;">
-                                                <canvas id="neighborhoodChart"></canvas>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-3">
-                                            <div class="p-3 bg-light rounded border-start border-4 border-primary">
-                                                <h5 class="text-primary fw-bold">Comparative View</h5>
-                                                <p class="text-muted small">Compare health metrics across different neighborhoods to identify disparities.</p>
-                                                <hr>
-                                                <small class="text-muted"><i class="fas fa-info-circle me-1"></i> Bars indicate prevalence rates.</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="tab-pane fade" id="trend" role="tabpanel">
-                                    <div class="row align-items-center">
-                                        <div class="col-lg-9">
-                                            <div class="chart-container" style="height: 400px; width: 100%;">
-                                                <canvas id="trendChart"></canvas>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-3">
-                                            <div class="p-3 bg-light rounded border-start border-4 border-success">
-                                                <h5 class="text-success fw-bold">5-Year Trends</h5>
-                                                <p class="text-muted small">Track changes in health outcomes over the last five years.</p>
-                                                <hr>
-                                                <small class="text-muted"><i class="fas fa-arrow-up me-1"></i> Upward trends indicate increasing prevalence.</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
 
                                 <div class="tab-pane fade" id="demographics" role="tabpanel">
                                     <div class="row align-items-center">
