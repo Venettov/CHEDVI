@@ -1278,37 +1278,89 @@ window.CHEDVI = {
     initializeGlobalSearch: function() {
         const searchInput = document.getElementById('globalSearch');
         if (searchInput && this.config.searchEnabled) {
-            // Existing input listener...
+            
+            // A. FOCUS LISTENER (New): Show suggestions when clicked
+            searchInput.addEventListener('focus', () => {
+                // Only show suggestions if the bar is empty
+                if (searchInput.value.trim() === '') {
+                    this.showDefaultSuggestions();
+                }
+            });
+
+            // B. INPUT LISTENER (Updated): Handle typing and clearing
             searchInput.addEventListener('input', (e) => {
-                // Add a small delay (debounce) so it doesn't flash while typing
                 clearTimeout(this.searchTimeout);
+                const query = e.target.value;
+                
                 this.searchTimeout = setTimeout(() => {
-                    this.performGlobalSearch(e.target.value);
+                    if (query.trim() === '') {
+                        // If user deletes text, show suggestions again
+                        this.showDefaultSuggestions(); 
+                    } else {
+                        // Otherwise, perform normal search
+                        this.performGlobalSearch(query);
+                    }
                 }, 300);
             });
 
-            // Existing form listener...
-            const searchForm = searchInput.closest('form');
-            if (searchForm) {
-                searchForm.addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.performGlobalSearch(searchInput.value);
-                });
-            }
-
-            // --- NEW CODE: CLOSE ON CLICK OUTSIDE ---
+            // C. CLICK OUTSIDE (Existing): Closes the menu
             document.addEventListener('click', (e) => {
                 const searchResults = document.getElementById('searchResults');
-                // If the click was NOT inside the search input OR the results dropdown
                 if (searchResults && !searchInput.contains(e.target) && !searchResults.contains(e.target)) {
                     this.hideSearchResults();
                 }
             });
+            
+            // D. KEYBOARD NAV (Existing): Keep your Arrow Key logic here...
+            // (Paste the arrow key logic we added previously here)
+        }
+    },
+
+    // Show default "Quick Links" when search is empty
+    showDefaultSuggestions: function() {
+        const suggestions = [
+            { 
+                type: 'page', 
+                title: 'Interactive Dashboard', 
+                description: 'Explore maps & health data', 
+                url: '/dashboard' 
+            },
+            { 
+                type: 'neighborhood', 
+                title: 'Neighborhood Rankings', 
+                description: 'See highest & lowest risk areas', 
+                url: '/rankings' 
+            },
+            { 
+                type: 'metric', 
+                title: 'Community Resources', 
+                description: 'Find clinics, food & housing', 
+                url: '/resources' 
+            },
+            { 
+                type: 'page', 
+                title: 'Policy Recommendations', 
+                description: 'Data-driven solutions', 
+                url: '/policy' 
+            }
+        ];
+        
+        // We reuse the existing display function!
+        this.displaySearchResults(suggestions);
+        
+        // Optional: Add a "Suggestions" header styling
+        const resultsContainer = document.getElementById('searchResults');
+        if (resultsContainer) {
+            const header = document.createElement('div');
+            header.className = 'dropdown-header text-uppercase small fw-bold text-muted mt-1';
+            header.innerText = 'Suggested';
+            resultsContainer.insertBefore(header, resultsContainer.firstChild);
         }
     },
     
     // Perform global search
     performGlobalSearch: function(query) {
+        // If query is too short, just hide (unless it's empty, handled above)
         if (!query || query.length < 2) {
             this.hideSearchResults();
             return;
