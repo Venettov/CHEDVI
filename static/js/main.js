@@ -1323,12 +1323,12 @@ window.CHEDVI = {
         const results = [];
         query = query.toLowerCase();
         
-        // Search neighborhoods
+        // 1. NEIGHBORHOODS (Complete List)
         const neighborhoods = [
             'Gateway', 'Bergen Square', 'Cooper Poynt', 'Pyne Point', 'Fairview',
             'Centerville', 'Parkside', 'Cramer Hill', 'North Camden', 'Waterfront',
             'Whitman Park', 'Stockton', 'Dudley', 'Marlton', 'Haddon Ave',
-            'Haddon Ave 2', 'Dudley 2', 'Stockton 2', 'Whitman Park 2'
+            'Liberty Park', 'Lanning Square', 'Cooper Grant', 'Beideman' // Added from Homepage
         ];
         
         neighborhoods.forEach(neighborhood => {
@@ -1336,45 +1336,58 @@ window.CHEDVI = {
                 results.push({
                     type: 'neighborhood',
                     title: neighborhood,
-                    description: 'Camden neighborhood',
-                    url: '/neighborhoods'
+                    description: 'View Neighborhood Profile',
+                    url: `/neighborhoods?name=${encodeURIComponent(neighborhood)}`
                 });
             }
         });
         
-        // Search health metrics
+        // 2. HEALTH & SDOH METRICS (Expanded with Site Themes)
         const metrics = [
-            { name: 'Diabetes', page: 'dashboard' },
-            { name: 'Obesity', page: 'dashboard' },
-            { name: 'Asthma', page: 'dashboard' },
-            { name: 'Mental Health', page: 'insights' },
-            { name: 'Income', page: 'rankings' },
-            { name: 'Education', page: 'rankings' },
-            { name: 'Healthcare Access', page: 'resources' }
+            // Clinical / Health Outcomes
+            { name: 'Diabetes Rate', keywords: ['sugar', 'insulin', 'chronic', 'health'], page: 'dashboard', tab: 'diabetes' },
+            { name: 'Obesity', keywords: ['weight', 'bmi', 'overweight', 'fitness'], page: 'dashboard', tab: 'obesity' },
+            { name: 'Asthma', keywords: ['breathing', 'lungs', 'air quality', 'environment'], page: 'dashboard', tab: 'asthma' },
+            { name: 'Mental Health', keywords: ['depression', 'anxiety', 'stress', 'distress'], page: 'dashboard', tab: 'mental' },
+            
+            // Economic Stability
+            { name: 'Median Income', keywords: ['money', 'salary', 'wages', 'wealth', 'economic stability'], page: 'dashboard', tab: 'income' },
+            { name: 'Poverty Rate', keywords: ['poor', 'financial aid', 'low income', 'struggle'], page: 'dashboard', tab: 'poverty' },
+            { name: 'Unemployment', keywords: ['jobs', 'work', 'hiring', 'labor', 'career'], page: 'dashboard', tab: 'unemployment' },
+            
+            // Social Infrastructure
+            { name: 'Food Access', keywords: ['grocery', 'nutrition', 'supermarket', 'hunger', 'food desert'], page: 'dashboard', tab: 'food' },
+            { name: 'Housing', keywords: ['shelter', 'rent', 'affordable', 'safety', 'home'], page: 'policy', anchor: 'housing' },
+            { name: 'Education', keywords: ['school', 'degree', 'diploma', 'college', 'learning'], page: 'dashboard', tab: 'education' }
         ];
         
         metrics.forEach(metric => {
-            if (metric.name.toLowerCase().includes(query)) {
+            // Check if Query matches Name OR Keywords
+            const matchesKeyword = metric.keywords.some(k => k.includes(query));
+            
+            if (metric.name.toLowerCase().includes(query) || matchesKeyword) {
                 results.push({
                     type: 'metric',
                     title: metric.name,
-                    description: 'Health equity metric',
-                    url: `/${metric.page}`
+                    description: 'Interactive Data & Trends',
+                    // Logic: If it has an anchor (like #housing), use that. Otherwise use query param.
+                    url: metric.anchor ? `/${metric.page}#${metric.anchor}` : `/${metric.page}?metric=${metric.tab}`
                 });
             }
         });
         
-        // Search pages
+        // 3. SITE PAGES & RESOURCES (New Categories)
         const pages = [
-            { name: 'Dashboard', url: '/dashboard', desc: 'Interactive health data visualization' },
-            { name: 'Rankings', url: '/rankings', desc: 'Neighborhood health rankings' },
-            { name: 'Insights', url: '/insights', desc: 'Health equity analysis' },
-            { name: 'Resources', url: '/resources', desc: 'Community resources' },
-            { name: 'Policy', url: '/policy', desc: 'Policy recommendations' }
+            { name: 'Policy Recommendations', url: '/policy', desc: 'Data-driven solutions & zoning analysis', keywords: ['law', 'government', 'change', 'action'] },
+            { name: 'Community Resources', url: '/resources', desc: 'Find help, clinics, and food pantries', keywords: ['help', 'donate', 'volunteer', 'support'] },
+            { name: 'Neighborhood Rankings', url: '/rankings', desc: 'Compare health scores across Camden', keywords: ['compare', 'best', 'worst', 'score'] },
+            { name: 'Health Insights', url: '/insights', desc: 'Deep dive analysis and correlations', keywords: ['research', 'study', 'report', 'findings'] },
+            { name: 'About CHEDVI', url: '/about', desc: 'Our mission and team', keywords: ['team', 'contact', 'who', 'mission'] }
         ];
         
         pages.forEach(page => {
-            if (page.name.toLowerCase().includes(query) || page.desc.toLowerCase().includes(query)) {
+            const matchesKeyword = page.keywords && page.keywords.some(k => k.includes(query));
+            if (page.name.toLowerCase().includes(query) || page.desc.toLowerCase().includes(query) || matchesKeyword) {
                 results.push({
                     type: 'page',
                     title: page.name,
@@ -1384,7 +1397,7 @@ window.CHEDVI = {
             }
         });
         
-        return results.slice(0, 10); // Limit to 10 results
+        return results.slice(0, 10);
     },
     
     // Display search results
