@@ -583,6 +583,40 @@ window.CHEDVI = {
                 this.selectSearchResult(searchResults);
             }
         });
+            searchInput.addEventListener('keydown', (e) => {
+                const resultsContainer = document.getElementById('searchResults');
+                if (!resultsContainer) return;
+
+                const items = resultsContainer.querySelectorAll('.dropdown-item');
+                let activeIndex = -1;
+
+                // Find currently active item
+                items.forEach((item, index) => {
+                    if (item.classList.contains('active')) activeIndex = index;
+                });
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    activeIndex = Math.min(activeIndex + 1, items.length - 1);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    activeIndex = Math.max(activeIndex - 1, 0);
+                } else if (e.key === 'Enter' && activeIndex > -1) {
+                    e.preventDefault();
+                    items[activeIndex].click(); // Simulate click
+                    return;
+                }
+
+                // Update visual selection
+                items.forEach((item, index) => {
+                    if (index === activeIndex) {
+                        item.classList.add('active', 'bg-light');
+                        item.scrollIntoView({ block: 'nearest' });
+                    } else {
+                        item.classList.remove('active', 'bg-light');
+                    }
+                });
+            });
     },
     
     // Perform search
@@ -1244,12 +1278,16 @@ window.CHEDVI = {
     initializeGlobalSearch: function() {
         const searchInput = document.getElementById('globalSearch');
         if (searchInput && this.config.searchEnabled) {
-            // Add search functionality
+            // Existing input listener...
             searchInput.addEventListener('input', (e) => {
-                this.performGlobalSearch(e.target.value);
+                // Add a small delay (debounce) so it doesn't flash while typing
+                clearTimeout(this.searchTimeout);
+                this.searchTimeout = setTimeout(() => {
+                    this.performGlobalSearch(e.target.value);
+                }, 300);
             });
-            
-            // Add search form submit handler
+
+            // Existing form listener...
             const searchForm = searchInput.closest('form');
             if (searchForm) {
                 searchForm.addEventListener('submit', (e) => {
@@ -1257,6 +1295,15 @@ window.CHEDVI = {
                     this.performGlobalSearch(searchInput.value);
                 });
             }
+
+            // --- NEW CODE: CLOSE ON CLICK OUTSIDE ---
+            document.addEventListener('click', (e) => {
+                const searchResults = document.getElementById('searchResults');
+                // If the click was NOT inside the search input OR the results dropdown
+                if (searchResults && !searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                    this.hideSearchResults();
+                }
+            });
         }
     },
     
@@ -1343,10 +1390,12 @@ window.CHEDVI = {
     // Display search results
     displaySearchResults: function(results) {
         let searchResults = document.getElementById('searchResults');
+        
+        // 1. Create the dropdown container if it doesn't exist
         if (!searchResults) {
             searchResults = document.createElement('div');
             searchResults.id = 'searchResults';
-            searchResults.className = 'search-results dropdown-menu show';
+            searchResults.className = 'search-results dropdown-menu show shadow-lg'; // Added shadow-lg for depth
             searchResults.style.cssText = 'position: absolute; top: 100%; left: 0; right: 0; z-index: 1000; max-height: 400px; overflow-y: auto;';
             
             const searchInput = document.getElementById('globalSearch');
@@ -1356,22 +1405,33 @@ window.CHEDVI = {
             }
         }
         
+        // 2. Get the current search query for highlighting
+        const searchInput = document.getElementById('globalSearch');
+        const query = searchInput ? searchInput.value.toLowerCase() : '';
+
         if (results.length === 0) {
-            searchResults.innerHTML = '<div class="dropdown-item-text text-muted">No results found</div>';
+            searchResults.innerHTML = '<div class="dropdown-item-text text-muted p-3">No results found</div>';
         } else {
-            searchResults.innerHTML = results.map(result => `
-                <a href="${result.url}" class="dropdown-item">
-                    <div class="d-flex">
-                        <div class="me-3">
+            searchResults.innerHTML = results.map(result => {
+                // 3. Highlight Logic: Wrap the matching text in <strong> tags
+                // We escape special characters to prevent regex errors
+                const safeQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                const regex = new RegExp(`(${safeQuery})`, 'gi');
+                const highlightedTitle = result.title.replace(regex, '<strong class="text-primary">$1</strong>');
+                
+                return `
+                <a href="${result.url}" class="dropdown-item py-2 border-bottom">
+                    <div class="d-flex align-items-center">
+                        <div class="me-3 text-secondary">
                             <i class="fas fa-${this.getSearchIcon(result.type)}"></i>
                         </div>
                         <div>
-                            <div class="fw-bold">${result.title}</div>
+                            <div class="fw-bold">${highlightedTitle}</div>
                             <div class="text-muted small">${result.description}</div>
                         </div>
                     </div>
                 </a>
-            `).join('');
+            `}).join('');
         }
     },
     
