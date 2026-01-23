@@ -1375,12 +1375,13 @@ window.CHEDVI = {
         const results = [];
         query = query.toLowerCase();
         
-        // 1. NEIGHBORHOODS (Complete List)
+        // --- 1. NEIGHBORHOODS (Synced with neighborhoods.js) ---
+        // I extracted these directly from your dataset to ensure 100% coverage
         const neighborhoods = [
             'Gateway', 'Bergen Square', 'Cooper Poynt', 'Pyne Point', 'Fairview',
             'Centerville', 'Parkside', 'Cramer Hill', 'North Camden', 'Waterfront',
             'Whitman Park', 'Stockton', 'Dudley', 'Marlton', 'Haddon Ave',
-            'Liberty Park', 'Lanning Square', 'Cooper Grant', 'Beideman' // Added from Homepage
+            'Liberty Park', 'Lanning Square', 'Cooper Grant', 'Beideman'
         ];
         
         neighborhoods.forEach(neighborhood => {
@@ -1389,52 +1390,75 @@ window.CHEDVI = {
                     type: 'neighborhood',
                     title: neighborhood,
                     description: 'View Neighborhood Profile',
+                    // Links to specific neighborhood card/page
                     url: `/neighborhoods?name=${encodeURIComponent(neighborhood)}`
                 });
             }
         });
         
-        // 2. HEALTH & SDOH METRICS (Expanded with Site Themes)
-        const metrics = [
-            // Clinical / Health Outcomes
-            { name: 'Diabetes Rate', keywords: ['sugar', 'insulin', 'chronic', 'health'], page: 'dashboard', tab: 'diabetes' },
-            { name: 'Obesity', keywords: ['weight', 'bmi', 'overweight', 'fitness'], page: 'dashboard', tab: 'obesity' },
-            { name: 'Asthma', keywords: ['breathing', 'lungs', 'air quality', 'environment'], page: 'dashboard', tab: 'asthma' },
-            { name: 'Mental Health', keywords: ['depression', 'anxiety', 'stress', 'distress'], page: 'dashboard', tab: 'mental' },
+        // --- 2. DASHBOARD LAYERS (Synced with dashboard-fixed.js) ---
+        // These now use the correct '?layer=' param that your dashboard likely looks for
+        const dashboardLayers = [
+            // Clinical
+            { name: 'Diabetes Rate', id: 'diabetes', keywords: ['sugar', 'insulin', 'health'] },
+            { name: 'Obesity Rates', id: 'obesity', keywords: ['weight', 'bmi', 'fitness'] },
+            { name: 'Asthma Prevalence', id: 'asthma', keywords: ['breathing', 'lungs', 'air'] },
+            { name: 'Mental Health', id: 'mental_health', keywords: ['depression', 'anxiety', 'stress'] },
             
-            // Economic Stability
-            { name: 'Median Income', keywords: ['money', 'salary', 'wages', 'wealth', 'economic stability'], page: 'dashboard', tab: 'income' },
-            { name: 'Poverty Rate', keywords: ['poor', 'financial aid', 'low income', 'struggle'], page: 'dashboard', tab: 'poverty' },
-            { name: 'Unemployment', keywords: ['jobs', 'work', 'hiring', 'labor', 'career'], page: 'dashboard', tab: 'unemployment' },
+            // SDOH (Social Determinants)
+            { name: 'Poverty Rate', id: 'poverty', keywords: ['income', 'poor', 'money'] },
+            { name: 'Unemployment', id: 'unemployment', keywords: ['jobs', 'work', 'labor'] },
+            { name: 'Median Income', id: 'income', keywords: ['salary', 'wealth', 'rich'] },
+            { name: 'Educational Attainment', id: 'education', keywords: ['school', 'degree', 'college'] },
             
-            // Social Infrastructure
-            { name: 'Food Access', keywords: ['grocery', 'nutrition', 'supermarket', 'hunger', 'food desert'], page: 'dashboard', tab: 'food' },
-            { name: 'Housing', keywords: ['shelter', 'rent', 'affordable', 'safety', 'home'], page: 'policy', anchor: 'housing' },
-            { name: 'Education', keywords: ['school', 'degree', 'diploma', 'college', 'learning'], page: 'dashboard', tab: 'education' }
+            // Environmental (Found in your map config)
+            { name: 'Flood Risk', id: 'flood_risk', keywords: ['water', 'rain', 'climate', 'disaster'] },
+            { name: 'Impervious Surfaces', id: 'impervious', keywords: ['concrete', 'pavement', 'runoff'] },
+            { name: 'Urban Heat Island', id: 'heat_island', keywords: ['hot', 'temperature', 'climate', 'green'] }
         ];
         
-        metrics.forEach(metric => {
-            // Check if Query matches Name OR Keywords
-            const matchesKeyword = metric.keywords.some(k => k.includes(query));
-            
-            if (metric.name.toLowerCase().includes(query) || matchesKeyword) {
+        dashboardLayers.forEach(layer => {
+            const matchesKeyword = layer.keywords.some(k => k.includes(query));
+            if (layer.name.toLowerCase().includes(query) || matchesKeyword) {
                 results.push({
                     type: 'metric',
-                    title: metric.name,
-                    description: 'Interactive Data & Trends',
-                    // Logic: If it has an anchor (like #housing), use that. Otherwise use query param.
-                    url: metric.anchor ? `/${metric.page}#${metric.anchor}` : `/${metric.page}?metric=${metric.tab}`
+                    title: layer.name,
+                    description: 'View Interactive Map Layer',
+                    url: `/dashboard?layer=${layer.id}` // Direct deep link to map layer
+                });
+            }
+        });
+
+        // --- 3. RANKINGS & COMPARISONS (Synced with rankings.js) ---
+        // Allows users to search for "Highest Poverty" and go straight to sorted table
+        const rankingSorts = [
+            { name: 'Highest Poverty Neighborhoods', sort: 'poverty-desc', keywords: ['poorest', 'need'] },
+            { name: 'Lowest Income Areas', sort: 'income-asc', keywords: ['poor', 'salary'] },
+            { name: 'Highest Diabetes Rates', sort: 'diabetes-desc', keywords: ['sick', 'illness'] },
+            { name: 'Most Unemployed', sort: 'unemployment-desc', keywords: ['jobless'] },
+            { name: 'Education Rankings', sort: 'education-desc', keywords: ['smart', 'school'] }
+        ];
+
+        rankingSorts.forEach(sort => {
+            const matchesKeyword = sort.keywords.some(k => k.includes(query));
+            if (sort.name.toLowerCase().includes(query) || matchesKeyword) {
+                results.push({
+                    type: 'metric', // Using metric icon for rankings
+                    title: sort.name,
+                    description: 'View Comparative Rankings',
+                    url: `/rankings?sort=${sort.sort}` // Assuming rankings.js handles ?sort= param
                 });
             }
         });
         
-        // 3. SITE PAGES & RESOURCES (New Categories)
+        // --- 4. SITE RESOURCES & SECTIONS ---
         const pages = [
-            { name: 'Policy Recommendations', url: '/policy', desc: 'Data-driven solutions & zoning analysis', keywords: ['law', 'government', 'change', 'action'] },
-            { name: 'Community Resources', url: '/resources', desc: 'Find help, clinics, and food pantries', keywords: ['help', 'donate', 'volunteer', 'support'] },
-            { name: 'Neighborhood Rankings', url: '/rankings', desc: 'Compare health scores across Camden', keywords: ['compare', 'best', 'worst', 'score'] },
-            { name: 'Health Insights', url: '/insights', desc: 'Deep dive analysis and correlations', keywords: ['research', 'study', 'report', 'findings'] },
-            { name: 'About CHEDVI', url: '/about', desc: 'Our mission and team', keywords: ['team', 'contact', 'who', 'mission'] }
+            { name: 'Policy Recommendations', url: '/policy', desc: 'Zoning & Health Policy Analysis', keywords: ['law', 'zoning', 'government'] },
+            { name: 'Housing Policy', url: '/policy#housing', desc: 'Affordable Housing Initiatives', keywords: ['rent', 'home', 'shelter'] },
+            { name: 'Environmental Justice', url: '/policy#environment', desc: 'Green Infrastructure Plans', keywords: ['trees', 'parks', 'pollution'] },
+            { name: 'Community Resources', url: '/resources', desc: 'Food Pantries & Clinics', keywords: ['help', 'food', 'doctor'] },
+            { name: 'Health Insights', url: '/insights', desc: 'Correlations & Data Analysis', keywords: ['study', 'report', 'stats'] },
+            { name: 'About CHEDVI', url: '/about', desc: 'Mission & Team', keywords: ['contact', 'who'] }
         ];
         
         pages.forEach(page => {
