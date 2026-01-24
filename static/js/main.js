@@ -1692,7 +1692,7 @@ window.CHEDVI = {
         }
     },
     
-    // Get selected neighborhood (placeholder)
+    // Get selected neighborhood
     getSelectedNeighborhood: function() {
         // Look for the global variable we just set in dashboard-fixed.js
         return window.currentSelection || null; 
