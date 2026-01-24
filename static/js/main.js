@@ -1714,22 +1714,22 @@ window.CHEDVI = {
         
         if (!neighborhood) return 'N/A (No Data)';
 
-        // 3. Map "Display Name" to "CSV Column Name"
+        // 3. Map "Display Name" to the EXACT keys used in rankings.js
         let key = '';
         const lowerMetric = metricDisplayStr.toLowerCase();
 
-        // MAPPINGS BASED ON YOUR CSV HEADER ROW:
-        if (lowerMetric.includes('diabetes')) key = 'diabetes_rate';           // CSV: diabetes_rate
-        else if (lowerMetric.includes('obesity')) key = 'obesity_rate';        // CSV: obesity_rate
-        else if (lowerMetric.includes('asthma')) key = 'asthma_rate';          // CSV: asthma_rate
-        else if (lowerMetric.includes('mental')) key = 'mental_distress_rate'; // CSV: mental_distress_rate
-        else if (lowerMetric.includes('pressure')) key = 'high_blood_pressure';// CSV: high_blood_pressure
-        else if (lowerMetric.includes('poverty')) key = 'poverty_rate';        // CSV: poverty_rate
-        else if (lowerMetric.includes('income')) key = 'median_income';        // CSV: median_income
-        else if (lowerMetric.includes('unemployment')) key = 'unemployment_rate'; // CSV: unemployment_rate
-        else if (lowerMetric.includes('food')) key = 'food_access_score';      // CSV: food_access_score
-        else if (lowerMetric.includes('education')) key = 'education';         // (Assuming education column exists)
-        else if (lowerMetric.includes('insurance')) key = 'lack_health_insurance'; // CSV: lack_health_insurance
+        // MAPPINGS MATCHING RANKINGS.JS:
+        if (lowerMetric.includes('diabetes')) key = 'diabetes';                  // rankings.js: diabetes
+        else if (lowerMetric.includes('obesity')) key = 'obesity';               // rankings.js: obesity
+        else if (lowerMetric.includes('asthma')) key = 'asthma';                 // rankings.js: asthma
+        else if (lowerMetric.includes('mental')) key = 'mental_distress';        // rankings.js: mental_distress
+        else if (lowerMetric.includes('pressure')) key = 'high_blood_pressure';  // rankings.js: high_blood_pressure
+        else if (lowerMetric.includes('poverty')) key = 'poverty_rate';          // rankings.js: poverty_rate
+        else if (lowerMetric.includes('income')) key = 'income';                 // rankings.js: income
+        else if (lowerMetric.includes('unemployment')) key = 'unemployment';     // rankings.js: unemployment
+        else if (lowerMetric.includes('food')) key = 'food_access';              // rankings.js: food_access
+        else if (lowerMetric.includes('education')) key = 'education';           // rankings.js: education
+        else if (lowerMetric.includes('insurance')) key = 'lack_health_insurance'; // rankings.js: lack_health_insurance
         
         // 4. Return the value
         let value = neighborhood[key];
@@ -1737,8 +1737,8 @@ window.CHEDVI = {
         if (value === undefined || value === null) return 'N/A';
         
         // Formatting: Add '$' for income, '%' for rates
-        if (key === 'median_income' && !value.toString().includes('$')) return '$' + parseInt(value).toLocaleString();
-        if ((key.includes('rate') || key.includes('score') || key.includes('insurance')) && !value.toString().includes('%')) return value + '%';
+        if (key === 'income' && !value.toString().includes('$')) return '$' + parseInt(value).toLocaleString();
+        if ((key.includes('rate') || key.includes('score') || key.includes('insurance') || key.includes('unemployment')) && !value.toString().includes('%')) return value + '%';
         
         return value;
     },
