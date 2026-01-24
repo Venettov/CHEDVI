@@ -3,8 +3,6 @@
 let leftMap, rightMap;
 let leftPolygons = [];
 let rightPolygons = [];
-let comparisonList = [];
-let currentSelection = null;
 
 // Camden neighborhoods with authentic 2022 Census data
 const camdenNeighborhoods = [
@@ -455,8 +453,6 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     loadInitialData();
     initializeAllCharts();
-    setupComparisonListeners();
-    updateComparisonPanel();
     
     if (typeof populateDataExplorer === 'function') {
         populateDataExplorer(); 
@@ -598,9 +594,6 @@ function setupEventListeners() {
 function handlePolygonClick(e, sourceMap) {
     const targetName = e.target.neighborhoodName;
 
-    // Update Global Selection
-    currentSelection = targetName; 
-
     // Reset styles
     leftPolygons.forEach(p => p.setStyle(p.defaultStyle));
     rightPolygons.forEach(p => p.setStyle(p.defaultStyle));
@@ -619,9 +612,6 @@ function handlePolygonClick(e, sourceMap) {
     }
 
     updateMetrics(targetName);
-    
-    updateComparisonPanel(); 
-
 }
 
 // 8. HELPERS
@@ -1099,81 +1089,6 @@ function updateInsightText(xName, yName, r) {
     else msg = `<strong>Complex Relationship:</strong> There is no simple linear link between <em>${xName}</em> and <em>${yName}</em>. Use the map to explore specific neighborhoods.`;
 
     box.innerHTML = `<h6 class="alert-heading fw-bold text-primary"><i class="fas fa-robot me-2"></i>Automated Analysis</h6><p class="mb-0 text-muted">${msg}</p>`;
-}
-
-function updateComparisonPanel() {
-    const countSpan = document.getElementById('comparisonCount');
-    const viewBtn = document.getElementById('viewComparison');
-    const addBtn = document.getElementById('addToComparison');
-    const clearBtn = document.getElementById('clearComparison');
-
-    // 1. Update the Counter
-    if(countSpan) countSpan.textContent = comparisonList.length;
-
-    // 2. Enable "View" only if we have 2+ items
-    if(viewBtn) {
-        viewBtn.disabled = comparisonList.length < 2;
-    }
-
-    // 3. Handle the "Add" Button State
-    if(addBtn) {
-        if (!currentSelection) {
-            // No neighborhood selected on map yet
-            addBtn.disabled = true;
-            addBtn.innerHTML = '<i class="fas fa-balance-scale me-1"></i>Add to Comparison';
-        } 
-        else if (comparisonList.includes(currentSelection)) {
-            // Already in the list
-            addBtn.disabled = true;
-            addBtn.innerHTML = '<i class="fas fa-check me-1"></i>Added';
-        } 
-        else {
-            // Selected and ready to add
-            addBtn.disabled = false;
-            addBtn.innerHTML = '<i class="fas fa-plus me-1"></i>Add to Comparison';
-        }
-    }
-}
-
-// Attach click listeners to the buttons
-function setupComparisonListeners() {
-    const addBtn = document.getElementById('addToComparison');
-    const clearBtn = document.getElementById('clearComparison');
-    const viewBtn = document.getElementById('viewComparison');
-
-    if (addBtn) {
-        addBtn.addEventListener('click', () => {
-            if (currentSelection && !comparisonList.includes(currentSelection)) {
-                comparisonList.push(currentSelection);
-                updateComparisonPanel();
-                
-                // Visual feedback (Success Alert)
-                alert(`${currentSelection} added to comparison list!`);
-            }
-        });
-    }
-
-    if (clearBtn) {
-        clearBtn.addEventListener('click', () => {
-            comparisonList = [];
-            currentSelection = null;
-            // Reset map highlights
-            leftPolygons.forEach(p => p.setStyle(p.defaultStyle));
-            rightPolygons.forEach(p => p.setStyle(p.defaultStyle));
-            leftMap.closePopup();
-            rightMap.closePopup();
-            
-            updateComparisonPanel();
-        });
-    }
-    
-    if (viewBtn) {
-        viewBtn.addEventListener('click', () => {
-            // Here you would normally open a modal or redirect
-            const url = `/rankings?compare=${encodeURIComponent(comparisonList.join(','))}`;
-            window.location.href = url;
-        });
-    }
 }
 
 window.startTour = function() { alert('Welcome to the Camden Health Dashboard!'); };
