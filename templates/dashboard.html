@@ -684,5 +684,43 @@
         });
     });
 
+
+    // -----------------------------------------------------------------
+    // IMPROVEMENT: FIX SIDEBAR CHARTS & ARROWS
+    // -----------------------------------------------------------------
+    document.addEventListener("DOMContentLoaded", function(){
+        
+        // 1. Force Charts to Resize when Sidebar Sections Open
+        const sidebarCollapses = document.querySelectorAll('.dashboard-sidebar .collapse');
+        sidebarCollapses.forEach(collapseEl => {
+            collapseEl.addEventListener('shown.bs.collapse', event => {
+                // This triggers Chart.js to re-measure the container
+                window.dispatchEvent(new Event('resize'));
+            });
+        });
+
+        // 2. Rotate Arrows on Click
+        // This looks for buttons in the sidebar and rotates their icon when expanded
+        const sidebarButtons = document.querySelectorAll('.dashboard-sidebar button[data-bs-toggle="collapse"]');
+        sidebarButtons.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const icon = this.querySelector('.fa-chevron-down');
+                if (this.getAttribute('aria-expanded') === 'true') {
+                    icon.style.transform = 'rotate(180deg)';
+                } else {
+                    icon.style.transform = 'rotate(0deg)';
+                }
+                icon.style.transition = 'transform 0.3s ease';
+            });
+            
+            // Set initial state based on current HTML
+            const icon = btn.querySelector('.fa-chevron-down');
+            if (btn.getAttribute('aria-expanded') === 'true') {
+                icon.style.transform = 'rotate(180deg)';
+                icon.style.transition = 'transform 0.3s ease';
+            }
+        });
+    });
+
 </script>
 {% endblock %}
