@@ -1704,13 +1704,44 @@ window.CHEDVI = {
     },
     
     // Get metric value for neighborhood
-    getMetricValue: function(neighborhood, metric) {
-        // This would fetch from the actual data source
-        const mockValues = {
-            'Gateway': { 'Diabetes Rate (%)': '17.0%', 'Obesity Rate (%)': '43.9%' },
-            'Bergen Square': { 'Diabetes Rate (%)': '15.7%', 'Obesity Rate (%)': '47.6%' }
-        };
-        return mockValues[neighborhood]?.[metric] || 'N/A';
+    getMetricValue: function(neighborhoodName, metricDisplayStr) {
+        // 1. Try to find the real data source (Dashboard or Rankings)
+        // Note: dashboardData is defined in dashboard.html, camdenRankingsData in rankings.js
+        const realData = window.dashboardData || window.camdenRankingsData || window.camdenData || [];
+        
+        // 2. Find the specific neighborhood object in the data
+        // We handle case differences just to be safe
+        const neighborhood = realData.find(n => n.name.toLowerCase() === neighborhoodName.toLowerCase());
+        
+        if (!neighborhood) return 'N/A (No Data)';
+
+        // 3. Map the "Display Name" (e.g. "Diabetes Rate (%)") to the "Database Key" (e.g. "diabetes")
+        let key = '';
+        const lowerMetric = metricDisplayStr.toLowerCase();
+
+        if (lowerMetric.includes('diabetes')) key = 'diabetes';
+        else if (lowerMetric.includes('obesity')) key = 'obesity';
+        else if (lowerMetric.includes('asthma')) key = 'asthma';
+        else if (lowerMetric.includes('mental')) key = 'mental_distress'; // or mentalDistress
+        else if (lowerMetric.includes('pressure')) key = 'high_blood_pressure';
+        else if (lowerMetric.includes('poverty')) key = 'poverty_rate'; // Check your CSV key, sometimes 'poverty'
+        else if (lowerMetric.includes('income')) key = 'income';
+        else if (lowerMetric.includes('unemployment')) key = 'unemployment';
+        else if (lowerMetric.includes('food')) key = 'food_access';
+        else if (lowerMetric.includes('education')) key = 'education';
+        else if (lowerMetric.includes('insurance')) key = 'lack_health_insurance';
+        
+        // 4. Return the value if found
+        let value = neighborhood[key];
+        
+        // Handle undefined or missing keys
+        if (value === undefined || value === null) return 'N/A';
+        
+        // Add styling/formatting if needed (e.g., adding % or $)
+        if (lowerMetric.includes('income') && !value.toString().includes('$')) return '$' + value.toLocaleString();
+        if ((lowerMetric.includes('rate') || lowerMetric.includes('%')) && !value.toString().includes('%')) return value + '%';
+        
+        return value;
     },
     
     // Initialize breadcrumbs
