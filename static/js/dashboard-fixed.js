@@ -1101,10 +1101,6 @@ function updateInsightText(xName, yName, r) {
     box.innerHTML = `<h6 class="alert-heading fw-bold text-primary"><i class="fas fa-robot me-2"></i>Automated Analysis</h6><p class="mb-0 text-muted">${msg}</p>`;
 }
 
-window.startTour = function() { alert('Welcome to the Camden Health Dashboard!'); };
-window.exportData = function(format) { alert(`Data export (${format}) coming soon.`); };
-
-
 function updateComparisonPanel() {
     const countSpan = document.getElementById('comparisonCount');
     const viewBtn = document.getElementById('viewComparison');
@@ -1179,5 +1175,8 @@ function setupComparisonListeners() {
         });
     }
 }
+
+window.startTour = function() { alert('Welcome to the Camden Health Dashboard!'); };
+window.exportData = function(format) { alert(`Data export (${format}) coming soon.`); };
 
 console.log('Dashboard script loaded with GLOBAL DEFAULTS');
