@@ -1694,7 +1694,8 @@ window.CHEDVI = {
     
     // Get selected neighborhood (placeholder)
     getSelectedNeighborhood: function() {
-        return 'Gateway'; // Placeholder - would get from UI selection
+        // Look for the global variable we just set in dashboard-fixed.js
+        return window.currentSelection || null; 
     },
     
     // Get selected metric (placeholder)

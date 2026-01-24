@@ -594,6 +594,10 @@ function setupEventListeners() {
 function handlePolygonClick(e, sourceMap) {
     const targetName = e.target.neighborhoodName;
 
+    // --- ADD THIS LINE TO LINK TO DATABASE ---
+    window.currentSelection = targetName; 
+    // -----------------------------------------
+
     // Reset styles
     leftPolygons.forEach(p => p.setStyle(p.defaultStyle));
     rightPolygons.forEach(p => p.setStyle(p.defaultStyle));

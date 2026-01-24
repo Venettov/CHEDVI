@@ -567,7 +567,7 @@
 
 <script>
     const dbPayload = {{ db_data | tojson | safe if db_data else 'null' }};
-    const dashboardData = {{ dashboard_data | tojson | safe }};
+    window.dashboardData = {{ dashboard_data | tojson | safe }};
 
     function exportData(type) {
         if (type === 'csv') {
