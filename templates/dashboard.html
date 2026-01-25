@@ -682,7 +682,7 @@
 
 
     // -----------------------------------------------------------------
-    // IMPROVEMENT: FIX SIDEBAR CHARTS & ARROWS
+    // FIX SIDEBAR CHARTS & ARROWS
     // -----------------------------------------------------------------
     document.addEventListener("DOMContentLoaded", function(){
         
@@ -719,31 +719,32 @@
     });
 
     // -----------------------------------------------------------------
-    // NEW: EXPORT FUNCTIONS FOR THE INTERACTIVE GRAPH
+    // EXPORT FUNCTIONS FOR THE INTERACTIVE GRAPH
     // -----------------------------------------------------------------
 
     // 1. Export Data to CSV
     function exportGraphCSV() {
-        // Get the current labels from the dropdowns so the file makes sense
-        const xLabel = document.getElementById('xVariable').options[document.getElementById('xVariable').selectedIndex].text;
-        const yLabel = document.getElementById('yVariable').options[document.getElementById('yVariable').selectedIndex].text;
+        const xElement = document.getElementById('xVariable');
+        const yElement = document.getElementById('yVariable');
         
-        // Get the variable IDs (e.g., 'income', 'diabetes')
-        // Note: We need to map these to our database keys if they differ
-        const xVar = document.getElementById('xVariable').value;
-        const yVar = document.getElementById('yVariable').value;
+        // Get the text labels (e.g., "Median Income")
+        const xLabel = xElement.options[xElement.selectedIndex].text;
+        const yLabel = yElement.options[yElement.selectedIndex].text;
+        
+        // Get the values (e.g., "income")
+        const xVar = xElement.value;
+        const yVar = yElement.value;
 
         let csvContent = "data:text/csv;charset=utf-8,";
         csvContent += `Neighborhood,${xLabel},${yLabel}\n`; // Header Row
 
-        // Loop through the global data to build the rows
+        // Use the global data
         window.dashboardData.forEach(item => {
-            // We use the same 'getMetricValue' logic here implicitly
-            // Simple mapping for demo (you might need to align keys with your rankings.js logic)
+            // Helper to handle inconsistent key naming safely
             let xVal = item[xVar] || item[xVar + '_rate'] || item['median_' + xVar] || ''; 
             let yVal = item[yVar] || item[yVar + '_rate'] || '';
             
-            // Clean up the data (remove $ or % for pure CSV numbers if needed, or keep them)
+            // Add row
             csvContent += `"${item.name}",${xVal},${yVal}\n`;
         });
 
@@ -759,10 +760,12 @@
     // 2. Export Graph to PDF
     function exportGraphPDF() {
         const chartCanvas = document.getElementById('interactiveCorrelationChart');
-        const xLabel = document.getElementById('xVariable').options[document.getElementById('xVariable').selectedIndex].text;
-        const yLabel = document.getElementById('yVariable').options[document.getElementById('yVariable').selectedIndex].text;
+        const xElement = document.getElementById('xVariable');
+        const yElement = document.getElementById('yVariable');
+        
+        const xLabel = xElement.options[xElement.selectedIndex].text;
+        const yLabel = yElement.options[yElement.selectedIndex].text;
 
-        // Use the library you already imported (html2pdf)
         const opt = {
             margin: 0.5,
             filename: `Chart_${xLabel}_vs_${yLabel}.pdf`,
@@ -771,8 +774,8 @@
             jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
         };
 
-        // We capture the parent container to get the labels and title, not just the canvas
-        const elementToCapture = chartCanvas.parentElement.parentElement; // Captures the whole card body
+        // Capture the parent card so we get the title/legend, not just the lines
+        const elementToCapture = chartCanvas.parentElement.parentElement; 
         
         html2pdf().set(opt).from(elementToCapture).save();
     }
