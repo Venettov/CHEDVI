@@ -726,27 +726,26 @@
     // EXPORT FUNCTIONS FOR THE INTERACTIVE GRAPH
     // -----------------------------------------------------------------
 
-    // 1. Export Data to CSV (FIXED MAPPING)
+    // 1. Export Data to CSV (FIXED FOR CONTROL PANEL LAYOUT)
     function exportGraphCSV() {
         const xElement = document.getElementById('xVariable');
         const yElement = document.getElementById('yVariable');
         
-        // Get Display Labels (for the CSV Header)
+        // 1. Get the "Human Readable" labels for the file header
         const xLabel = xElement.options[xElement.selectedIndex].text;
         const yLabel = yElement.options[yElement.selectedIndex].text;
         
-        // Get Dropdown Values (e.g. "income", "foodAccess")
+        // 2. Get the "Short Value" from the dropdown (e.g., "foodAccess")
         const xValRaw = xElement.value;
         const yValRaw = yElement.value;
 
-        // DATABASE MAPPING DICTIONARY
-        // This translates the Dropdown Value -> Real Database Column
+        // 3. THE TRANSLATOR: Map "Short Value" -> "Database Column"
         const dbMapping = {
             'income': 'median_income',
             'poverty': 'poverty_rate',
             'foodAccess': 'food_access_score',
             'insurance': 'lack_health_insurance',
-            'education': 'education', // or 'bachelors_degree_rate' depending on your DB
+            'education': 'education',
             'diabetes': 'diabetes_rate',
             'obesity': 'obesity_rate',
             'asthma': 'asthma_rate',
@@ -754,20 +753,19 @@
             'highBloodPressure': 'high_blood_pressure'
         };
 
-        // Determine the actual keys to look for
-        const xKey = dbMapping[xValRaw] || xValRaw; // Fallback to raw if not found
+        // If the value isn't in the list, just use the raw value
+        const xKey = dbMapping[xValRaw] || xValRaw;
         const yKey = dbMapping[yValRaw] || yValRaw;
 
         let csvContent = "data:text/csv;charset=utf-8,";
         csvContent += `Neighborhood,${xLabel},${yLabel}\n`; // Header Row
 
-        // Loop through global data
+        // 4. Build the Rows using the translated keys
         window.dashboardData.forEach(item => {
-            // Retrieve values using the translated keys
             let xValue = item[xKey] !== undefined ? item[xKey] : "";
             let yValue = item[yKey] !== undefined ? item[yKey] : "";
             
-            // Add row to CSV
+            // Clean up: Ensure we don't write "undefined" to the file
             csvContent += `"${item.name}",${xValue},${yValue}\n`;
         });
 
