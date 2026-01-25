@@ -232,79 +232,6 @@
         </div>
     </section>
 
-    <section class="py-4">
-        <div class="container">
-            <div class="row">
-                <div class="col-12">
-                    <div class="card shadow-sm h-100">
-                        <div class="card-header bg-white p-0">
-                            <ul class="nav nav-tabs nav-fill card-header-tabs m-0" id="analyticsTabs" role="tablist">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link active py-3 fw-bold" id="demographics-tab" data-bs-toggle="tab" data-bs-target="#demographics" type="button" role="tab" aria-controls="demographics" aria-selected="true">
-                                        <i class="fas fa-users text-info me-2"></i>Demographics Overview
-                                    </button>
-                                </li>
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link py-3 fw-bold" id="determinants-tab" data-bs-toggle="tab" data-bs-target="#determinants" type="button" role="tab" aria-controls="determinants" aria-selected="false">
-                                        <i class="fas fa-project-diagram text-warning me-2"></i>Social Determinants
-                                    </button>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div class="card-body p-4">
-                            <div class="tab-content" id="analyticsTabsContent">
-
-                                <div class="tab-pane fade show active" id="demographics" role="tabpanel" aria-labelledby="demographics-tab">
-                                    <div class="row align-items-center">
-                                        
-                                        <div class="col-lg-8 offset-lg-1">
-                                            <div class="chart-container" style="height: 400px; width: 100%;">
-                                                <canvas id="demographicsChart"></canvas>
-                                            </div>
-                                        </div>
-
-                                        <div class="col-lg-3">
-                                            <div class="p-3 bg-light rounded border-start border-4 border-info">
-                                                <h5 class="text-info fw-bold">Demographics</h5>
-                                                <p class="text-muted small">Breakdown of population by age groups and key demographic categories.</p>
-                                                <hr>
-                                                <small class="text-muted"><i class="fas fa-user-friends me-1"></i> Based on 2022 Census Data.</small>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                                <div class="tab-pane fade" id="determinants" role="tabpanel" aria-labelledby="determinants-tab">
-                                    <div class="row align-items-center">
-                                        
-                                        <div class="col-lg-8 offset-lg-1">
-                                            <div class="chart-container" style="height: 400px; width: 100%;">
-                                                <canvas id="sdohChart"></canvas>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="col-lg-3">
-                                            <div class="p-3 bg-light rounded border-start border-4 border-warning">
-                                                <h5 class="text-warning fw-bold">Social Factors</h5>
-                                                <p class="text-muted small">Analysis of social determinants including income, education, and housing.</p>
-                                                <hr>
-                                                <small class="text-muted"><i class="fas fa-home me-1"></i> Impact factors.</small>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <section class="py-5 bg-white border-top border-bottom" id="data-exploration-section">
         <div class="container">
             <div class="row mb-4">
@@ -408,6 +335,79 @@
                                 </div>
                             </div>
 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="py-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-white p-0">
+                            <ul class="nav nav-tabs nav-fill card-header-tabs m-0" id="analyticsTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active py-3 fw-bold" id="demographics-tab" data-bs-toggle="tab" data-bs-target="#demographics" type="button" role="tab" aria-controls="demographics" aria-selected="true">
+                                        <i class="fas fa-users text-info me-2"></i>Demographics Overview
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link py-3 fw-bold" id="determinants-tab" data-bs-toggle="tab" data-bs-target="#determinants" type="button" role="tab" aria-controls="determinants" aria-selected="false">
+                                        <i class="fas fa-project-diagram text-warning me-2"></i>Social Determinants
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="card-body p-4">
+                            <div class="tab-content" id="analyticsTabsContent">
+
+                                <div class="tab-pane fade show active" id="demographics" role="tabpanel" aria-labelledby="demographics-tab">
+                                    <div class="row align-items-center">
+                                        
+                                        <div class="col-lg-8 offset-lg-1">
+                                            <div class="chart-container" style="height: 400px; width: 100%;">
+                                                <canvas id="demographicsChart"></canvas>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-3">
+                                            <div class="p-3 bg-light rounded border-start border-4 border-info">
+                                                <h5 class="text-info fw-bold">Demographics</h5>
+                                                <p class="text-muted small">Breakdown of population by age groups and key demographic categories.</p>
+                                                <hr>
+                                                <small class="text-muted"><i class="fas fa-user-friends me-1"></i> Based on 2022 Census Data.</small>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                                <div class="tab-pane fade" id="determinants" role="tabpanel" aria-labelledby="determinants-tab">
+                                    <div class="row align-items-center">
+                                        
+                                        <div class="col-lg-8 offset-lg-1">
+                                            <div class="chart-container" style="height: 400px; width: 100%;">
+                                                <canvas id="sdohChart"></canvas>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-lg-3">
+                                            <div class="p-3 bg-light rounded border-start border-4 border-warning">
+                                                <h5 class="text-warning fw-bold">Social Factors</h5>
+                                                <p class="text-muted small">Analysis of social determinants including income, education, and housing.</p>
+                                                <hr>
+                                                <small class="text-muted"><i class="fas fa-home me-1"></i> Impact factors.</small>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -724,10 +724,6 @@
 
     // -----------------------------------------------------------------
     // EXPORT FUNCTIONS FOR THE INTERACTIVE GRAPH
-    // -----------------------------------------------------------------
-
-// -----------------------------------------------------------------
-    // NEW: "POP-UP REPORT" WINDOW (Solves all PDF/CSV issues)
     // -----------------------------------------------------------------
     
     function openExportWindow() {
