@@ -726,102 +726,119 @@
     // EXPORT FUNCTIONS FOR THE INTERACTIVE GRAPH
     // -----------------------------------------------------------------
 
-    // 1. Export Data to CSV (FIXED FOR CONTROL PANEL LAYOUT)
-    function exportGraphCSV() {
+// -----------------------------------------------------------------
+    // NEW: "POP-UP REPORT" WINDOW (Solves all PDF/CSV issues)
+    // -----------------------------------------------------------------
+    
+    function openExportWindow() {
         const xElement = document.getElementById('xVariable');
         const yElement = document.getElementById('yVariable');
         
-        // 1. Get the "Human Readable" labels for the file header
+        // 1. Get Labels & Keys
         const xLabel = xElement.options[xElement.selectedIndex].text;
         const yLabel = yElement.options[yElement.selectedIndex].text;
-        
-        // 2. Get the "Short Value" from the dropdown (e.g., "foodAccess")
-        const xValRaw = xElement.value;
-        const yValRaw = yElement.value;
-
-        // 3. THE TRANSLATOR: Map "Short Value" -> "Database Column"
-        const dbMapping = {
-            'income': 'median_income',
-            'poverty': 'poverty_rate',
-            'foodAccess': 'food_access_score',
-            'insurance': 'lack_health_insurance',
-            'education': 'education',
-            'diabetes': 'diabetes_rate',
-            'obesity': 'obesity_rate',
-            'asthma': 'asthma_rate',
-            'mentalDistress': 'mental_distress_rate',
-            'highBloodPressure': 'high_blood_pressure'
-        };
-
-        // If the value isn't in the list, just use the raw value
-        const xKey = dbMapping[xValRaw] || xValRaw;
-        const yKey = dbMapping[yValRaw] || yValRaw;
-
-        let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += `Neighborhood,${xLabel},${yLabel}\n`; // Header Row
-
-        // 4. Build the Rows using the translated keys
-        window.dashboardData.forEach(item => {
-            let xValue = item[xKey] !== undefined ? item[xKey] : "";
-            let yValue = item[yKey] !== undefined ? item[yKey] : "";
-            
-            // Clean up: Ensure we don't write "undefined" to the file
-            csvContent += `"${item.name}",${xValue},${yValue}\n`;
-        });
-
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `Camden_${xLabel}_vs_${yLabel}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    // 1. Export Data to CSV (FINAL ROBUST VERSION)
-    function exportGraphCSV() {
-        const xElement = document.getElementById('xVariable');
-        const yElement = document.getElementById('yVariable');
-        
-        // Headers
-        const xLabel = xElement.options[xElement.selectedIndex].text;
-        const yLabel = yElement.options[yElement.selectedIndex].text;
-        
-        // Keys from dropdown (e.g., "income", "diabetes")
         const xKeyRaw = xElement.value;
         const yKeyRaw = yElement.value;
 
-        let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += `Neighborhood,${xLabel},${yLabel}\n`; 
-
+        // 2. Prepare the Data (Shotgun Mapping)
+        let csvRows = [`Neighborhood,${xLabel},${yLabel}`];
+        let tableRows = "";
+        
         window.dashboardData.forEach(item => {
-            // "Shotgun Approach": Try ALL possible name variations to find the data
-            // 1. Try exact match ("income")
-            // 2. Try database style ("median_income", "diabetes_rate")
-            // 3. Try rate suffix ("income_rate")
-            
+            // Helper to find data regardless of naming convention
             const getVal = (key) => {
                 if (item[key] !== undefined) return item[key];
                 if (item[`median_${key}`] !== undefined) return item[`median_${key}`];
                 if (item[`${key}_rate`] !== undefined) return item[`${key}_rate`];
-                if (item[`lack_health_${key}`] !== undefined) return item[`lack_health_${key}`]; // for insurance
-                return ""; // Give up
+                if (item[`lack_health_${key}`] !== undefined) return item[`lack_health_${key}`];
+                if (key === 'education' && item['bachelors_degree_rate']) return item['bachelors_degree_rate'];
+                return "N/A"; 
             };
 
             let xVal = getVal(xKeyRaw);
             let yVal = getVal(yKeyRaw);
             
-            csvContent += `"${item.name}",${xVal},${yVal}\n`;
+            // Add to CSV String
+            csvRows.push(`"${item.name}",${xVal},${yVal}`);
+            
+            // Add to HTML Table (for visual check)
+            tableRows += `<tr><td>${item.name}</td><td>${xVal}</td><td>${yVal}</td></tr>`;
         });
 
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `Camden_${xLabel}_vs_${yLabel}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Create the CSV Blob URL
+        const csvString = csvRows.join("\n");
+        const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+        const csvUrl = URL.createObjectURL(blob);
+
+        // 3. Capture the Chart Image
+        const canvas = document.getElementById('interactiveCorrelationChart');
+        const chartImg = canvas.toDataURL('image/png');
+
+        // 4. Open the New Window
+        const win = window.open('', '_blank', 'width=900,height=800');
+        
+        if (!win) {
+            alert("Please allow pop-ups to view the report.");
+            return;
+        }
+
+        win.document.write(`
+            <html>
+            <head>
+                <title>Report: ${xLabel} vs ${yLabel}</title>
+                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                <style>
+                    body { padding: 40px; font-family: sans-serif; }
+                    .no-print { background: #f8f9fa; padding: 20px; border-radius: 8px; border: 1px solid #dee2e6; margin-bottom: 30px; }
+                    .chart-container { border: 1px solid #ddd; padding: 10px; border-radius: 8px; margin-bottom: 30px; }
+                    @media print { .no-print { display: none !important; } }
+                </style>
+            </head>
+            <body>
+                <div class="no-print d-flex align-items-center justify-content-between">
+                    <div>
+                        <h5 class="mb-1">Export Options</h5>
+                        <p class="mb-0 text-muted small">Choose how you want to save this data.</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="${csvUrl}" download="Camden_Data_${xKeyRaw}_vs_${yKeyRaw}.csv" class="btn btn-success">
+                            <i class="fas fa-file-csv"></i> Download CSV
+                        </a>
+                        <button onclick="window.print()" class="btn btn-primary">
+                            <i class="fas fa-file-pdf"></i> Print / Save as PDF
+                        </button>
+                    </div>
+                </div>
+
+                <div class="text-center mb-4">
+                    <h2>Camden Health Equity Analysis</h2>
+                    <h4 class="text-muted">${xLabel} vs. ${yLabel}</h4>
+                    <p class="text-muted small">Generated on ${new Date().toLocaleDateString()}</p>
+                </div>
+
+                <div class="chart-container text-center">
+                    <img src="${chartImg}" style="max-width: 100%; height: auto;" />
+                </div>
+
+                <h5 class="mt-5 mb-3">Underlying Data</h5>
+                <table class="table table-striped table-sm table-bordered">
+                    <thead>
+                        <tr class="table-dark"><th>Neighborhood</th><th>${xLabel}</th><th>${yLabel}</th></tr>
+                    </thead>
+                    <tbody>
+                        ${tableRows}
+                    </tbody>
+                </table>
+            </body>
+            </html>
+        `);
+        
+        win.document.close();
     }
+    
+    // Reroute old buttons to this new function
+    function exportGraphCSV() { openExportWindow(); }
+    function exportGraphPDF() { openExportWindow(); }
 
 </script>
 {% endblock %}
