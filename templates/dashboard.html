@@ -100,23 +100,6 @@
         <div class="container-fluid">
             <div class="row mb-4">
                 <div class="col-12 text-center">
-                    <h2 class="display-6 fw-bold mb-3">Health Disparity Comparison</h2>
-                    <p class="lead text-muted">Compare different health metrics across Camden neighborhoods to visualize disparities</p>
-                    
-                    <div class="comparison-tools mb-3" data-html2canvas-ignore="true">
-                        <div class="btn-group" role="group" aria-label="Comparison tools">
-                            <button type="button" class="btn btn-outline-primary" id="addToComparison">
-                                <i class="fas fa-balance-scale me-1"></i>Add to Comparison
-                            </button>
-                            <button type="button" class="btn btn-outline-success" id="viewComparison">
-                                <i class="fas fa-eye me-1"></i>View Comparison (<span id="comparisonCount">0</span>)
-                            </button>
-                            <button type="button" class="btn btn-outline-danger" id="clearComparison">
-                                <i class="fas fa-times me-1"></i>Clear All
-                            </button>
-                        </div>
-                    </div>
-                    
                     <div class="user-onboarding" id="onboardingTour" style="display: none;" data-html2canvas-ignore="true">
                         <div class="alert alert-info alert-dismissible fade show" role="alert">
                             <strong>Welcome to Camden Health Equity Dashboard!</strong> 
@@ -567,7 +550,7 @@
 
 <script>
     const dbPayload = {{ db_data | tojson | safe if db_data else 'null' }};
-    window.dashboardData = {{ dashboard_data | tojson | safe }};
+    const dashboardData = {{ dashboard_data | tojson | safe }};
 
     function exportData(type) {
         if (type === 'csv') {
