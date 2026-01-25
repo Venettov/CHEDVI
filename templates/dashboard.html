@@ -319,10 +319,10 @@
                     <div class="card shadow border-0 h-100">
                         <div class="card-header bg-light py-3 border-bottom">
                             <div class="row g-2 align-items-center justify-content-between">
-                                <div class="col-md-8 d-flex align-items-center gap-2 flex-wrap">
+                                <div class="col-xl-9 col-lg-8 d-flex align-items-center gap-2 flex-wrap">
                                     <span class="fw-bold text-primary text-nowrap"><i class="fas fa-chart-line me-2"></i>Analysis:</span>
                                     
-                                    <select class="form-select form-select-sm shadow-sm" id="xVariable" style="max-width: 160px;">
+                                    <select class="form-select form-select-sm shadow-sm" id="xVariable" style="max-width: 150px;">
                                         <option value="income">Median Income</option>
                                         <option value="poverty">Poverty Rate</option>
                                         <option value="foodAccess">Food Access Score</option>
@@ -332,7 +332,7 @@
                                     
                                     <span class="text-muted small">vs</span>
                                     
-                                    <select class="form-select form-select-sm shadow-sm" id="yVariable" style="max-width: 160px;">
+                                    <select class="form-select form-select-sm shadow-sm" id="yVariable" style="max-width: 150px;">
                                         <option value="diabetes">Diabetes Rate</option>
                                         <option value="obesity">Obesity Rate</option>
                                         <option value="asthma">Asthma Rate</option>
@@ -340,12 +340,14 @@
                                         <option value="highBloodPressure">High Blood Pressure</option>
                                     </select>
 
-                                    <select class="form-select form-select-sm d-none" id="chartTypeSelector">
-                                        <option value="scatter">Scatter</option>
+                                    <span class="text-muted small ms-2">View:</span>
+                                    <select class="form-select form-select-sm shadow-sm" id="chartTypeSelector" style="max-width: 130px;">
+                                        <option value="scatter">Scatter Plot</option>
+                                        <option value="bar">Ranked Bar</option>
                                     </select>
                                 </div>
 
-                                <div class="col-md-4 text-end d-flex align-items-center justify-content-end gap-2">
+                                <div class="col-xl-3 col-lg-4 text-end d-flex align-items-center justify-content-end gap-2">
                                     <div id="correlationBadge" class="badge bg-white text-dark border px-3 py-2 shadow-sm">
                                         <small class="text-muted d-block" style="font-size:0.6rem">STATISTICAL LINK</small>
                                         <span id="rValue" class="text-primary fw-bold">--</span>
@@ -718,30 +720,49 @@
     // EXPORT FUNCTIONS FOR THE INTERACTIVE GRAPH
     // -----------------------------------------------------------------
 
-    // 1. Export Data to CSV
+    // 1. Export Data to CSV (FIXED MAPPING)
     function exportGraphCSV() {
         const xElement = document.getElementById('xVariable');
         const yElement = document.getElementById('yVariable');
         
-        // Get the text labels (e.g., "Median Income")
+        // Get Display Labels (for the CSV Header)
         const xLabel = xElement.options[xElement.selectedIndex].text;
         const yLabel = yElement.options[yElement.selectedIndex].text;
         
-        // Get the values (e.g., "income")
-        const xVar = xElement.value;
-        const yVar = yElement.value;
+        // Get Dropdown Values (e.g. "income", "foodAccess")
+        const xValRaw = xElement.value;
+        const yValRaw = yElement.value;
+
+        // DATABASE MAPPING DICTIONARY
+        // This translates the Dropdown Value -> Real Database Column
+        const dbMapping = {
+            'income': 'median_income',
+            'poverty': 'poverty_rate',
+            'foodAccess': 'food_access_score',
+            'insurance': 'lack_health_insurance',
+            'education': 'education', // or 'bachelors_degree_rate' depending on your DB
+            'diabetes': 'diabetes_rate',
+            'obesity': 'obesity_rate',
+            'asthma': 'asthma_rate',
+            'mentalDistress': 'mental_distress_rate',
+            'highBloodPressure': 'high_blood_pressure'
+        };
+
+        // Determine the actual keys to look for
+        const xKey = dbMapping[xValRaw] || xValRaw; // Fallback to raw if not found
+        const yKey = dbMapping[yValRaw] || yValRaw;
 
         let csvContent = "data:text/csv;charset=utf-8,";
         csvContent += `Neighborhood,${xLabel},${yLabel}\n`; // Header Row
 
-        // Use the global data
+        // Loop through global data
         window.dashboardData.forEach(item => {
-            // Helper to handle inconsistent key naming safely
-            let xVal = item[xVar] || item[xVar + '_rate'] || item['median_' + xVar] || ''; 
-            let yVal = item[yVar] || item[yVar + '_rate'] || '';
+            // Retrieve values using the translated keys
+            let xValue = item[xKey] !== undefined ? item[xKey] : "";
+            let yValue = item[yKey] !== undefined ? item[yKey] : "";
             
-            // Add row
-            csvContent += `"${item.name}",${xVal},${yVal}\n`;
+            // Add row to CSV
+            csvContent += `"${item.name}",${xValue},${yValue}\n`;
         });
 
         const encodedUri = encodeURI(csvContent);
