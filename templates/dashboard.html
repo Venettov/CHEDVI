@@ -778,7 +778,7 @@
         document.body.removeChild(link);
     }
 
-    // 2. Export Graph to PDF (FIXED: "Z-Index" Strategy)
+    // 2. Export Graph to PDF
     function exportGraphPDF() {
         const xElement = document.getElementById('xVariable');
         const yElement = document.getElementById('yVariable');
@@ -786,43 +786,53 @@
         const yLabel = yElement.options[yElement.selectedIndex].text;
         const rValue = document.getElementById('rValue').innerText;
 
-        // 1. Create the container
+        // 1. Create a Full-Screen Overlay
+        // We place it ON TOP of everything (z-index 10000) so html2pdf definitely sees it.
         const reportContainer = document.createElement('div');
         
-        // STYLE FIX: Place it inside the viewport (0,0) so html2pdf "sees" it,
-        // but push it way behind the page (-9999) so the user doesn't see it.
-        reportContainer.style.position = 'fixed';
-        reportContainer.style.top = '0';
-        reportContainer.style.left = '0';
-        reportContainer.style.zIndex = '-9999'; 
-        reportContainer.style.width = '1000px'; // Fixed A4-like width
-        reportContainer.style.background = '#ffffff'; // Ensure white background
-        reportContainer.style.padding = '40px';
+        Object.assign(reportContainer.style, {
+            position: 'fixed',
+            top: '0',
+            left: '0',
+            width: '100vw', // Full width of viewport
+            height: '100vh', // Full height of viewport
+            zIndex: '10000', // On top of everything
+            backgroundColor: '#ffffff',
+            padding: '40px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center'
+        });
         
         document.body.appendChild(reportContainer);
 
-        // 2. Capture the chart image
-        // We set the background explicitly to white to avoid transparent/black chart issues
+        // 2. Capture the Chart Image
         const canvas = document.getElementById('interactiveCorrelationChart');
-        const chartImg = canvas.toDataURL('image/png', 1.0);
+        // Use JPEG to ensure no transparency issues
+        const chartImg = canvas.toDataURL('image/jpeg', 1.0); 
 
-        // 3. Fill with content
+        // 3. Build the "Print Preview" HTML
         reportContainer.innerHTML = `
-            <div style="font-family: Arial, sans-serif; text-align: center; color: #333; background: white;">
-                <h1 style="margin-bottom: 10px; font-size: 24px; color: #2c3e50;">Camden Health Equity Analysis</h1>
+            <div style="width: 100%; max-width: 900px; font-family: Arial, sans-serif; text-align: center;">
+                <h1 style="margin-bottom: 5px; color: #2c3e50;">Camden Health Equity Analysis</h1>
                 <h3 style="margin-top: 0; color: #7f8c8d; font-weight: normal;">${xLabel} vs. ${yLabel}</h3>
                 
                 <div style="margin: 30px auto; border: 1px solid #eee; padding: 20px; border-radius: 8px; background: white;">
-                    <img src="${chartImg}" style="width: 100%; max-height: 500px; object-fit: contain;" />
+                    <img src="${chartImg}" style="width: 100%; height: auto; max-height: 500px; object-fit: contain;" />
                 </div>
 
-                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; display: inline-block; border: 1px solid #dee2e6;">
-                    <strong style="color: #0d6efd; font-size: 16px;">Statistical Link (Correlation):</strong> 
-                    <span style="font-size: 18px; font-weight: bold; margin-left: 10px;">${rValue}</span>
+                <div style="background-color: #f8f9fa; padding: 15px 30px; border-radius: 50px; display: inline-block; border: 1px solid #dee2e6;">
+                    <strong style="color: #0d6efd; font-size: 16px;">Statistical Link:</strong> 
+                    <span style="font-size: 18px; font-weight: bold; margin-left: 10px; color: #333;">${rValue}</span>
                 </div>
                 
-                <div style="margin-top: 50px; border-top: 1px solid #eee; padding-top: 20px; font-size: 12px; color: #999;">
-                    Generated on ${new Date().toLocaleDateString()} at ${new Date().toLocaleTimeString()}
+                <div style="margin-top: 40px; font-size: 12px; color: #aaa; border-top: 1px solid #eee; padding-top: 20px;">
+                    Generated on ${new Date().toLocaleDateString()} via Camden Health Dashboard
+                </div>
+                
+                <div style="margin-top: 20px; color: #0d6efd;">
+                    <i class="fas fa-spinner fa-spin me-2"></i>Generating PDF...
                 </div>
             </div>
         `;
@@ -832,12 +842,12 @@
             margin: 0.5,
             filename: `Camden_Analysis_${xLabel}_vs_${yLabel}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
+            html2canvas: { scale: 2, useCORS: true },
             jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
         };
 
-        // 5. Save and Clean up
         html2pdf().set(opt).from(reportContainer).save().then(() => {
+            // 5. Clean up: Remove the overlay
             document.body.removeChild(reportContainer);
         });
     }
