@@ -778,27 +778,60 @@
         document.body.removeChild(link);
     }
 
-    // 2. Export Graph to PDF
+    // 2. Export Graph to PDF (FIXED: "Clean Report" Method)
     function exportGraphPDF() {
-        const chartCanvas = document.getElementById('interactiveCorrelationChart');
+        // 1. Get the current labels & values
         const xElement = document.getElementById('xVariable');
         const yElement = document.getElementById('yVariable');
-        
         const xLabel = xElement.options[xElement.selectedIndex].text;
         const yLabel = yElement.options[yElement.selectedIndex].text;
+        const rValue = document.getElementById('rValue').innerText;
 
+        // 2. Create a temporary "Clean Container" for the PDF
+        // This avoids including dropdowns/buttons which cause the freezing
+        const reportContainer = document.createElement('div');
+        reportContainer.style.width = '1000px'; // Fixed width for consistent PDF look
+        reportContainer.style.padding = '20px';
+        reportContainer.style.background = 'white';
+        
+        // 3. Convert the Live Chart to a Static Image
+        const canvas = document.getElementById('interactiveCorrelationChart');
+        const chartImg = canvas.toDataURL('image/png', 1.0);
+
+        // 4. Build the HTML for the PDF
+        reportContainer.innerHTML = `
+            <div style="font-family: sans-serif; text-align: center; color: #333;">
+                <h2 style="margin-bottom: 5px;">Camden Health Equity Analysis</h2>
+                <h4 style="margin-top: 0; color: #666;">${xLabel} vs. ${yLabel}</h4>
+                
+                <div style="margin: 20px auto; border: 1px solid #ddd; padding: 10px;">
+                    <img src="${chartImg}" style="width: 100%; max-height: 500px;" />
+                </div>
+
+                <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; display: inline-block;">
+                    <strong>Statistical Link (Correlation):</strong> <span style="color: #0d6efd; font-weight: bold;">${rValue}</span>
+                </div>
+                
+                <p style="margin-top: 30px; font-size: 12px; color: #999;">
+                    Generated on ${new Date().toLocaleDateString()} via Camden Health Dashboard
+                </p>
+            </div>
+        `;
+
+        // 5. Generate PDF
         const opt = {
             margin: 0.5,
-            filename: `Chart_${xLabel}_vs_${yLabel}.pdf`,
+            filename: `Analysis_${xLabel}_vs_${yLabel}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2 },
             jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
         };
 
-        // Capture the parent card so we get the title/legend, not just the lines
-        const elementToCapture = chartCanvas.parentElement.parentElement; 
-        
-        html2pdf().set(opt).from(elementToCapture).save();
+        // We use the 'worker' pattern to generate, then save, then remove the temp container
+        html2pdf().set(opt).from(reportContainer).save().then(() => {
+            // Clean up: Removed the temporary container from memory (it was never added to the DOM)
+            reportContainer.remove();
+        });
     }
 
 </script>
