@@ -778,7 +778,7 @@
         document.body.removeChild(link);
     }
 
-    // 2. Export Graph to PDF (FIXED: Append to Body)
+    // 2. Export Graph to PDF (FIXED: "Z-Index" Strategy)
     function exportGraphPDF() {
         const xElement = document.getElementById('xVariable');
         const yElement = document.getElementById('yVariable');
@@ -788,34 +788,36 @@
 
         // 1. Create the container
         const reportContainer = document.createElement('div');
-        reportContainer.style.width = '1000px';
-        reportContainer.style.padding = '40px';
-        reportContainer.style.background = 'white';
-        reportContainer.style.fontFamily = 'Arial, sans-serif';
         
-        // 2. CRITICAL FIX: Position it off-screen and add to DOM
-        // This allows html2pdf to "see" and render it without showing it to the user
-        reportContainer.style.position = 'absolute';
-        reportContainer.style.left = '-10000px';
+        // STYLE FIX: Place it inside the viewport (0,0) so html2pdf "sees" it,
+        // but push it way behind the page (-9999) so the user doesn't see it.
+        reportContainer.style.position = 'fixed';
         reportContainer.style.top = '0';
+        reportContainer.style.left = '0';
+        reportContainer.style.zIndex = '-9999'; 
+        reportContainer.style.width = '1000px'; // Fixed A4-like width
+        reportContainer.style.background = '#ffffff'; // Ensure white background
+        reportContainer.style.padding = '40px';
+        
         document.body.appendChild(reportContainer);
 
-        // 3. Capture the chart image
+        // 2. Capture the chart image
+        // We set the background explicitly to white to avoid transparent/black chart issues
         const canvas = document.getElementById('interactiveCorrelationChart');
         const chartImg = canvas.toDataURL('image/png', 1.0);
 
-        // 4. Fill with content
+        // 3. Fill with content
         reportContainer.innerHTML = `
-            <div style="text-align: center; color: #333;">
-                <h1 style="margin-bottom: 10px; font-size: 24px;">Camden Health Equity Analysis</h1>
-                <h3 style="margin-top: 0; color: #666; font-weight: normal;">${xLabel} vs. ${yLabel}</h3>
+            <div style="font-family: Arial, sans-serif; text-align: center; color: #333; background: white;">
+                <h1 style="margin-bottom: 10px; font-size: 24px; color: #2c3e50;">Camden Health Equity Analysis</h1>
+                <h3 style="margin-top: 0; color: #7f8c8d; font-weight: normal;">${xLabel} vs. ${yLabel}</h3>
                 
-                <div style="margin: 30px auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+                <div style="margin: 30px auto; border: 1px solid #eee; padding: 20px; border-radius: 8px; background: white;">
                     <img src="${chartImg}" style="width: 100%; max-height: 500px; object-fit: contain;" />
                 </div>
 
-                <div style="background-color: #f0f7ff; padding: 20px; border-radius: 8px; display: inline-block; border: 1px solid #cce5ff;">
-                    <strong style="color: #0056b3; font-size: 16px;">Statistical Link (Correlation):</strong> 
+                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; display: inline-block; border: 1px solid #dee2e6;">
+                    <strong style="color: #0d6efd; font-size: 16px;">Statistical Link (Correlation):</strong> 
                     <span style="font-size: 18px; font-weight: bold; margin-left: 10px;">${rValue}</span>
                 </div>
                 
@@ -825,17 +827,17 @@
             </div>
         `;
 
-        // 5. Generate PDF
+        // 4. Generate PDF
         const opt = {
             margin: 0.5,
             filename: `Camden_Analysis_${xLabel}_vs_${yLabel}.pdf`,
             image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
+            html2canvas: { scale: 2, useCORS: true, scrollY: 0 },
             jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
         };
 
+        // 5. Save and Clean up
         html2pdf().set(opt).from(reportContainer).save().then(() => {
-            // 6. Clean up: Remove the container from the page
             document.body.removeChild(reportContainer);
         });
     }
