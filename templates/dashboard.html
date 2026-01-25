@@ -140,7 +140,7 @@
                 </div>
             </div>
             
-            <div class="row g-3">
+            <div class="row g-3" id="maps-capture-area">
                 <div class="col-xl-6 col-12">
                     <div class="card h-100 shadow-sm">
                         <div class="card-header bg-danger text-white">
@@ -869,24 +869,24 @@
     // MAP EXPORT FUNCTIONS
     // -----------------------------------------------------------------
 
-    // 1. Open Map Report Window (FIXED: Handles "Overview Mode" + Fixes Blank Maps)
+    // 1. Open Map Report Window (FIXED: Captures Specific Area + Fixes Security Error)
     function openMapExportWindow() {
-        // 1. Check if a neighborhood is selected
         const selectedName = window.currentSelection;
         let reportTitle = "Camden City Overview";
         let reportSubtitle = "City-wide Health & Social Determinants Analysis";
+        
+        // Default Message
         let metricsHTML = `<div class="alert alert-info border-0 shadow-sm">
                                <i class="fas fa-info-circle me-2"></i>
                                <strong>City-Wide View:</strong> Click a specific neighborhood on the map to see detailed local metrics here.
                            </div>`;
 
-        // 2. If selected, switch to "Detail Mode"
+        // If a neighborhood is selected, show its data
         if (selectedName) {
             const data = window.dashboardData.find(n => n.name === selectedName);
             if (data) {
                 reportTitle = selectedName;
                 reportSubtitle = "Neighborhood Health Equity Profile";
-                // Build the metrics grid for this specific neighborhood
                 metricsHTML = `
                     <h4 class="mb-3 border-bottom pb-2">Key Health & Social Metrics</h4>
                     <div class="row g-3">
@@ -902,78 +902,81 @@
             }
         }
 
-        // 3. Feedback: Show Spinner
+        // Feedback Icon
         const btnIcon = document.querySelector('button[onclick="openMapExportWindow()"] i');
         const originalClass = btnIcon ? btnIcon.className : "fas fa-file-pdf";
         if(btnIcon) btnIcon.className = "fas fa-spinner fa-spin me-2 text-primary";
 
-        // 4. Capture the Map (With a tiny delay to ensure maps render)
-        const mapContainer = document.getElementById('dashboard-content');
+        // TARGET THE SPECIFIC MAP ROW
+        const mapContainer = document.getElementById('maps-capture-area');
 
+        // Wait a moment for maps to settle
         setTimeout(() => {
             html2canvas(mapContainer, { 
-                useCORS: true, 
-                allowTaint: true,
+                useCORS: true,       // Ask for permission to use external map tiles
+                allowTaint: false,   // CRITICAL: Must be false to prevent security blocks
                 scrollY: -window.scrollY,
-                ignoreElements: (element) => element.id === 'onboardingTour' 
+                backgroundColor: '#ffffff' 
             }).then(canvas => {
-                const mapImg = canvas.toDataURL('image/png');
-                
-                // Open Window
-                const win = window.open('', '_blank', 'width=1200,height=900');
-                if (!win) {
-                    alert("Please allow pop-ups.");
-                    if(btnIcon) btnIcon.className = originalClass;
-                    return;
+                try {
+                    const mapImg = canvas.toDataURL('image/png');
+                    
+                    const win = window.open('', '_blank', 'width=1200,height=900');
+                    if (!win) {
+                        alert("Please allow pop-ups.");
+                        if(btnIcon) btnIcon.className = originalClass;
+                        return;
+                    }
+
+                    win.document.write(`
+                        <html>
+                        <head>
+                            <title>Report: ${reportTitle}</title>
+                            <link href="[https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css](https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css)" rel="stylesheet">
+                            <link href="[https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css](https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css)" rel="stylesheet">
+                            <style>
+                                body { padding: 40px; font-family: sans-serif; }
+                                .metric-box { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #dee2e6; }
+                                .metric-label { color: #6c757d; font-size: 0.85rem; text-transform: uppercase; font-weight: bold; }
+                                .metric-value { color: #212529; font-size: 1.25rem; font-weight: bold; }
+                                @media print { .no-print { display: none !important; } }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="no-print d-flex justify-content-between align-items-center mb-4 p-3 bg-light rounded border">
+                                <h5 class="mb-0"><i class="fas fa-file-alt me-2 text-primary"></i>Report Preview</h5>
+                                <button onclick="window.print()" class="btn btn-primary"><i class="fas fa-print me-2"></i>Print / Save PDF</button>
+                            </div>
+
+                            <div class="text-center mb-4">
+                                <h1 class="mb-1">${reportTitle}</h1>
+                                <p class="text-muted">${reportSubtitle}</p>
+                            </div>
+
+                            <div class="mb-5 text-center border rounded p-2 bg-white shadow-sm">
+                                <img src="${mapImg}" style="max-width: 100%; height: auto; max-height: 600px;" />
+                                <p class="small text-muted mt-2 fst-italic">Snapshot of dashboard analysis at time of report</p>
+                            </div>
+
+                            ${metricsHTML}
+
+                            <div class="mt-5 text-center text-muted small border-top pt-3">
+                                Generated on ${new Date().toLocaleDateString()} via Camden Health Equity Dashboard
+                            </div>
+                        </body>
+                        </html>
+                    `);
+                    win.document.close();
+                } catch (e) {
+                    console.error("Export Error:", e);
+                    alert("Unable to generate map image. The browser blocked the map tiles for security reasons.");
                 }
-
-                // Build HTML
-                win.document.write(`
-                    <html>
-                    <head>
-                        <title>Report: ${reportTitle}</title>
-                        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-                        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-                        <style>
-                            body { padding: 40px; font-family: sans-serif; }
-                            .metric-box { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #dee2e6; }
-                            .metric-label { color: #6c757d; font-size: 0.85rem; text-transform: uppercase; font-weight: bold; }
-                            .metric-value { color: #212529; font-size: 1.25rem; font-weight: bold; }
-                            @media print { .no-print { display: none !important; } }
-                        </style>
-                    </head>
-                    <body>
-                        <div class="no-print d-flex justify-content-between align-items-center mb-4 p-3 bg-light rounded border">
-                            <h5 class="mb-0"><i class="fas fa-file-alt me-2 text-primary"></i>Report Preview</h5>
-                            <button onclick="window.print()" class="btn btn-primary"><i class="fas fa-print me-2"></i>Print / Save PDF</button>
-                        </div>
-
-                        <div class="text-center mb-4">
-                            <h1 class="mb-1">${reportTitle}</h1>
-                            <p class="text-muted">${reportSubtitle}</p>
-                        </div>
-
-                        <div class="mb-5 text-center border rounded p-2 bg-white shadow-sm">
-                            <img src="${mapImg}" style="max-width: 100%; height: auto; max-height: 650px;" />
-                            <p class="small text-muted mt-2 fst-italic">Snapshot of dashboard analysis at time of report</p>
-                        </div>
-
-                        ${metricsHTML}
-
-                        <div class="mt-5 text-center text-muted small border-top pt-3">
-                            Generated on ${new Date().toLocaleDateString()} via Camden Health Equity Dashboard
-                        </div>
-                    </body>
-                    </html>
-                `);
-                win.document.close();
                 
-                // Restore button icon
                 if(btnIcon) btnIcon.className = originalClass;
             });
-        }, 500); // 500ms Delay to fix blank map issue
+        }, 500);
     }
-    
+
     // 2. Export Map Data to CSV
     function exportMapCSV() {
         const selectedName = window.currentSelection;
