@@ -110,6 +110,35 @@
                     </div>
                 </div>
             </div>
+
+            <div class="row mb-3">
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body py-3 d-flex align-items-center justify-content-between">
+                            <div>
+                                <h4 class="mb-0 fw-bold text-primary">
+                                    <i class="fas fa-map me-2"></i>Neighborhood Comparison
+                                </h4>
+                                <p class="text-muted small mb-0">Select metrics below to visualize disparities across Camden.</p>
+                            </div>
+                            
+                            <div class="btn-group" data-html2canvas-ignore="true">
+                                <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-download me-2"></i>Export Options
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                    <li><button class="dropdown-item py-2" onclick="openMapExportWindow()">
+                                        <i class="fas fa-file-pdf me-2 text-danger"></i>Print / Save Report (PDF)
+                                    </button></li>
+                                    <li><button class="dropdown-item py-2" onclick="exportMapCSV()">
+                                        <i class="fas fa-file-csv me-2 text-success"></i>Download Data (CSV)
+                                    </button></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <div class="row g-3">
                 <div class="col-xl-6 col-12">
@@ -151,11 +180,11 @@
                             <div class="row align-items-center">
                                 <div class="col">
                                     <h6 class="card-title mb-0">
-                                        <i class="fas fa-map-marked-alt me-2"></i>Social Determinants
+                                        <i class="fas fa-layer-group me-2"></i>Social Determinants
                                     </h6>
                                 </div>
-                                <div class="col-auto d-flex gap-2" data-html2canvas-ignore="true">
-                                    <select class="form-select form-select-sm text-dark" id="rightMapSelector" style="max-width: 180px;">
+                                <div class="col-auto" data-html2canvas-ignore="true">
+                                    <select class="form-select form-select-sm text-dark shadow-sm" id="rightMapSelector" style="max-width: 200px;">
                                         <option value="income">Median Income ($)</option>
                                         <option value="education">Education Level (%)</option>
                                         <option value="food_access">Food Access Score</option>
@@ -163,20 +192,6 @@
                                         <option value="unemployment">Unemployment Rate (%)</option>
                                         <option value="healthcare_access">Healthcare Access (%)</option>
                                     </select>
-
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                            <i class="fas fa-download"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end shadow">
-                                            <li><button class="dropdown-item py-2" onclick="openMapExportWindow()">
-                                                <i class="fas fa-file-pdf me-2 text-danger"></i>Print / Save Report
-                                            </button></li>
-                                            <li><button class="dropdown-item py-2" onclick="exportMapCSV()">
-                                                <i class="fas fa-file-csv me-2 text-success"></i>Download Data (CSV)
-                                            </button></li>
-                                        </ul>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -950,7 +965,7 @@
             btnIcon.className = originalClass;
         });
     }
-    
+
     // 2. Export Map Data to CSV
     function exportMapCSV() {
         const selectedName = window.currentSelection;
