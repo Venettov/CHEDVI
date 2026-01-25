@@ -778,78 +778,49 @@
         document.body.removeChild(link);
     }
 
-    // 2. Export Graph to PDF
-    function exportGraphPDF() {
+    // 1. Export Data to CSV (FINAL ROBUST VERSION)
+    function exportGraphCSV() {
         const xElement = document.getElementById('xVariable');
         const yElement = document.getElementById('yVariable');
+        
+        // Headers
         const xLabel = xElement.options[xElement.selectedIndex].text;
         const yLabel = yElement.options[yElement.selectedIndex].text;
-        const rValue = document.getElementById('rValue').innerText;
-
-        // 1. Create a Full-Screen Overlay
-        // We place it ON TOP of everything (z-index 10000) so html2pdf definitely sees it.
-        const reportContainer = document.createElement('div');
         
-        Object.assign(reportContainer.style, {
-            position: 'fixed',
-            top: '0',
-            left: '0',
-            width: '100vw', // Full width of viewport
-            height: '100vh', // Full height of viewport
-            zIndex: '10000', // On top of everything
-            backgroundColor: '#ffffff',
-            padding: '40px',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center'
+        // Keys from dropdown (e.g., "income", "diabetes")
+        const xKeyRaw = xElement.value;
+        const yKeyRaw = yElement.value;
+
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += `Neighborhood,${xLabel},${yLabel}\n`; 
+
+        window.dashboardData.forEach(item => {
+            // "Shotgun Approach": Try ALL possible name variations to find the data
+            // 1. Try exact match ("income")
+            // 2. Try database style ("median_income", "diabetes_rate")
+            // 3. Try rate suffix ("income_rate")
+            
+            const getVal = (key) => {
+                if (item[key] !== undefined) return item[key];
+                if (item[`median_${key}`] !== undefined) return item[`median_${key}`];
+                if (item[`${key}_rate`] !== undefined) return item[`${key}_rate`];
+                if (item[`lack_health_${key}`] !== undefined) return item[`lack_health_${key}`]; // for insurance
+                return ""; // Give up
+            };
+
+            let xVal = getVal(xKeyRaw);
+            let yVal = getVal(yKeyRaw);
+            
+            csvContent += `"${item.name}",${xVal},${yVal}\n`;
         });
-        
-        document.body.appendChild(reportContainer);
 
-        // 2. Capture the Chart Image
-        const canvas = document.getElementById('interactiveCorrelationChart');
-        // Use JPEG to ensure no transparency issues
-        const chartImg = canvas.toDataURL('image/jpeg', 1.0); 
-
-        // 3. Build the "Print Preview" HTML
-        reportContainer.innerHTML = `
-            <div style="width: 100%; max-width: 900px; font-family: Arial, sans-serif; text-align: center;">
-                <h1 style="margin-bottom: 5px; color: #2c3e50;">Camden Health Equity Analysis</h1>
-                <h3 style="margin-top: 0; color: #7f8c8d; font-weight: normal;">${xLabel} vs. ${yLabel}</h3>
-                
-                <div style="margin: 30px auto; border: 1px solid #eee; padding: 20px; border-radius: 8px; background: white;">
-                    <img src="${chartImg}" style="width: 100%; height: auto; max-height: 500px; object-fit: contain;" />
-                </div>
-
-                <div style="background-color: #f8f9fa; padding: 15px 30px; border-radius: 50px; display: inline-block; border: 1px solid #dee2e6;">
-                    <strong style="color: #0d6efd; font-size: 16px;">Statistical Link:</strong> 
-                    <span style="font-size: 18px; font-weight: bold; margin-left: 10px; color: #333;">${rValue}</span>
-                </div>
-                
-                <div style="margin-top: 40px; font-size: 12px; color: #aaa; border-top: 1px solid #eee; padding-top: 20px;">
-                    Generated on ${new Date().toLocaleDateString()} via Camden Health Dashboard
-                </div>
-                
-                <div style="margin-top: 20px; color: #0d6efd;">
-                    <i class="fas fa-spinner fa-spin me-2"></i>Generating PDF...
-                </div>
-            </div>
-        `;
-
-        // 4. Generate PDF
-        const opt = {
-            margin: 0.5,
-            filename: `Camden_Analysis_${xLabel}_vs_${yLabel}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
-        };
-
-        html2pdf().set(opt).from(reportContainer).save().then(() => {
-            // 5. Clean up: Remove the overlay
-            document.body.removeChild(reportContainer);
-        });
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Camden_${xLabel}_vs_${yLabel}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
 </script>
