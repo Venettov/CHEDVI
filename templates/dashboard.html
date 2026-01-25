@@ -854,7 +854,7 @@
     // MAP EXPORT FUNCTIONS
     // -----------------------------------------------------------------
 
-    // 1. Open Map Report Window
+// 1. Open Map Report Window (UPDATED: Captures Maps + Overlay)
     function openMapExportWindow() {
         // Get current selection (set globally by dashboard-fixed.js)
         const selectedName = window.currentSelection;
@@ -868,25 +868,26 @@
         const data = window.dashboardData.find(n => n.name === selectedName);
         if (!data) return;
 
-        // Capture the Maps (Left and Right)
-        // Target the specific row containing the maps inside the dashboard content
-        const mapContainer = document.querySelector('#dashboard-content .row.g-3');
+        // TARGET THE FULL DASHBOARD CONTENT (Maps + Overlay Section)
+        const mapContainer = document.getElementById('dashboard-content'); 
         
-        // Show "Generating" feedback
+        // Feedback Icon
         const btnIcon = document.querySelector('button[onclick="openMapExportWindow()"] i');
         const originalClass = btnIcon.className;
         btnIcon.className = "fas fa-spinner fa-spin me-2 text-primary";
 
-        // Use html2canvas (built into html2pdf) to snapshot the maps
+        // Snapshot
         html2canvas(mapContainer, { 
-            useCORS: true,       // Important for map tiles
+            useCORS: true, 
             allowTaint: true,
-            scrollY: -window.scrollY 
+            scrollY: -window.scrollY,
+            // Ignore the "Welcome" alert if it's visible to keep report clean
+            ignoreElements: (element) => element.id === 'onboardingTour' 
         }).then(canvas => {
             const mapImg = canvas.toDataURL('image/png');
             
             // Open Window
-            const win = window.open('', '_blank', 'width=1100,height=850');
+            const win = window.open('', '_blank', 'width=1200,height=900');
             if (!win) {
                 alert("Please allow pop-ups.");
                 btnIcon.className = originalClass;
@@ -918,9 +919,9 @@
                         <p class="text-muted">Camden Health Equity Profile</p>
                     </div>
 
-                    <div class="mb-5 text-center border rounded p-2">
-                        <img src="${mapImg}" style="max-width: 100%; height: auto; max-height: 400px;" />
-                        <p class="small text-muted mt-2 fst-italic">Map comparison view at time of report</p>
+                    <div class="mb-5 text-center border rounded p-2 bg-white shadow-sm">
+                        <img src="${mapImg}" style="max-width: 100%; height: auto; max-height: 600px;" />
+                        <p class="small text-muted mt-2 fst-italic">Comprehensive view (Maps + Analysis) at time of report</p>
                     </div>
 
                     <h4 class="mb-3 border-bottom pb-2">Key Health & Social Metrics</h4>
@@ -949,7 +950,7 @@
             btnIcon.className = originalClass;
         });
     }
-
+    
     // 2. Export Map Data to CSV
     function exportMapCSV() {
         const selectedName = window.currentSelection;
