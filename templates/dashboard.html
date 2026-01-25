@@ -869,103 +869,111 @@
     // MAP EXPORT FUNCTIONS
     // -----------------------------------------------------------------
 
-// 1. Open Map Report Window (UPDATED: Captures Maps + Overlay)
+    // 1. Open Map Report Window (FIXED: Handles "Overview Mode" + Fixes Blank Maps)
     function openMapExportWindow() {
-        // Get current selection (set globally by dashboard-fixed.js)
+        // 1. Check if a neighborhood is selected
         const selectedName = window.currentSelection;
-        
-        if (!selectedName) {
-            alert("Please click on a neighborhood in the map first.");
-            return;
-        }
+        let reportTitle = "Camden City Overview";
+        let reportSubtitle = "City-wide Health & Social Determinants Analysis";
+        let metricsHTML = `<div class="alert alert-info border-0 shadow-sm">
+                               <i class="fas fa-info-circle me-2"></i>
+                               <strong>City-Wide View:</strong> Click a specific neighborhood on the map to see detailed local metrics here.
+                           </div>`;
 
-        // Find the data
-        const data = window.dashboardData.find(n => n.name === selectedName);
-        if (!data) return;
-
-        // TARGET THE FULL DASHBOARD CONTENT (Maps + Overlay Section)
-        const mapContainer = document.getElementById('dashboard-content'); 
-        
-        // Feedback Icon
-        const btnIcon = document.querySelector('button[onclick="openMapExportWindow()"] i');
-        const originalClass = btnIcon.className;
-        btnIcon.className = "fas fa-spinner fa-spin me-2 text-primary";
-
-        // Snapshot
-        html2canvas(mapContainer, { 
-            useCORS: true, 
-            allowTaint: true,
-            scrollY: -window.scrollY,
-            // Ignore the "Welcome" alert if it's visible to keep report clean
-            ignoreElements: (element) => element.id === 'onboardingTour' 
-        }).then(canvas => {
-            const mapImg = canvas.toDataURL('image/png');
-            
-            // Open Window
-            const win = window.open('', '_blank', 'width=1200,height=900');
-            if (!win) {
-                alert("Please allow pop-ups.");
-                btnIcon.className = originalClass;
-                return;
-            }
-
-            // Build HTML
-            win.document.write(`
-                <html>
-                <head>
-                    <title>Neighborhood Report: ${selectedName}</title>
-                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-                    <style>
-                        body { padding: 40px; font-family: sans-serif; }
-                        .metric-box { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #dee2e6; }
-                        .metric-label { color: #6c757d; font-size: 0.85rem; text-transform: uppercase; font-weight: bold; }
-                        .metric-value { color: #212529; font-size: 1.25rem; font-weight: bold; }
-                        @media print { .no-print { display: none !important; } }
-                    </style>
-                </head>
-                <body>
-                    <div class="no-print d-flex justify-content-between align-items-center mb-4 p-3 bg-light rounded border">
-                        <h5 class="mb-0">Report Preview</h5>
-                        <button onclick="window.print()" class="btn btn-primary"><i class="fas fa-print me-2"></i>Print / Save PDF</button>
-                    </div>
-
-                    <div class="text-center mb-4">
-                        <h1 class="mb-1">${selectedName}</h1>
-                        <p class="text-muted">Camden Health Equity Profile</p>
-                    </div>
-
-                    <div class="mb-5 text-center border rounded p-2 bg-white shadow-sm">
-                        <img src="${mapImg}" style="max-width: 100%; height: auto; max-height: 600px;" />
-                        <p class="small text-muted mt-2 fst-italic">Comprehensive view (Maps + Analysis) at time of report</p>
-                    </div>
-
+        // 2. If selected, switch to "Detail Mode"
+        if (selectedName) {
+            const data = window.dashboardData.find(n => n.name === selectedName);
+            if (data) {
+                reportTitle = selectedName;
+                reportSubtitle = "Neighborhood Health Equity Profile";
+                // Build the metrics grid for this specific neighborhood
+                metricsHTML = `
                     <h4 class="mb-3 border-bottom pb-2">Key Health & Social Metrics</h4>
                     <div class="row g-3">
                         <div class="col-4"><div class="metric-box"><div class="metric-label">Median Income</div><div class="metric-value">$${parseInt(data.median_income || 0).toLocaleString()}</div></div></div>
                         <div class="col-4"><div class="metric-box"><div class="metric-label">Poverty Rate</div><div class="metric-value">${data.poverty_rate}%</div></div></div>
                         <div class="col-4"><div class="metric-box"><div class="metric-label">Unemployment</div><div class="metric-value">${data.unemployment_rate}%</div></div></div>
-                        
                         <div class="col-4"><div class="metric-box"><div class="metric-label">Diabetes Rate</div><div class="metric-value text-danger">${data.diabetes_rate}%</div></div></div>
                         <div class="col-4"><div class="metric-box"><div class="metric-label">Obesity Rate</div><div class="metric-value text-warning">${data.obesity_rate}%</div></div></div>
                         <div class="col-4"><div class="metric-box"><div class="metric-label">Asthma Rate</div><div class="metric-value text-info">${data.asthma_rate}%</div></div></div>
-                        
                         <div class="col-6"><div class="metric-box"><div class="metric-label">Food Access Score</div><div class="metric-value">${data.food_access_score}</div></div></div>
                         <div class="col-6"><div class="metric-box"><div class="metric-label">Mental Distress</div><div class="metric-value">${data.mental_distress_rate}%</div></div></div>
-                    </div>
+                    </div>`;
+            }
+        }
 
-                    <div class="mt-5 text-center text-muted small">
-                        Generated on ${new Date().toLocaleDateString()}
-                    </div>
-                </body>
-                </html>
-            `);
-            win.document.close();
-            
-            // Restore button icon
-            btnIcon.className = originalClass;
-        });
+        // 3. Feedback: Show Spinner
+        const btnIcon = document.querySelector('button[onclick="openMapExportWindow()"] i');
+        const originalClass = btnIcon ? btnIcon.className : "fas fa-file-pdf";
+        if(btnIcon) btnIcon.className = "fas fa-spinner fa-spin me-2 text-primary";
+
+        // 4. Capture the Map (With a tiny delay to ensure maps render)
+        const mapContainer = document.getElementById('dashboard-content');
+
+        setTimeout(() => {
+            html2canvas(mapContainer, { 
+                useCORS: true, 
+                allowTaint: true,
+                scrollY: -window.scrollY,
+                ignoreElements: (element) => element.id === 'onboardingTour' 
+            }).then(canvas => {
+                const mapImg = canvas.toDataURL('image/png');
+                
+                // Open Window
+                const win = window.open('', '_blank', 'width=1200,height=900');
+                if (!win) {
+                    alert("Please allow pop-ups.");
+                    if(btnIcon) btnIcon.className = originalClass;
+                    return;
+                }
+
+                // Build HTML
+                win.document.write(`
+                    <html>
+                    <head>
+                        <title>Report: ${reportTitle}</title>
+                        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+                        <style>
+                            body { padding: 40px; font-family: sans-serif; }
+                            .metric-box { background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #dee2e6; }
+                            .metric-label { color: #6c757d; font-size: 0.85rem; text-transform: uppercase; font-weight: bold; }
+                            .metric-value { color: #212529; font-size: 1.25rem; font-weight: bold; }
+                            @media print { .no-print { display: none !important; } }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="no-print d-flex justify-content-between align-items-center mb-4 p-3 bg-light rounded border">
+                            <h5 class="mb-0"><i class="fas fa-file-alt me-2 text-primary"></i>Report Preview</h5>
+                            <button onclick="window.print()" class="btn btn-primary"><i class="fas fa-print me-2"></i>Print / Save PDF</button>
+                        </div>
+
+                        <div class="text-center mb-4">
+                            <h1 class="mb-1">${reportTitle}</h1>
+                            <p class="text-muted">${reportSubtitle}</p>
+                        </div>
+
+                        <div class="mb-5 text-center border rounded p-2 bg-white shadow-sm">
+                            <img src="${mapImg}" style="max-width: 100%; height: auto; max-height: 650px;" />
+                            <p class="small text-muted mt-2 fst-italic">Snapshot of dashboard analysis at time of report</p>
+                        </div>
+
+                        ${metricsHTML}
+
+                        <div class="mt-5 text-center text-muted small border-top pt-3">
+                            Generated on ${new Date().toLocaleDateString()} via Camden Health Equity Dashboard
+                        </div>
+                    </body>
+                    </html>
+                `);
+                win.document.close();
+                
+                // Restore button icon
+                if(btnIcon) btnIcon.className = originalClass;
+            });
+        }, 500); // 500ms Delay to fix blank map issue
     }
-
+    
     // 2. Export Map Data to CSV
     function exportMapCSV() {
         const selectedName = window.currentSelection;
