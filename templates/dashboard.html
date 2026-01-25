@@ -317,45 +317,54 @@
             <div class="row justify-content-center">
                 <div class="col-lg-12">
                     <div class="card shadow border-0 h-100">
-                        <div class="card-header bg-light py-3 border-bottom">
-                            <div class="row g-2 align-items-center justify-content-between">
-                                <div class="col-xl-9 col-lg-8 d-flex align-items-center gap-2 flex-wrap">
-                                    <span class="fw-bold text-primary text-nowrap"><i class="fas fa-chart-line me-2"></i>Analysis:</span>
-                                    
-                                    <select class="form-select form-select-sm shadow-sm" id="xVariable" style="max-width: 150px;">
+                        <div class="card-header bg-white py-3 border-bottom">
+                            <h5 class="card-title mb-0 text-primary">
+                                <i class="fas fa-chart-line me-2"></i>Interactive Data Exploration
+                            </h5>
+                        </div>
+
+                        <div class="card-body p-4">
+                            
+                            <div class="row g-3 align-items-end mb-4 p-3 bg-light rounded-3 border">
+                                <div class="col-md-3">
+                                    <label for="xVariable" class="form-label fw-bold text-muted small text-uppercase">Influence (X-Axis)</label>
+                                    <select class="form-select shadow-sm border-0" id="xVariable">
                                         <option value="income">Median Income</option>
                                         <option value="poverty">Poverty Rate</option>
                                         <option value="foodAccess">Food Access Score</option>
                                         <option value="insurance">Uninsured Rate</option>
                                         <option value="education">Education Rate</option>
                                     </select>
-                                    
-                                    <span class="text-muted small">vs</span>
-                                    
-                                    <select class="form-select form-select-sm shadow-sm" id="yVariable" style="max-width: 150px;">
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <label for="yVariable" class="form-label fw-bold text-muted small text-uppercase">Outcome (Y-Axis)</label>
+                                    <select class="form-select shadow-sm border-0" id="yVariable">
                                         <option value="diabetes">Diabetes Rate</option>
                                         <option value="obesity">Obesity Rate</option>
                                         <option value="asthma">Asthma Rate</option>
                                         <option value="mentalDistress">Mental Distress</option>
                                         <option value="highBloodPressure">High Blood Pressure</option>
                                     </select>
-
-                                    <span class="text-muted small ms-2">View:</span>
-                                    <select class="form-select form-select-sm shadow-sm" id="chartTypeSelector" style="max-width: 130px;">
-                                        <option value="scatter">Scatter Plot</option>
-                                        <option value="bar">Ranked Bar</option>
+                                </div>
+                                
+                                <div class="col-md-3">
+                                    <label for="chartTypeSelector" class="form-label fw-bold text-muted small text-uppercase">Visualization Mode</label>
+                                    <select class="form-select shadow-sm border-0" id="chartTypeSelector">
+                                        <option value="scatter">Scatter Plot + Trend</option>
+                                        <option value="bar">Ranked Bar Chart</option>
                                     </select>
                                 </div>
 
-                                <div class="col-xl-3 col-lg-4 text-end d-flex align-items-center justify-content-end gap-2">
-                                    <div id="correlationBadge" class="badge bg-white text-dark border px-3 py-2 shadow-sm">
-                                        <small class="text-muted d-block" style="font-size:0.6rem">STATISTICAL LINK</small>
-                                        <span id="rValue" class="text-primary fw-bold">--</span>
+                                <div class="col-md-3 text-end">
+                                    <div id="correlationBadge" class="d-inline-block px-3 py-2 rounded-pill bg-white border shadow-sm mb-2 w-100">
+                                        <small class="d-block text-muted" style="font-size: 0.65rem; letter-spacing: 0.5px;">STATISTICAL LINK</small>
+                                        <span id="rValue" class="fw-bold text-primary">--</span>
                                     </div>
 
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" title="Export Options">
-                                            <i class="fas fa-download"></i>
+                                    <div class="btn-group w-100">
+                                        <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <i class="fas fa-download me-2"></i>Export Options
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow">
                                             <li><button class="dropdown-item py-2" onclick="exportGraphCSV()">
@@ -368,40 +377,37 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
 
-                        <div class="card-body p-0">
-                            <div class="chart-container w-100 position-relative" style="height: 550px;">
+                            <div class="chart-container mb-4 position-relative" style="height: 500px;">
                                 <canvas id="interactiveCorrelationChart"></canvas>
                             </div>
-                            
-                            <div class="p-3 border-top">
-                                <div id="correlationInsight" class="alert alert-light border-start border-4 border-primary shadow-sm mb-3">
-                                    <h6 class="alert-heading fw-bold text-primary"><i class="fas fa-lightbulb me-2"></i>Analysis</h6>
-                                    <p class="mb-0 text-muted">Select variables above to reveal hidden patterns in the Camden health data.</p>
-                                </div>
 
-                                <button class="btn btn-sm btn-outline-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#tableCollapse">
-                                    <i class="fas fa-table me-2"></i>View Underlying Data Table
-                                </button>
-                                <div class="collapse mt-3" id="tableCollapse">
-                                    <div class="table-responsive bg-white border rounded" style="max-height: 300px;">
-                                        <table class="table table-hover table-sm table-striped mb-0" id="dataExplorerTable">
-                                            <thead class="table-light sticky-top">
-                                                <tr>
-                                                    <th class="ps-3">Neighborhood</th>
-                                                    <th>Income</th>
-                                                    <th>Poverty</th>
-                                                    <th>Diabetes</th>
-                                                    <th>Obesity</th>
-                                                    <th>Asthma</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="tableBody"></tbody>
-                                        </table>
-                                    </div>
+                            <div id="correlationInsight" class="alert alert-light border-start border-4 border-primary shadow-sm mb-4">
+                                <h6 class="alert-heading fw-bold text-primary"><i class="fas fa-lightbulb me-2"></i>Analysis</h6>
+                                <p class="mb-0 text-muted">Select variables above to reveal hidden patterns in the Camden health data.</p>
+                            </div>
+
+                            <button class="btn btn-sm btn-outline-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#tableCollapse">
+                                <i class="fas fa-table me-2"></i>View Underlying Data Table
+                            </button>
+                            <div class="collapse mt-3" id="tableCollapse">
+                                <div class="table-responsive bg-white border rounded" style="max-height: 300px;">
+                                    <table class="table table-hover table-sm table-striped mb-0" id="dataExplorerTable">
+                                        <thead class="table-light sticky-top">
+                                            <tr>
+                                                <th class="ps-3">Neighborhood</th>
+                                                <th>Income</th>
+                                                <th>Poverty</th>
+                                                <th>Diabetes</th>
+                                                <th>Obesity</th>
+                                                <th>Asthma</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tableBody"></tbody>
+                                    </table>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
