@@ -1714,7 +1714,7 @@ window.CHEDVI = {
         
         if (!neighborhood) return 'N/A (No Data)';
 
-        // 3. Map "Display Name" to the EXACT keys used in rankings.js
+        // 3. Map "Display Name" to the exact keys used in rankings.js
         let key = '';
         const lowerMetric = metricDisplayStr.toLowerCase();
 
