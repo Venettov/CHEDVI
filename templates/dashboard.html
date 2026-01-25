@@ -349,13 +349,26 @@
                                         <option value="bar">Ranked Bar Chart</option>
                                     </select>
                                 </div>
-                                
                                 <div class="col-md-3 text-end">
-                                    <div id="correlationBadge" class="d-inline-block px-3 py-2 rounded-pill bg-white border shadow-sm">
-                                        <small class="d-block text-muted" style="font-size: 0.7rem; letter-spacing: 0.5px;">STATISTICAL LINK</small>
-                                        <span id="rValue" class="fw-bold text-primary">--</span>
-                                    </div>
+                                <div id="correlationBadge" class="d-inline-block px-3 py-2 rounded-pill bg-white border shadow-sm me-2">
+                                    <small class="d-block text-muted" style="font-size: 0.7rem; letter-spacing: 0.5px;">STATISTICAL LINK</small>
+                                    <span id="rValue" class="fw-bold text-primary">--</span>
                                 </div>
+
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><button class="dropdown-item" onclick="exportGraphCSV()">
+                                            <i class="fas fa-file-csv me-2 text-success"></i>Download Data (CSV)
+                                        </button></li>
+                                        <li><button class="dropdown-item" onclick="exportGraphPDF()">
+                                            <i class="fas fa-file-pdf me-2 text-danger"></i>Download Graph (PDF)
+                                        </button></li>
+                                    </ul>
+                                </div>
+                            </div>
                             </div>
 
                             <div class="chart-container mb-4" style="height: 450px; position: relative;">
@@ -704,6 +717,65 @@
             }
         });
     });
+
+    // -----------------------------------------------------------------
+    // NEW: EXPORT FUNCTIONS FOR THE INTERACTIVE GRAPH
+    // -----------------------------------------------------------------
+
+    // 1. Export Data to CSV
+    function exportGraphCSV() {
+        // Get the current labels from the dropdowns so the file makes sense
+        const xLabel = document.getElementById('xVariable').options[document.getElementById('xVariable').selectedIndex].text;
+        const yLabel = document.getElementById('yVariable').options[document.getElementById('yVariable').selectedIndex].text;
+        
+        // Get the variable IDs (e.g., 'income', 'diabetes')
+        // Note: We need to map these to our database keys if they differ
+        const xVar = document.getElementById('xVariable').value;
+        const yVar = document.getElementById('yVariable').value;
+
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += `Neighborhood,${xLabel},${yLabel}\n`; // Header Row
+
+        // Loop through the global data to build the rows
+        window.dashboardData.forEach(item => {
+            // We use the same 'getMetricValue' logic here implicitly
+            // Simple mapping for demo (you might need to align keys with your rankings.js logic)
+            let xVal = item[xVar] || item[xVar + '_rate'] || item['median_' + xVar] || ''; 
+            let yVal = item[yVar] || item[yVar + '_rate'] || '';
+            
+            // Clean up the data (remove $ or % for pure CSV numbers if needed, or keep them)
+            csvContent += `"${item.name}",${xVal},${yVal}\n`;
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `Camden_${xLabel}_vs_${yLabel}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // 2. Export Graph to PDF
+    function exportGraphPDF() {
+        const chartCanvas = document.getElementById('interactiveCorrelationChart');
+        const xLabel = document.getElementById('xVariable').options[document.getElementById('xVariable').selectedIndex].text;
+        const yLabel = document.getElementById('yVariable').options[document.getElementById('yVariable').selectedIndex].text;
+
+        // Use the library you already imported (html2pdf)
+        const opt = {
+            margin: 0.5,
+            filename: `Chart_${xLabel}_vs_${yLabel}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'in', format: 'letter', orientation: 'landscape' }
+        };
+
+        // We capture the parent container to get the labels and title, not just the canvas
+        const elementToCapture = chartCanvas.parentElement.parentElement; // Captures the whole card body
+        
+        html2pdf().set(opt).from(elementToCapture).save();
+    }
 
 </script>
 {% endblock %}
