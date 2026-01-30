@@ -370,21 +370,34 @@ def resources():
     contact_form = ContactForm()
     resource_form = ResourceRequestForm()
     newsletter_form = NewsletterForm()
+
     if request.method == 'POST':
+        # 1. Handle Contact Form
         if 'contact_submit' in request.form:
             if contact_form.validate_on_submit():
-                db.session.add(Contact(name=contact_form.name.data, email=contact_form.email.data, organization=contact_form.organization.data, message=contact_form.message.data))
-                db.session.commit()
-                flash('Message sent!', 'success')
-                return redirect(url_for('resources'))
-        elif 'resource_submit' in request.form:
-            if resource_form.validate_on_submit():
-                db.session.add(ResourceRequest(name=resource_form.name.data, email=resource_form.email.data, zip_code=resource_form.zip_code.data, resource_type=resource_form.resource_type.data, needs_description=resource_form.needs_description.data))
-                db.session.commit()
-                flash('Request submitted!', 'success')
-                return redirect(url_for('resources'))
+                try:
+                    # IMPORTANT: Verify 'organization' vs 'subject' in your models.py
+                    new_msg = Contact(
+                        name=contact_form.name.data, 
+                        email=contact_form.email.data, 
+                        organization=contact_form.organization.data, 
+                        message=contact_form.message.data
+                    )
+                    db.session.add(new_msg)
+                    db.session.commit()
+                    flash('Message sent successfully!', 'success')
+                    return redirect(url_for('resources'))
+                except Exception as e:
+                    db.session.rollback()
+                    flash(f'Database Error: {str(e)}', 'danger')
+            else:
+                # THIS IS THE FIX: It will now tell you WHY it failed
+                flash(f'Error: {contact_form.errors}', 'danger')
+
+        # 2. Handle Newsletter
         elif 'newsletter_submit' in request.form:
             if newsletter_form.validate_on_submit():
+                # Check for duplicates to prevent errors
                 if not Newsletter.query.filter_by(email=newsletter_form.email.data).first():
                     db.session.add(Newsletter(email=newsletter_form.email.data))
                     db.session.commit()
@@ -392,7 +405,13 @@ def resources():
                 else:
                     flash('Already subscribed.', 'info')
                 return redirect(url_for('resources'))
-    return render_template('resources.html', contact_form=contact_form, resource_form=resource_form, newsletter_form=newsletter_form)
+            else:
+                flash(f'Newsletter Error: {newsletter_form.errors}', 'danger')
+
+    return render_template('resources.html', 
+                           contact_form=contact_form, 
+                           resource_form=resource_form, 
+                           newsletter_form=newsletter_form)
 
 @app.route('/api/neighborhoods')
 def api_neighborhoods():
