@@ -18,8 +18,22 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SESSION_SECRET", "dev-secret-key-change-in-production")
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-# Configure the database
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL", "sqlite:///chedvi.db")
+# --- DATABASE CONFIGURATION (UPDATED) ---
+# 1. Get the URL from Render
+database_url = os.environ.get("DATABASE_URL")
+
+# 2. Fix the "postgres://" issue (Render provides 'postgres', but SQLAlchemy requires 'postgresql')
+if database_url and database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+# 3. Fallback logic: If no URL is found, warn the user and use local SQLite
+if not database_url:
+    logging.warning("⚠️ No DATABASE_URL found. Using local sqlite:///chedvi.db (Data will NOT persist on Render).")
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///chedvi.db"
+else:
+    logging.info("✅ Connected to Production Database (Neon).")
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_recycle": 300,
     "pool_pre_ping": True,
