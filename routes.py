@@ -370,48 +370,29 @@ def resources():
     contact_form = ContactForm()
     resource_form = ResourceRequestForm()
     newsletter_form = NewsletterForm()
-
     if request.method == 'POST':
-        # 1. Handle Contact Form Submission
         if 'contact_submit' in request.form:
             if contact_form.validate_on_submit():
-                try:
-                    # Using the 'Contact' model already imported from models.py
-                    new_contact = Contact(
-                        name=contact_form.name.data,
-                        email=contact_form.email.data,
-                        subject=contact_form.subject.data,
-                        message=contact_form.message.data
-                    )
-                    db.session.add(new_contact)
-                    db.session.commit()
-                    flash('Your message has been saved to the database!', 'success')
-                    return redirect(url_for('resources'))
-                except SQLAlchemyError as e:
-                    db.session.rollback()
-                    flash('Database error: Could not save message.', 'danger')
-            else:
-                flash('Please correct the errors in the contact form.', 'danger')
-
-        # 2. Handle Newsletter Submission
+                db.session.add(Contact(name=contact_form.name.data, email=contact_form.email.data, organization=contact_form.organization.data, message=contact_form.message.data))
+                db.session.commit()
+                flash('Message sent!', 'success')
+                return redirect(url_for('resources'))
+        elif 'resource_submit' in request.form:
+            if resource_form.validate_on_submit():
+                db.session.add(ResourceRequest(name=resource_form.name.data, email=resource_form.email.data, zip_code=resource_form.zip_code.data, resource_type=resource_form.resource_type.data, needs_description=resource_form.needs_description.data))
+                db.session.commit()
+                flash('Request submitted!', 'success')
+                return redirect(url_for('resources'))
         elif 'newsletter_submit' in request.form:
             if newsletter_form.validate_on_submit():
-                # Check if email exists to avoid duplicates
-                existing = Newsletter.query.filter_by(email=newsletter_form.email.data).first()
-                if not existing:
-                    new_sub = Newsletter(email=newsletter_form.email.data)
-                    db.session.add(new_sub)
+                if not Newsletter.query.filter_by(email=newsletter_form.email.data).first():
+                    db.session.add(Newsletter(email=newsletter_form.email.data))
                     db.session.commit()
-                    flash('Thank you for subscribing!', 'success')
+                    flash('Subscribed!', 'success')
                 else:
-                    flash('You are already subscribed.', 'info')
+                    flash('Already subscribed.', 'info')
                 return redirect(url_for('resources'))
-
-    return render_template('resources.html', 
-                           contact_form=contact_form, 
-                           resource_form=resource_form, 
-                           newsletter_form=newsletter_form)
-
+    return render_template('resources.html', contact_form=contact_form, resource_form=resource_form, newsletter_form=newsletter_form)
 
 @app.route('/api/neighborhoods')
 def api_neighborhoods():
