@@ -283,27 +283,27 @@
                         </h4>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ url_for('resources') }}">
+                        <form method="POST" action="{{ url_for('resources_custom') }}">
                             {{ contact_form.hidden_tag() }}
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     {{ contact_form.name.label(class="form-label") }}
-                                    {{ contact_form.name(class="form-control") }}
+                                    {{ contact_form.name(class="form-control", placeholder="Your Name") }}
                                 </div>
                                 <div class="col-md-6">
                                     {{ contact_form.email.label(class="form-label") }}
-                                    {{ contact_form.email(class="form-control") }}
+                                    {{ contact_form.email(class="form-control", placeholder="email@example.com") }}
                                 </div>
                                 <div class="col-12">
-                                    {{ contact_form.organization.label(class="form-label") }}
-                                    {{ contact_form.organization(class="form-control") }}
+                                    {{ contact_form.subject.label(class="form-label") }}
+                                    {{ contact_form.subject(class="form-control", placeholder="Subject of your message") }}
                                 </div>
                                 <div class="col-12">
                                     {{ contact_form.message.label(class="form-label") }}
-                                    {{ contact_form.message(class="form-control", rows="5") }}
+                                    {{ contact_form.message(class="form-control", rows="5", placeholder="How can we help you?") }}
                                 </div>
                                 <div class="col-12">
-                                    <button type="submit" name="contact_submit" class="btn btn-success">
+                                    <button type="submit" name="contact_submit" class="btn btn-primary w-100">
                                         <i class="fas fa-paper-plane me-2"></i>Send Message
                                     </button>
                                 </div>
