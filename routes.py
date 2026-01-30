@@ -372,15 +372,15 @@ def resources():
     newsletter_form = NewsletterForm()
 
     if request.method == 'POST':
-        # 1. Handle Contact Form
+        # 1. Handle Contact Form Submission
         if 'contact_submit' in request.form:
             if contact_form.validate_on_submit():
                 try:
-                    # IMPORTANT: Verify 'organization' vs 'subject' in your models.py
+                    # FIX: Map 'organization' form data to the 'subject' database column
                     new_msg = Contact(
                         name=contact_form.name.data, 
                         email=contact_form.email.data, 
-                        organization=contact_form.organization.data, 
+                        subject=contact_form.organization.data, # <--- CHANGED THIS LINE
                         message=contact_form.message.data
                     )
                     db.session.add(new_msg)
@@ -389,15 +389,16 @@ def resources():
                     return redirect(url_for('resources'))
                 except Exception as e:
                     db.session.rollback()
+                    # This helps you see the exact error if it fails again
                     flash(f'Database Error: {str(e)}', 'danger')
             else:
-                # THIS IS THE FIX: It will now tell you WHY it failed
-                flash(f'Error: {contact_form.errors}', 'danger')
+                # This tells you if the form itself was invalid (e.g. invalid email)
+                flash(f'Form Validation Error: {contact_form.errors}', 'danger')
 
-        # 2. Handle Newsletter
+        # 2. Handle Newsletter Submission
         elif 'newsletter_submit' in request.form:
             if newsletter_form.validate_on_submit():
-                # Check for duplicates to prevent errors
+                # Check for duplicates
                 if not Newsletter.query.filter_by(email=newsletter_form.email.data).first():
                     db.session.add(Newsletter(email=newsletter_form.email.data))
                     db.session.commit()
