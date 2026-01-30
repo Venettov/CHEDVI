@@ -376,7 +376,7 @@ def resources():
         if 'contact_submit' in request.form:
             if contact_form.validate_on_submit():
                 try:
-                    # FIX: Map 'organization' form data to the 'subject' database column
+                    
                     new_msg = Contact(
                         name=contact_form.name.data, 
                         email=contact_form.email.data, 
@@ -392,7 +392,7 @@ def resources():
                     # This helps you see the exact error if it fails again
                     flash(f'Database Error: {str(e)}', 'danger')
             else:
-                # This tells you if the form itself was invalid (e.g. invalid email)
+                # This tells if the form itself was invalid (e.g. invalid email)
                 flash(f'Form Validation Error: {contact_form.errors}', 'danger')
 
         # 2. Handle Newsletter Submission
