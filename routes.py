@@ -380,7 +380,7 @@ def resources():
                     new_msg = Contact(
                         name=contact_form.name.data, 
                         email=contact_form.email.data, 
-                        subject=contact_form.organization.data, # <--- CHANGED THIS LINE
+                        organization=contact_form.organization.data,
                         message=contact_form.message.data
                     )
                     db.session.add(new_msg)
