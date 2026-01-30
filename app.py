@@ -29,6 +29,7 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 db.init_app(app)
 
 # --- DATABASE MODEL FOR CONTACT MESSAGES ---
+# This creates the table to store your "Contact Us" submissions
 class ContactMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -38,18 +39,17 @@ class ContactMessage(db.Model):
     timestamp = db.Column(db.DateTime, server_default=db.func.now())
 
 with app.app_context():
-    # Import existing models and create tables
+    # Import models to ensure tables are created
     import models
     db.create_all()
 
-# Import other routes (this ensures other pages keep working)
+# Import existing routes
 from routes import *
 
 # --- FIXED RESOURCES ROUTE ---
-# This overrides the version in routes.py to handle both forms correctly
+# Renamed function to 'resources_custom' to avoid collision with routes.py
 @app.route('/resources', methods=['GET', 'POST'])
-def resources():
-    # Assuming you are using Flask-WTF forms as seen in your HTML
+def resources_custom():
     from forms import ContactForm, NewsletterForm 
     contact_form = ContactForm()
     newsletter_form = NewsletterForm()
@@ -67,16 +67,17 @@ def resources():
                 db.session.add(msg)
                 db.session.commit()
                 flash('Message sent successfully! Our team will reach out soon.', 'success')
-                return redirect(url_for('resources'))
+                # Redirect back to this custom function
+                return redirect(url_for('resources_custom'))
             else:
                 flash('Please fix the errors in the contact form.', 'danger')
 
         # 2. Handle Newsletter Submission
         elif 'newsletter_submit' in request.form:
             if newsletter_form.validate_on_submit():
-                # Logic for newsletter (e.g., adding to a Subscriber table)
+                # Note: Add your newsletter subscription logic here if needed
                 flash('Thank you for subscribing to our newsletter!', 'success')
-                return redirect(url_for('resources'))
+                return redirect(url_for('resources_custom'))
 
     return render_template('resources.html', 
                            contact_form=contact_form, 
