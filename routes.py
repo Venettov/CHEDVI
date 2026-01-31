@@ -1,6 +1,8 @@
 import os
 import shutil
 import pandas as pd
+from flask_mail import Message 
+from app import app, db, mail
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import render_template, request, redirect, url_for, flash, jsonify, session
 from app import app, db
@@ -376,7 +378,7 @@ def resources():
         if 'contact_submit' in request.form:
             if contact_form.validate_on_submit():
                 try:
-                    
+                    # A. Save to Database
                     new_msg = Contact(
                         name=contact_form.name.data, 
                         email=contact_form.email.data, 
@@ -385,20 +387,39 @@ def resources():
                     )
                     db.session.add(new_msg)
                     db.session.commit()
-                    flash('Message sent successfully!', 'success')
+
+                    # B. Send Email Notification
+                    try:
+                        msg = Message(
+                            subject=f"New Contact Form: {contact_form.organization.data}",
+                            recipients=['andre.riveraruiz@rutgers.edu']
+                        )
+                        msg.body = f"""
+                        You have received a new message on CHEDVI.
+                        
+                        Name: {contact_form.name.data}
+                        Email: {contact_form.email.data}
+                        Subject: {contact_form.organization.data}
+                        
+                        Message:
+                        {contact_form.message.data}
+                        """
+                        mail.send(msg)
+                        flash('Message sent and emailed successfully!', 'success')
+                    except Exception as e:
+                        print(f"Email sending failed: {e}")
+                        flash('Message saved, but email notification failed.', 'warning')
+
                     return redirect(url_for('resources'))
                 except Exception as e:
                     db.session.rollback()
-                    # This helps you see the exact error if it fails again
                     flash(f'Database Error: {str(e)}', 'danger')
             else:
-                # This tells if the form itself was invalid (e.g. invalid email)
-                flash(f'Form Validation Error: {contact_form.errors}', 'danger')
+                 flash(f'Form Error: {contact_form.errors}', 'danger')
 
-        # 2. Handle Newsletter Submission
+        # 2. Handle Newsletter Submission 
         elif 'newsletter_submit' in request.form:
             if newsletter_form.validate_on_submit():
-                # Check for duplicates
                 if not Newsletter.query.filter_by(email=newsletter_form.email.data).first():
                     db.session.add(Newsletter(email=newsletter_form.email.data))
                     db.session.commit()
@@ -406,9 +427,8 @@ def resources():
                 else:
                     flash('Already subscribed.', 'info')
                 return redirect(url_for('resources'))
-            else:
-                flash(f'Newsletter Error: {newsletter_form.errors}', 'danger')
 
+    # THIS RETURN STATEMENT IS CRITICAL - DO NOT DELETE
     return render_template('resources.html', 
                            contact_form=contact_form, 
                            resource_form=resource_form, 
