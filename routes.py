@@ -376,7 +376,10 @@ def resources():
     if request.method == 'POST':
         # 1. Handle Contact Form Submission
         if 'contact_submit' in request.form:
+            print("DEBUG: Contact form submitted...") # <--- Debug Log
+            
             if contact_form.validate_on_submit():
+                print("DEBUG: Form Validated! Attempting to save...") # <--- Debug Log
                 try:
                     # A. Save to Database
                     new_msg = Contact(
@@ -387,6 +390,7 @@ def resources():
                     )
                     db.session.add(new_msg)
                     db.session.commit()
+                    print("DEBUG: Saved to DB.") # <--- Debug Log
 
                     # B. Send Email Notification
                     try:
@@ -405,16 +409,20 @@ def resources():
                         {contact_form.message.data}
                         """
                         mail.send(msg)
+                        print("DEBUG: Email sent successfully.") # <--- Debug Log
                         flash('Message sent and emailed successfully!', 'success')
                     except Exception as e:
-                        print(f"Email sending failed: {e}")
+                        print(f"ERROR: Email sending failed: {e}") # <--- Debug Log
                         flash('Message saved, but email notification failed.', 'warning')
 
                     return redirect(url_for('resources'))
                 except Exception as e:
                     db.session.rollback()
+                    print(f"ERROR: Database failed: {e}") # <--- Debug Log
                     flash(f'Database Error: {str(e)}', 'danger')
             else:
+                 # THIS IS LIKELY WHERE THE ERROR IS HIDING
+                 print(f"ERROR: Validation Failed: {contact_form.errors}") # <--- Debug Log
                  flash(f'Form Error: {contact_form.errors}', 'danger')
 
         # 2. Handle Newsletter Submission 
