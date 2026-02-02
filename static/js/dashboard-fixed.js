@@ -1092,7 +1092,7 @@ function updateInsightText(xName, yName, r) {
     else if (r > 0.5) msg = `<strong>Risk Factor:</strong> As <em>${xName}</em> increases, <em>${yName}</em> tends to rise sharply.`;
     else msg = `<strong>Complex Relationship:</strong> There is no simple linear link between <em>${xName}</em> and <em>${yName}</em>. Use the map to explore specific neighborhoods.`;
 
-    box.innerHTML = `<h6 class="alert-heading fw-bold text-primary"><i class="fas fa-robot me-2"></i>Automated Analysis</h6><p class="mb-0 text-muted">${msg}</p>`;
+    box.innerHTML = `<h6 class="alert-heading fw-bold text-primary"><i class="fas fa-robot me-2"></i>Preliminary Analysis</h6><p class="mb-0 text-muted">${msg}</p>`;
 }
 
 window.startTour = function() { alert('Welcome to the Camden Health Dashboard!'); };
