@@ -263,27 +263,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-             <div class="col-md-6 col-lg-3">
-                <div class="card team-card h-100 border-0 shadow-sm">
-                    <div class="card-body text-center p-4">
-                        <div class="team-avatar mb-3">
-                            <div class="avatar-placeholder bg-success d-flex align-items-center justify-content-center rounded-circle mx-auto" style="width: 80px; height: 80px;">
-                                <i class="fas fa-chart-line fa-2x text-white"></i>
-                            </div>
-                        </div>
-                        <h5 class="card-title">Jose A. Riveraruiz</h5> 
-                        <p class="text-success fw-semibold">Graduate Student</p>
-                        <p class="card-text text-muted small">
-                            Data Science Program
-                        </p>
-                        <div class="team-expertise">
-                            <span class="badge bg-light text-dark">Data Science</span>
-                        </div>
-                    </div>
-                </div>
-            </div>           
+            </div>         
             
             <div class="col-md-6 col-lg-3">
                 <div class="card team-card h-100 border-0 shadow-sm">
@@ -305,6 +285,26 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-6 col-lg-3">
+                <div class="card team-card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="team-avatar mb-3">
+                            <div class="avatar-placeholder bg-success d-flex align-items-center justify-content-center rounded-circle mx-auto" style="width: 80px; height: 80px;">
+                                <i class="fas fa-chart-line fa-2x text-white"></i>
+                            </div>
+                        </div>
+                        <h5 class="card-title">Jose A. Riveraruiz</h5> 
+                        <p class="text-success fw-semibold">Graduate Student</p>
+                        <p class="card-text text-muted small">
+                            Data Science Program
+                        </p>
+                        <div class="team-expertise">
+                            <span class="badge bg-light text-dark">Data Science</span>
+                        </div>
+                    </div>
+                </div>
+        </div>  
         
         <div class="row mt-5">
             <div class="col-12 text-center">
@@ -337,15 +337,14 @@
             <div class="col-md-6 col-lg-4">
                 <div class="card partner-card h-100 border-0 shadow-sm">
                     <div class="card-body text-center p-4">
-                        <div class="partner-icon mb-3">
-                            <div class="icon-circle bg-primary d-flex align-items-center justify-content-center rounded-circle mx-auto" style="width: 80px; height: 80px;">
-                                <i class="fas fa-users fa-3x text-white"></i>
-                            </div>
+                        <div class="partner-icon mb-4 d-flex align-items-center justify-content-center" style="height: 100px;">
+                            <img src="{{ url_for('static', filename='images/Camden_Coalition.png') }}" 
+                                 alt="Camden Coalition of Health Providers Logo" 
+                                 class="img-fluid" 
+                                 style="max-height: 90px; width: auto;">
                         </div>
                         <h4 class="card-title">Camden Coalition of Health Providers</h4>
                         <p class="text-primary fw-semibold">Community Organization</p>
-
-
                     </div>
                 </div>
             </div>
@@ -353,15 +352,14 @@
             <div class="col-md-6 col-lg-4">
                 <div class="card partner-card h-100 border-0 shadow-sm">
                     <div class="card-body text-center p-4">
-                        <div class="partner-icon mb-3">
-                            <div class="icon-circle bg-success d-flex align-items-center justify-content-center rounded-circle mx-auto" style="width: 80px; height: 80px;">
-                                <i class="fas fa-university fa-3x text-white"></i>
-                            </div>
+                        <div class="partner-icon mb-4 d-flex align-items-center justify-content-center" style="height: 100px;">
+                            <img src="{{ url_for('static', filename='images/Rutgers_University.png') }}" 
+                                 alt="Rutgers University Camden Logo" 
+                                 class="img-fluid" 
+                                 style="max-height: 90px; width: auto;">
                         </div>
                         <h4 class="card-title">Rutgers University Camden</h4>
                         <p class="text-success fw-semibold">Academic Institution</p>
-
-
                     </div>
                 </div>
             </div>
@@ -369,10 +367,11 @@
             <div class="col-md-6 col-lg-4">
                 <div class="card partner-card h-100 border-0 shadow-sm">
                     <div class="card-body text-center p-4">
-                        <div class="partner-icon mb-3">
-                            <div class="icon-circle bg-info d-flex align-items-center justify-content-center rounded-circle mx-auto" style="width: 80px; height: 80px;">
-                                <i class="fas fa-dollar-sign fa-3x text-white"></i>
-                            </div>
+                        <div class="partner-icon mb-4 d-flex align-items-center justify-content-center" style="height: 100px;">
+                            <img src="{{ url_for('static', filename='images/Ritgers_DICE.png') }}" 
+                                 alt="Rutgers Camden DICE Division Logo" 
+                                 class="img-fluid" 
+                                 style="max-height: 90px; width: auto;">
                         </div>
                         <h4 class="card-title">Rutgers Camden DICE Division</h4>
                         <p class="text-info fw-semibold">Funding Partner</p>
