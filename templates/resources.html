@@ -328,43 +328,4 @@
         </div>
     </div>
 </section>
-
-<section class="py-5 bg-primary text-white">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-6 mb-4">
-                <h3 class="mb-3">Stay Connected</h3>
-                <p class="mb-4">
-                    Subscribe to our newsletter for updates on health equity initiatives and new data insights.
-                </p>
-                <form method="POST" action="{{ url_for('resources') }}" class="d-flex">
-                    {{ newsletter_form.hidden_tag() }}
-                    <div class="flex-grow-1 me-2">
-                        {{ newsletter_form.email(class="form-control", placeholder="Enter your email") }}
-                    </div>
-                    <button type="submit" name="newsletter_submit" class="btn btn-light">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </form>
-            </div>
-            <div class="col-lg-6">
-                <h3 class="mb-3">Follow Us</h3>
-                <p class="mb-4">
-                    Connect with us on social media for the latest updates and community discussions.
-                </p>
-                <div class="social-links">
-                    <a href="#" class="btn btn-outline-light me-3">
-                        <i class="fab fa-twitter"></i> Twitter
-                    </a>
-                    <a href="#" class="btn btn-outline-light me-3">
-                        <i class="fab fa-facebook"></i> Facebook
-                    </a>
-                    <a href="#" class="btn btn-outline-light">
-                        <i class="fab fa-linkedin"></i> LinkedIn
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
 {% endblock %}
