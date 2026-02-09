@@ -5,10 +5,9 @@ from flask_mail import Message
 from app import app, db, mail
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import render_template, request, redirect, url_for, flash, jsonify, session
-from app import app, db
 from models import Contact, ResourceRequest, Newsletter, NeighborhoodHealth, Admin
 from forms import ContactForm, ResourceRequestForm, NewsletterForm
-from sqlalchemy.exc import SQLAlchemyError # Import to catch DB specific errors
+from sqlalchemy.exc import SQLAlchemyError
 
 # Configuration
 DATA_FILE = 'neighborhood_data.csv'
