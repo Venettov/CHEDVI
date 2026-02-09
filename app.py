@@ -17,7 +17,7 @@ db = SQLAlchemy(model_class=Base)
 # Create the app
 app = Flask(__name__)
 
-# --- FIX: UNIFIED SECRET KEY ---
+# --- UNIFIED SECRET KEY ---
 # Use the Render variable 'SECRET_KEY'. Fallback ensures it never crashes.
 app.secret_key = os.environ.get("SECRET_KEY", "fallback-secret-key-987654321")
 
@@ -41,11 +41,11 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
 }
 
-# --- EMAIL CONFIGURATION ---
+# --- EMAIL CONFIGURATION (FIXED FOR RENDER) ---
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 465  # CHANGED: 587 -> 465
-app.config['MAIL_USE_TLS'] = False # CHANGED: True -> False
-app.config['MAIL_USE_SSL'] = True  # ADDED: This forces a secure SSL connection
+app.config['MAIL_PORT'] = 587          # CHANGED: 465 -> 587 (Standard TLS Port)
+app.config['MAIL_USE_TLS'] = True      # CHANGED: False -> True (Required for 587)
+app.config['MAIL_USE_SSL'] = False     # CHANGED: True -> False (Prevents Hanging)
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 
 # Remove spaces from password if present
