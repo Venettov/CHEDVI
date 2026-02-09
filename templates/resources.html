@@ -283,7 +283,7 @@
                         </h4>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="{{ url_for('resources') }}">
+                        <form method="POST" action="{{ url_for('resources', _anchor='contact') }}">
                             {{ contact_form.hidden_tag() }}
                             
                             {% if contact_form.errors %}
