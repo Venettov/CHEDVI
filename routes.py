@@ -476,12 +476,6 @@ def api_health_metrics():
         'average_income': round(avg_income, 0)
     })
 
-@app.errorhandler(404)
-def not_found_error(error): return render_template('404.html'), 404
-
-@app.errorhandler(500)
-def internal_error(error): db.session.rollback(); return render_template('500.html'), 500
-
 @app.route('/debug-email')
 def debug_email():
     try:
@@ -503,3 +497,9 @@ def debug_email():
     except Exception as e:
         # Print the error to the screen so we can see it
         return f"<h1>EMAIL FAILED</h1><p>Error details: {str(e)}</p>", 500
+
+@app.errorhandler(404)
+def not_found_error(error): return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error): db.session.rollback(); return render_template('500.html'), 500
