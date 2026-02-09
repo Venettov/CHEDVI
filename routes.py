@@ -1,6 +1,7 @@
 import os
 import shutil
 import pandas as pd
+from threading import Thread
 from flask_mail import Message 
 from app import app, db, mail
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -14,6 +15,15 @@ DATA_FILE = 'neighborhood_data.csv'
 BACKUP_FILE = 'neighborhood_data.bak'
 
 # --- HELPER FUNCTIONS ---
+
+# --- NEW HELPER FUNCTION ---
+def send_async_email(app, msg):
+    with app.app_context():
+        try:
+            mail.send(msg)
+            print("DEBUG: Background email sent successfully.")
+        except Exception as e:
+            print(f"ERROR: Background email failed: {e}")
 
 def verify_admin(username, password):
     user = Admin.query.filter_by(username=username).first()
@@ -390,26 +400,25 @@ def resources():
                     db.session.add(new_msg)
                     db.session.commit()
                     
-                    # B. Send Email
-                    try:
-                        sender_email = app.config.get('MAIL_USERNAME')
-                        msg = Message(
-                            subject=f"New Contact Form: {contact_form.organization.data}",
-                            sender=sender_email,
-                            recipients=['andre.riveraruiz@rutgers.edu']
-                        )
-                        msg.body = f"""
-                        From: {contact_form.name.data}
-                        Email: {contact_form.email.data}
-                        
-                        Message:
-                        {contact_form.message.data}
-                        """
-                        mail.send(msg)
-                        flash('Message sent successfully!', 'success')
-                    except Exception as e:
-                        print(f"Email Error: {e}")
-                        flash(f'Saved to DB, but email failed: {e}', 'warning')
+                    # B. Send Email (Background Thread)
+                    sender_email = app.config.get('MAIL_USERNAME')
+                    msg = Message(
+                        subject=f"New Contact Form: {contact_form.organization.data}",
+                        sender=sender_email,
+                        recipients=['andre.riveraruiz@rutgers.edu']
+                    )
+                    msg.body = f"""
+                    From: {contact_form.name.data}
+                    Email: {contact_form.email.data}
+                    
+                    Message:
+                    {contact_form.message.data}
+                    """
+                    
+                    # Launch background task so page doesn't freeze
+                    Thread(target=send_async_email, args=(app._get_current_object(), msg)).start()
+                    
+                    flash('Message sent successfully!', 'success')
 
                     return redirect(url_for('resources', _anchor='contact'))
                     
