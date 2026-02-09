@@ -376,10 +376,10 @@ def resources():
     if request.method == 'POST':
         # 1. Handle Contact Form Submission
         if 'contact_submit' in request.form:
-            print("DEBUG: Contact form submitted...") # <--- Debug Log
+            print("DEBUG: Contact form submitted...") 
             
             if contact_form.validate_on_submit():
-                print("DEBUG: Form Validated! Attempting to save...") # <--- Debug Log
+                print("DEBUG: Form Validated! Attempting to save...") 
                 try:
                     # A. Save to Database
                     new_msg = Contact(
@@ -390,42 +390,53 @@ def resources():
                     )
                     db.session.add(new_msg)
                     db.session.commit()
-                    print("DEBUG: Saved to DB.") # <--- Debug Log
+                    print("DEBUG: Saved to DB.") 
 
                     # B. Send Email Notification
                     try:
+                        # Ensure we have a valid sender from config
+                        sender_email = app.config.get('MAIL_USERNAME')
+                        
                         msg = Message(
                             subject=f"New Contact Form: {contact_form.organization.data}",
-                            recipients=['andre.riveraruiz@rutgers.edu']
+                            sender=sender_email, # Explicitly set sender
+                            recipients=['andre.riveraruiz@rutgers.edu'] # Your destination email
                         )
+                        
+                        # Email Body
                         msg.body = f"""
                         You have received a new message on CHEDVI.
                         
-                        Name: {contact_form.name.data}
+                        ------------------------------------------
+                        From: {contact_form.name.data}
                         Email: {contact_form.email.data}
-                        Subject: {contact_form.organization.data}
+                        Organization: {contact_form.organization.data}
+                        ------------------------------------------
                         
                         Message:
                         {contact_form.message.data}
                         """
+                        
                         mail.send(msg)
-                        print("DEBUG: Email sent successfully.") # <--- Debug Log
+                        print("DEBUG: Email sent successfully.") 
                         flash('Message sent and emailed successfully!', 'success')
+                        
                     except Exception as e:
-                        print(f"ERROR: Email sending failed: {e}") # <--- Debug Log
-                        flash('Message saved, but email notification failed.', 'warning')
+                        print(f"ERROR: Email sending failed: {e}") 
+                        # We don't want to crash the page if email fails, since DB save worked
+                        flash(f'Message saved to database, but email failed: {str(e)}', 'warning')
 
                     return redirect(url_for('resources'))
+                    
                 except Exception as e:
                     db.session.rollback()
-                    print(f"ERROR: Database failed: {e}") # <--- Debug Log
+                    print(f"ERROR: Database failed: {e}") 
                     flash(f'Database Error: {str(e)}', 'danger')
             else:
-                 # THIS IS LIKELY WHERE THE ERROR IS HIDING
-                 print(f"ERROR: Validation Failed: {contact_form.errors}") # <--- Debug Log
+                 print(f"ERROR: Validation Failed: {contact_form.errors}") 
                  flash(f'Form Error: {contact_form.errors}', 'danger')
 
-        # 2. Handle Newsletter Submission 
+        # ... (Keep newsletter logic exactly as it is) ...
         elif 'newsletter_submit' in request.form:
             if newsletter_form.validate_on_submit():
                 if not Newsletter.query.filter_by(email=newsletter_form.email.data).first():
@@ -436,7 +447,6 @@ def resources():
                     flash('Already subscribed.', 'info')
                 return redirect(url_for('resources'))
 
-    # THIS RETURN STATEMENT IS CRITICAL - DO NOT DELETE
     return render_template('resources.html', 
                            contact_form=contact_form, 
                            resource_form=resource_form, 
