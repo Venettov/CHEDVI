@@ -478,10 +478,14 @@ def api_health_metrics():
 
 @app.route('/debug-email')
 def debug_email():
+    import socket
+    # Force a timeout after 5 seconds so the server doesn't freeze/crash
+    socket.setdefaulttimeout(5)
+    
     try:
         sender = app.config.get('MAIL_USERNAME')
         if not sender:
-            return "Error: MAIL_USERNAME is not set in config.", 500
+            return "Error: MAIL_USERNAME is not set in config.", 200
             
         msg = Message(
             subject="Debug Test Email",
@@ -490,13 +494,13 @@ def debug_email():
         )
         msg.body = "If you are reading this, your email configuration is correct!"
         
-        # Send immediately (Synchronous) to catch errors
+        # Send immediately
         mail.send(msg)
         return "<h1>SUCCESS! Email sent. Check your inbox/spam.</h1>", 200
         
     except Exception as e:
-        # Print the error to the screen so we can see it
-        return f"<h1>EMAIL FAILED</h1><p>Error details: {str(e)}</p>", 500
+        # Catch the error and print it to the screen
+        return f"<h1>EMAIL FAILED</h1><p>Error details: {str(e)}</p>", 200
 
 @app.errorhandler(404)
 def not_found_error(error): return render_template('404.html'), 404
