@@ -14,9 +14,6 @@ from sqlalchemy.exc import SQLAlchemyError # Import to catch DB specific errors
 DATA_FILE = 'neighborhood_data.csv'
 BACKUP_FILE = 'neighborhood_data.bak'
 
-# SECURITY
-app.secret_key = os.environ.get('SECRET_KEY', 'replace-this-with-a-secure-key')
-
 # --- HELPER FUNCTIONS ---
 
 def verify_admin(username, password):
