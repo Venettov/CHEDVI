@@ -43,8 +43,9 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
 
 # --- EMAIL CONFIGURATION ---
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_PORT'] = 465  # CHANGED: 587 -> 465
+app.config['MAIL_USE_TLS'] = False # CHANGED: True -> False
+app.config['MAIL_USE_SSL'] = True  # ADDED: This forces a secure SSL connection
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 
 # Remove spaces from password if present
