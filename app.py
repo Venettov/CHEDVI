@@ -18,7 +18,7 @@ db = SQLAlchemy(model_class=Base)
 app = Flask(__name__)
 
 # --- FIX: UNIFIED SECRET KEY ---
-# We use the Render variable 'SECRET_KEY'. If not found, we use a hardcoded fallback.
+# Use the Render variable 'SECRET_KEY'. Fallback ensures it never crashes.
 app.secret_key = os.environ.get("SECRET_KEY", "fallback-secret-key-987654321")
 
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
