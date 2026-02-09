@@ -285,6 +285,19 @@
                     <div class="card-body">
                         <form method="POST" action="{{ url_for('resources') }}">
                             {{ contact_form.hidden_tag() }}
+                            
+                            {% if contact_form.errors %}
+                                <div class="alert alert-danger">
+                                    <h5 class="alert-heading"><i class="fas fa-exclamation-circle me-2"></i>Submission Failed</h5>
+                                    <ul class="mb-0">
+                                        {% for field, errors in contact_form.errors.items() %}
+                                            {% for error in errors %}
+                                                <li><strong>{{ field }}:</strong> {{ error }}</li>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     {{ contact_form.name.label(class="form-label") }}
