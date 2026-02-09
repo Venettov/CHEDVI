@@ -286,6 +286,8 @@
                         <form method="POST" action="{{ url_for('resources', _anchor='contact') }}">
                             {{ contact_form.hidden_tag() }}
                             
+                            <input type="hidden" name="form_id" value="contact_form">
+                            
                             {% if contact_form.errors %}
                                 <div class="alert alert-danger">
                                     <h5 class="alert-heading"><i class="fas fa-exclamation-circle me-2"></i>Submission Failed</h5>

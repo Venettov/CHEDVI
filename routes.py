@@ -370,12 +370,15 @@ def resources():
     newsletter_form = NewsletterForm()
 
     if request.method == 'POST':
-        # 1. Handle Contact Form Submission
-        if 'contact_submit' in request.form:
-            print("DEBUG: Contact form submitted...") 
+        # Get the hidden ID to know which form was submitted
+        form_id = request.form.get('form_id')
+
+        # 1. Handle Contact Form
+        if form_id == 'contact_form':
+            print("DEBUG: Contact Form Detected.") 
             
             if contact_form.validate_on_submit():
-                print("DEBUG: Form Validated! Attempting to save...") 
+                print("DEBUG: Validation Passed.") 
                 try:
                     # A. Save to Database
                     new_msg = Contact(
@@ -386,54 +389,40 @@ def resources():
                     )
                     db.session.add(new_msg)
                     db.session.commit()
-                    print("DEBUG: Saved to DB.") 
-
-                    # B. Send Email Notification
+                    
+                    # B. Send Email
                     try:
-                        # Ensure we have a valid sender from config
                         sender_email = app.config.get('MAIL_USERNAME')
-                        
                         msg = Message(
                             subject=f"New Contact Form: {contact_form.organization.data}",
-                            sender=sender_email, # Explicitly set sender
-                            recipients=['andre.riveraruiz@rutgers.edu'] # Your destination email
+                            sender=sender_email,
+                            recipients=['andre.riveraruiz@rutgers.edu']
                         )
-                        
-                        # Email Body
                         msg.body = f"""
-                        You have received a new message on CHEDVI.
-                        
-                        ------------------------------------------
                         From: {contact_form.name.data}
                         Email: {contact_form.email.data}
-                        Organization: {contact_form.organization.data}
-                        ------------------------------------------
                         
                         Message:
                         {contact_form.message.data}
                         """
-                        
                         mail.send(msg)
-                        print("DEBUG: Email sent successfully.") 
-                        flash('Message sent and emailed successfully!', 'success')
-                        
+                        flash('Message sent successfully!', 'success')
                     except Exception as e:
-                        print(f"ERROR: Email sending failed: {e}") 
-                        # We don't want to crash the page if email fails, since DB save worked
-                        flash(f'Message saved to database, but email failed: {str(e)}', 'warning')
+                        print(f"Email Error: {e}")
+                        flash(f'Saved to DB, but email failed: {e}', 'warning')
 
-                    return redirect(url_for('resources'))
+                    return redirect(url_for('resources', _anchor='contact'))
                     
                 except Exception as e:
                     db.session.rollback()
-                    print(f"ERROR: Database failed: {e}") 
-                    flash(f'Database Error: {str(e)}', 'danger')
+                    flash(f'Database Error: {e}', 'danger')
             else:
-                 print(f"ERROR: Validation Failed: {contact_form.errors}") 
-                 flash(f'Form Error: {contact_form.errors}', 'danger')
+                 print(f"DEBUG: Validation Failed: {contact_form.errors}")
+                 # The error box in HTML will handle the display, but we flash a generic alert too
+                 flash('Please correct the errors in the form below.', 'danger')
 
-        # ... (Keep newsletter logic exactly as it is) ...
-        elif 'newsletter_submit' in request.form:
+        # 2. Handle Newsletter
+        elif form_id == 'newsletter_form' or 'newsletter_submit' in request.form:
             if newsletter_form.validate_on_submit():
                 if not Newsletter.query.filter_by(email=newsletter_form.email.data).first():
                     db.session.add(Newsletter(email=newsletter_form.email.data))
