@@ -41,11 +41,12 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
 }
 
-# --- EMAIL CONFIGURATION (FIXED FOR RENDER) ---
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587          # CHANGED: 465 -> 587 (Standard TLS Port)
-app.config['MAIL_USE_TLS'] = True      # CHANGED: False -> True (Required for 587)
-app.config['MAIL_USE_SSL'] = False     # CHANGED: True -> False (Prevents Hanging)
+# --- EMAIL CONFIGURATION ---
+# We use the legacy alias 'smtp.googlemail.com' to bypass potential IP blocks on the main address.
+app.config['MAIL_SERVER'] = 'smtp.googlemail.com'  
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
 app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
 
 # Remove spaces from password if present
@@ -54,6 +55,8 @@ if mail_password:
     app.config['MAIL_PASSWORD'] = mail_password.replace(' ', '')
 
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
+# Increase internal timeout to fail fast instead of hanging (if supported)
+app.config['MAIL_ASCII_ATTACHMENTS'] = False
 
 # Initialize Extensions
 db.init_app(app)
