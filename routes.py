@@ -481,3 +481,25 @@ def not_found_error(error): return render_template('404.html'), 404
 
 @app.errorhandler(500)
 def internal_error(error): db.session.rollback(); return render_template('500.html'), 500
+
+@app.route('/debug-email')
+def debug_email():
+    try:
+        sender = app.config.get('MAIL_USERNAME')
+        if not sender:
+            return "Error: MAIL_USERNAME is not set in config.", 500
+            
+        msg = Message(
+            subject="Debug Test Email",
+            sender=sender,
+            recipients=['andre.riveraruiz@rutgers.edu']
+        )
+        msg.body = "If you are reading this, your email configuration is correct!"
+        
+        # Send immediately (Synchronous) to catch errors
+        mail.send(msg)
+        return "<h1>SUCCESS! Email sent. Check your inbox/spam.</h1>", 200
+        
+    except Exception as e:
+        # Print the error to the screen so we can see it
+        return f"<h1>EMAIL FAILED</h1><p>Error details: {str(e)}</p>", 500
