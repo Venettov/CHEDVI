@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 import pandas as pd
 from threading import Thread
@@ -16,14 +17,15 @@ BACKUP_FILE = 'neighborhood_data.bak'
 
 # --- HELPER FUNCTIONS ---
 
-# --- NEW HELPER FUNCTION ---
+# --- UPDATED HELPER FUNCTION ---
 def send_async_email(app, msg):
     with app.app_context():
         try:
+            print("DEBUG: Starting background email task...", file=sys.stderr)
             mail.send(msg)
-            print("DEBUG: Background email sent successfully.")
+            print("DEBUG: EMAIL SENT SUCCESSFULLY! Check spam folder.", file=sys.stderr)
         except Exception as e:
-            print(f"ERROR: Background email failed: {e}")
+            print(f"ERROR: EMAIL FAILED: {e}", file=sys.stderr)
 
 def verify_admin(username, password):
     user = Admin.query.filter_by(username=username).first()
