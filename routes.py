@@ -403,7 +403,7 @@ def resources():
                     db.session.commit()
                     
                     # B. Send Email (Background Thread)
-                    sender_email = app.config.get('MAIL_USERNAME')
+                    sender_email = app.config.get('MAIL_DEFAULT_SENDER')
                     msg = Message(
                         subject=f"New Contact Form: {contact_form.organization.data}",
                         sender=sender_email,
@@ -483,7 +483,7 @@ def debug_email():
     socket.setdefaulttimeout(5)
     
     try:
-        sender = app.config.get('MAIL_USERNAME')
+        sender = app.config.get('MAIL_DEFAULT_SENDER')
         if not sender:
             return "Error: MAIL_USERNAME is not set in config.", 200
             
