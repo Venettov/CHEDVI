@@ -17,7 +17,6 @@ BACKUP_FILE = 'neighborhood_data.bak'
 
 # --- HELPER FUNCTIONS ---
 
-# --- UPDATED HELPER FUNCTION ---
 def send_async_email(app, msg):
     with app.app_context():
         try:
