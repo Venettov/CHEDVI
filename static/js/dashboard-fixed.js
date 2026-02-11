@@ -389,12 +389,13 @@ const camdenNeighborhoods = [
 ];
 
 // --- COLOR SCALES ---
-// Red Scale for "Negative" metrics (Diabetes, Poverty)
-const COLORS_RED = ['#fee5d9', '#fcae91', '#fb6a4a', '#de2d26', '#a50f15']; 
-// Green Scale for "Positive" metrics (Income, Education)
+// Blue Scale for Health Metrics (Diabetes, Asthma, etc.)
+const COLORS_BLUE = ['#eff3ff', '#bdd7e7', '#6baed6', '#3182bd', '#08519c']; 
+
+// Green Scale for "Positive" Social Determinants (Income, Education)
 const COLORS_GREEN = ['#edf8e9', '#bae4b3', '#74c476', '#31a354', '#006d2c'];
 
-// Metrics where "Higher is Better"
+// Metrics where "Higher is Better" (Uses Green Scale)
 const POSITIVE_METRICS = ['income', 'education', 'healthcare_access', 'food_access', 'visited_dentist'];
 
 function getColor(value, min, max, scheme) {
@@ -531,7 +532,7 @@ function renderMapPolygons(mapInstance, polygonArray, mapSide, metric) {
     const max = Math.max(...values);
     
     // 4. Determine Color Scheme (Green for good, Red for bad)
-    const scheme = POSITIVE_METRICS.includes(metric) ? COLORS_GREEN : COLORS_RED;
+    const scheme = POSITIVE_METRICS.includes(metric) ? COLORS_GREEN : COLORS_BLUE;
 
     // 5. Add new polygons with Dynamic Colors
     camdenNeighborhoods.forEach(n => {
