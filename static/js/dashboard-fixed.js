@@ -388,6 +388,29 @@ const camdenNeighborhoods = [
     }
 ];
 
+// --- COLOR SCALES ---
+// Red Scale for "Negative" metrics (Diabetes, Poverty)
+const COLORS_RED = ['#fee5d9', '#fcae91', '#fb6a4a', '#de2d26', '#a50f15']; 
+// Green Scale for "Positive" metrics (Income, Education)
+const COLORS_GREEN = ['#edf8e9', '#bae4b3', '#74c476', '#31a354', '#006d2c'];
+
+// Metrics where "Higher is Better"
+const POSITIVE_METRICS = ['income', 'education', 'healthcare_access', 'food_access', 'visited_dentist'];
+
+function getColor(value, min, max, scheme) {
+    if (value === undefined || value === null) return '#ccc';
+    if (max === min) return scheme[2]; // Flat data
+    
+    // Normalize value to 0-1 range
+    const pct = (value - min) / (max - min);
+    
+    // Map percentage to color index (0 to 4)
+    let index = Math.floor(pct * (scheme.length));
+    if (index >= scheme.length) index = scheme.length - 1;
+    
+    return scheme[index];
+}
+
 // ==========================================
 // HYBRID DATA ARCHITECTURE (DB + FALLBACK)
 // ==========================================
@@ -490,28 +513,100 @@ function initializeMaps() {
     } catch (error) { console.error('Error initializing maps:', error); }
 }
 
-// 4. CORE RENDER FUNCTION
+// 4. CORE RENDER FUNCTION (UPDATED WITH COLOR SCALES & LEGEND)
 function renderMapPolygons(mapInstance, polygonArray, mapSide, metric) {
     // 1. Clear existing layers
     polygonArray.forEach(p => mapInstance.removeLayer(p));
     polygonArray.length = 0; 
 
-    // 2. Add new polygons
+    // 2. Clear existing legend if it exists
+    if (mapInstance.legendControl) {
+        mapInstance.removeControl(mapInstance.legendControl);
+    }
+
+    // 3. Calculate Min/Max for this metric across ALL neighborhoods
+    // We filter out undefined values to prevent errors
+    const values = camdenNeighborhoods.map(n => n.data[metric]).filter(v => v !== undefined);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    
+    // 4. Determine Color Scheme (Green for good, Red for bad)
+    const scheme = POSITIVE_METRICS.includes(metric) ? COLORS_GREEN : COLORS_RED;
+
+    // 5. Add new polygons with Dynamic Colors
     camdenNeighborhoods.forEach(n => {
+        const val = n.data[metric];
+        const dynamicColor = getColor(val, min, max, scheme);
+        
+        // Create a style object that overrides the default blue
+        const polyStyle = {
+            color: "#2c3e50", 
+            weight: 2, 
+            opacity: 1, 
+            fillColor: dynamicColor, 
+            fillOpacity: 0.7 
+        };
+
         const popupContent = createPopupContent(n, metric);
         
-        const poly = L.polygon(n.bounds, STYLE_BLUE).addTo(mapInstance);
+        const poly = L.polygon(n.bounds, polyStyle).addTo(mapInstance);
         poly.bindPopup(popupContent);
         
-        // Metadata
+        // Metadata for interactions
         poly.neighborhoodName = n.name;
-        poly.defaultStyle = STYLE_BLUE; 
+        poly.defaultStyle = polyStyle; // Save this color so hover effects reset correctly
         
         // Click Event
         poly.on('click', (e) => handlePolygonClick(e, mapSide));
         
         polygonArray.push(poly);
     });
+
+    // 6. Add the Legend Control
+    addLegend(mapInstance, min, max, scheme, metric);
+}
+
+function addLegend(mapInstance, min, max, scheme, metric) {
+    const legend = L.control({position: 'bottomright'});
+
+    legend.onAdd = function (map) {
+        const div = L.DomUtil.create('div', 'info legend');
+        
+        // Format numbers (Currency vs Percent)
+        const format = (num) => {
+            if (metric === 'income') return '$' + (num/1000).toFixed(0) + 'k';
+            if (['food_access'].includes(metric)) return num.toFixed(1);
+            return num.toFixed(0) + '%';
+        };
+
+        // CSS for the Legend Box
+        div.style.backgroundColor = 'white';
+        div.style.padding = '10px';
+        div.style.borderRadius = '5px';
+        div.style.boxShadow = '0 0 15px rgba(0,0,0,0.2)';
+        div.style.fontSize = '12px';
+        div.style.lineHeight = '18px';
+
+        div.innerHTML += `<strong>${getMetricLabel(metric)}</strong><br>`;
+
+        // Loop through our color intervals
+        // We divide the range into 5 steps matching our 5 colors
+        const step = (max - min) / scheme.length;
+        
+        for (let i = 0; i < scheme.length; i++) {
+            const rangeStart = min + (i * step);
+            const rangeEnd = min + ((i + 1) * step);
+            
+            div.innerHTML +=
+                `<i style="background:${scheme[i]}; width:18px; height:18px; float:left; margin-right:8px; opacity:0.7"></i> ` +
+                `${format(rangeStart)} – ${format(rangeEnd)}<br>`;
+        }
+
+        return div;
+    };
+
+    legend.addTo(mapInstance);
+    mapInstance.legendControl = legend; // Store reference to remove it later
 }
 
 // 5. CREATE POPUP CONTENT
