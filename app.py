@@ -8,6 +8,7 @@ from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 # --- CRITICAL FIX: FORCE IPv4 ---
+# Keeps the connection compatible with SendGrid and Render
 allowed_gai_family = socket.AF_INET
 
 def _getaddrinfo_ipv4(host, port, family=0, type=0, proto=0, flags=0):
@@ -51,19 +52,15 @@ app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
     "pool_pre_ping": True,
 }
 
-# --- EMAIL CONFIGURATION (SSL) ---
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 465         # CHANGED: Switch to SSL Port
-app.config['MAIL_USE_TLS'] = False    # CHANGED: TLS Off
-app.config['MAIL_USE_SSL'] = True     # CHANGED: SSL On
-app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME')
-
-# Remove spaces from password if present
-mail_password = os.environ.get('MAIL_PASSWORD')
-if mail_password:
-    app.config['MAIL_PASSWORD'] = mail_password.replace(' ', '')
-
-app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_USERNAME')
+# --- EMAIL CONFIGURATION (SENDGRID) ---
+# We use the Environment Variables from Render to set this up.
+app.config['MAIL_SERVER'] = os.environ.get('MAIL_SERVER', 'smtp.sendgrid.net')
+app.config['MAIL_PORT'] = int(os.environ.get('MAIL_PORT', 2525)) # Uses Port 2525 to bypass firewall
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USE_SSL'] = False
+app.config['MAIL_USERNAME'] = os.environ.get('MAIL_USERNAME', 'apikey')
+app.config['MAIL_PASSWORD'] = os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('MAIL_DEFAULT_SENDER')
 app.config['MAIL_ASCII_ATTACHMENTS'] = False 
 
 # Initialize Extensions
