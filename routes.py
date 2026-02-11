@@ -402,25 +402,31 @@ def resources():
                     db.session.add(new_msg)
                     db.session.commit()
                     
-                    # B. Send Email (Background Thread)
-                    sender_email = app.config.get('MAIL_DEFAULT_SENDER')
-                    msg = Message(
-                        subject=f"New Contact Form: {contact_form.organization.data}",
-                        sender=sender_email,
-                        recipients=['andre.riveraruiz@rutgers.edu']
-                    )
-                    msg.body = f"""
-                    From: {contact_form.name.data}
-                    Email: {contact_form.email.data}
-                    
-                    Message:
-                    {contact_form.message.data}
-                    """
-                    
-                    # Launch background task so page doesn't freeze
-                    Thread(target=send_async_email, args=(app._get_current_object(), msg)).start()
-                    
-                    flash('Message sent successfully!', 'success')
+                    # B. Send Email (DIRECTLY - No Background Thread)
+                    # We use the direct send method because threading was causing the "Silent Fail"
+                    try:
+                        sender_email = app.config.get('MAIL_DEFAULT_SENDER')
+                        msg = Message(
+                            subject=f"New Contact Form: {contact_form.organization.data}",
+                            sender=sender_email,
+                            recipients=['andre.riveraruiz@rutgers.edu']
+                        )
+                        msg.body = f"""
+                        From: {contact_form.name.data}
+                        Email: {contact_form.email.data}
+                        
+                        Message:
+                        {contact_form.message.data}
+                        """
+                        
+                        # Send immediately to ensure it leaves the server
+                        mail.send(msg)
+                        flash('Message sent successfully!', 'success')
+                        
+                    except Exception as e:
+                        # If email fails, we still saved to DB, so we warn the user but don't crash
+                        print(f"EMAIL FAILED: {str(e)}", file=sys.stderr)
+                        flash(f'Message saved, but email notification failed: {str(e)}', 'warning')
 
                     return redirect(url_for('resources', _anchor='contact'))
                     
@@ -429,7 +435,6 @@ def resources():
                     flash(f'Database Error: {e}', 'danger')
             else:
                  print(f"DEBUG: Validation Failed: {contact_form.errors}")
-                 # The error box in HTML will handle the display, but we flash a generic alert too
                  flash('Please correct the errors in the form below.', 'danger')
 
         # 2. Handle Newsletter
