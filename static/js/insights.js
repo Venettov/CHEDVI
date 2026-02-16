@@ -270,32 +270,32 @@ function createFoodObesityChart() {
     const explanations = {
         'obesity': {
             title: 'Food Access & Obesity',
-            main: 'Neighborhoods with lower food access scores consistently show higher rates of obesity, highlighting the impact of "food deserts."',
+            main: '',
             detail: 'Without easy access to fresh, nutritious food, residents often rely on processed options that are high in calories but low in nutrients, directly contributing to weight gain.'
         },
         'diabetes': {
             title: 'Food Access & Diabetes',
-            main: 'There is a strong link between poor food access and high diabetes prevalence in Camden.',
+            main: '',
             detail: 'Managing diabetes requires a diet rich in fresh vegetables and low in simple sugars. In areas where corner stores replace grocery stores, following this diet becomes nearly impossible.'
         },
         'highBloodPressure': {
             title: 'Food Access & Hypertension',
-            main: 'Limited access to fresh food is correlated with higher rates of high blood pressure across the city.',
+            main: '',
             detail: 'Processed and shelf-stable foods found in food deserts are typically loaded with sodium (salt), which is a primary driver of hypertension and heart strain.'
         },
         'mentalDistress': {
             title: 'Food Access & Mental Health',
-            main: 'Food insecurity is a significant stressor that correlates with higher reports of mental distress.',
+            main: '',
             detail: 'The daily stress of not knowing where your next healthy meal comes from, combined with poor nutrition, can exacerbate anxiety and depression symptoms.'
         },
         'asthma': {
             title: 'Food Access & Asthma',
-            main: 'While less direct, areas with poor food access often overlap with environmental triggers for asthma.',
+            main: '',
             detail: 'This correlation highlights "cumulative burden"—neighborhoods lacking grocery stores often also face higher pollution and poorer housing conditions that trigger asthma.'
         },
         'poverty': {
             title: 'Food Access & Poverty',
-            main: 'Poverty is the root cause of food insecurity. The data shows an almost perfect match between low income and low food access.',
+            main: '',
             detail: 'Grocery chains rarely invest in high-poverty areas, forcing residents to pay higher prices for lower quality food at local convenience stores.'
         }
     };
@@ -397,27 +397,27 @@ function createEducationHealthChart() {
     const explanations = {
         'diabetes': {
             title: 'Education & Diabetes',
-            main: 'There is a strong correlation: neighborhoods with higher high school graduation rates tend to have significantly lower diabetes rates.',
+            main: '',
             detail: 'Education improves "Health Literacy"—the ability to understand medical instructions, nutrition labels, and manage complex conditions like diabetes effectively.'
         },
         'obesity': {
             title: 'Education & Obesity',
-            main: 'Higher education levels are associated with lower obesity rates across Camden neighborhoods.',
+            main: '',
             detail: 'Schools provide critical physical education and nutrition knowledge. Additionally, higher education often leads to jobs with better work-life balance, allowing time for exercise and healthy cooking.'
         },
         'poverty': {
             title: 'The Education-Poverty Cycle',
-            main: 'This is the strongest correlation in our dataset. Low graduation rates are almost perfectly mirrored by high poverty rates.',
+            main: '',
             detail: 'Without a high school diploma, residents are often locked out of the living-wage job market, creating a generational cycle of poverty that is difficult to break.'
         },
         'mentalDistress': {
             title: 'Education & Mental Health',
-            main: 'Neighborhoods with lower educational attainment report higher levels of frequent mental distress.',
+            main: '',
             detail: 'Education provides social capital and problem-solving skills. The stress of economic insecurity combined with limited career options weighs heavily on mental well-being.'
         },
         'income': {
             title: 'Education & Income',
-            main: 'Education is the primary driver of income. As graduation rates rise, median neighborhood income increases sharply.',
+            main: '',
             detail: 'This chart validates the need for investment in Camden\'s schools. Every percentage point increase in graduation rates translates directly into economic growth for the community.'
         }
     };
@@ -530,32 +530,32 @@ function createHousingHealthChart() {
     const explanations = {
         'asthma': {
             title: 'Housing & Asthma',
-            main: 'The data reveals a "Triple Threat": Neighborhoods with high housing problems (right) often have high asthma rates (top) and high poverty (large bubbles).',
+            main: '',
             detail: 'Substandard housing often contains triggers like mold, pests, and poor ventilation. When combined with economic stress, it creates a perfect storm for respiratory issues.'
         },
         'leadRisk': {
             title: 'Housing & Lead Risk',
-            main: 'Older, substandard housing is the primary source of lead exposure. The correlation with poverty is stark.',
+            main: '',
             detail: 'Lead poisoning is entirely preventable. The data suggests that inspection and remediation resources must be concentrated in the specific neighborhoods showing this high-risk overlap.'
         },
         'mentalDistress': {
             title: 'Housing & Mental Health',
-            main: 'Housing instability is a massive stressor. Neighborhoods with housing quality issues report significantly higher mental distress.',
+            main: '',
             detail: 'The constant anxiety of unsafe living conditions, eviction risk, or overcrowding directly impacts mental wellbeing, creating a cycle of stress and poor health.'
         },
         'diabetes': {
             title: 'Housing & Diabetes',
-            main: 'While less direct than asthma, housing problems correlate with diabetes management issues.',
+            main: '',
             detail: 'Lack of safe storage for medication (like insulin), no space for indoor exercise, and the stress of unstable housing all make managing complex chronic conditions much harder.'
         },
         'obesity': {
             title: 'Housing & Obesity',
-            main: 'Poor housing conditions often exist in neighborhoods lacking safe outdoor spaces or parks, limiting physical activity.',
+            main: '',
             detail: 'When residents don’t feel safe exercising in their neighborhood or lack space at home, sedentary behaviors increase, contributing to higher obesity rates.'
         },
         'highBloodPressure': {
             title: 'Housing & Hypertension',
-            main: 'The stress of living in distressed housing is physically toxic. There is a clear link between housing problems and high blood pressure.',
+            main: '',
             detail: 'Crowding, noise pollution, and financial strain trigger the body’s "fight or flight" response. Chronic activation of this stress response drives up blood pressure permanently.'
         }
     };
@@ -709,27 +709,27 @@ function createMentalHealthChart() {
     const explanations = {
         'mentalDistress': {
             title: 'Poverty & Mental Health',
-            main: 'A Consistent Pattern: Neighborhoods with higher poverty rates (right) and higher unemployment (large bubbles) report significantly higher levels of mental distress.',
+            main: '',
             detail: 'Financial instability acts as a chronic stressor. The "cognitive load" of worrying about bills, housing, and food directly contributes to anxiety and depression.'
         },
         'highBloodPressure': {
             title: 'Stress & The Heart',
-            main: 'Chronic financial stress is physically toxic. High poverty rates strongly correlate with high blood pressure across Camden.',
+            main: '',
             detail: 'This is known as "Allostatic Load"—the wear and tear on the body caused by chronic stress. Living in poverty keeps the body in a constant "fight or flight" mode, damaging the cardiovascular system.'
         },
         'obesity': {
             title: 'Stress & Nutrition',
-            main: 'High-poverty, high-unemployment areas show higher obesity rates, highlighting the link between stress and diet.',
+            main: '',
             detail: 'Stress triggers cortisol release, which increases appetite for high-calorie comfort foods. Combined with "food deserts" in poor areas, this creates a cycle of stress-induced weight gain.'
         },
         'diabetes': {
             title: 'Stress & Diabetes',
-            main: 'Managing diabetes requires stability. The data shows that in high-stress (high poverty/unemployment) areas, diabetes rates climb.',
+            main: '',
             detail: 'The daily crisis management required by poverty leaves little mental bandwidth for the complex self-care (diet, monitoring, medication) that diabetes requires.'
         },
         'asthma': {
             title: 'Stress & Inflammation',
-            main: 'While environmental, asthma is also stress-sensitive. High poverty areas show a clear overlap with higher asthma rates.',
+            main: '',
             detail: 'Psychological stress increases inflammation in the body, which can trigger or worsen asthma attacks, making the condition harder to control in distressed neighborhoods.'
         }
     };
