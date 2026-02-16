@@ -600,10 +600,6 @@
                         <div class="chart-container mb-3" style="height: 400px;">
                             <canvas id="interactiveCorrelationChart"></canvas>
                         </div>
-                        <div id="correlationInsight" class="alert alert-info">
-                            <h6 class="alert-heading">Exploring Connections</h6>
-                            <p class="mb-0">Select variables above to see how social factors influence health outcomes in Camden.</p>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -776,21 +772,6 @@
             }
         });
         
-        updateInsightText(xVar, yVar);
-    }
-
-    function updateInsightText(x, y) {
-        const box = document.getElementById('correlationInsight');
-        let text = "Select variables to analyze.";
-        
-        if (x === 'income' && (y === 'diabetes' || y === 'obesity')) {
-            text = "<strong>Strong Negative Correlation:</strong> As income increases, disease rates tend to decrease significantly.";
-        } else if (x === 'poverty' && (y === 'mentalDistress' || y === 'asthma')) {
-             text = "<strong>Positive Correlation:</strong> Higher poverty rates are often associated with higher stress and health issues.";
-        } else {
-             text = `Analyzing the relationship between <strong>${x}</strong> and <strong>${y}</strong> across Camden neighborhoods.`;
-        }
-        box.innerHTML = `<p class="mb-0">${text}</p>`;
     }
 
     // --- 2. NEW DATA TABLE LOGIC ---
