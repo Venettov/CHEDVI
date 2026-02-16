@@ -666,8 +666,8 @@ function createHealthcareAccessChart() {
             datasets: [{
                 label: 'Uninsured Rate (%)',
                 data: data,
-                backgroundColor: data.map(val => val > 40 ? 'rgba(220, 53, 69, 0.7)' : 'rgba(255, 193, 7, 0.7)'), // Red for >40%, Yellow for others
-                borderColor: data.map(val => val > 40 ? 'rgba(220, 53, 69, 1)' : 'rgba(255, 193, 7, 1)'),
+                backgroundColor: 'rgba(13, 202, 240, 0.7)', 
+                borderColor: 'rgba(13, 202, 240, 1)',
                 borderWidth: 1
             }]
         },
@@ -677,7 +677,7 @@ function createHealthcareAccessChart() {
             plugins: {
                 title: {
                     display: true,
-                    text: 'Uninsured Rates by Neighborhood (Red = Critical Gap)',
+                    text: 'Uninsured Rates by Neighborhood',
                     font: { size: 16, weight: 'bold' }
                 },
                 legend: { display: false }
