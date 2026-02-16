@@ -271,32 +271,32 @@ function createFoodObesityChart() {
         'obesity': {
             title: 'Food Access & Obesity',
             main: '',
-            detail: 'Without easy access to fresh, nutritious food, residents often rely on processed options that are high in calories but low in nutrients, directly contributing to weight gain.'
+            detail: 'Enter explanation here.'
         },
         'diabetes': {
             title: 'Food Access & Diabetes',
             main: '',
-            detail: 'Managing diabetes requires a diet rich in fresh vegetables and low in simple sugars. In areas where corner stores replace grocery stores, following this diet becomes nearly impossible.'
+            detail: 'Enter explanation here.'
         },
         'highBloodPressure': {
             title: 'Food Access & Hypertension',
             main: '',
-            detail: 'Processed and shelf-stable foods found in food deserts are typically loaded with sodium (salt), which is a primary driver of hypertension and heart strain.'
+            detail: 'Enter explanation here.'
         },
         'mentalDistress': {
             title: 'Food Access & Mental Health',
             main: '',
-            detail: 'The daily stress of not knowing where your next healthy meal comes from, combined with poor nutrition, can exacerbate anxiety and depression symptoms.'
+            detail: 'Enter explanation here.'
         },
         'asthma': {
             title: 'Food Access & Asthma',
             main: '',
-            detail: 'This correlation highlights "cumulative burden"—neighborhoods lacking grocery stores often also face higher pollution and poorer housing conditions that trigger asthma.'
+            detail: 'Enter explanation here.'
         },
         'poverty': {
             title: 'Food Access & Poverty',
             main: '',
-            detail: 'Grocery chains rarely invest in high-poverty areas, forcing residents to pay higher prices for lower quality food at local convenience stores.'
+            detail: 'Enter explanation here.'
         }
     };
 
@@ -398,27 +398,27 @@ function createEducationHealthChart() {
         'diabetes': {
             title: 'Education & Diabetes',
             main: '',
-            detail: 'Education improves "Health Literacy"—the ability to understand medical instructions, nutrition labels, and manage complex conditions like diabetes effectively.'
+            detail: 'Enter explanation here.'
         },
         'obesity': {
             title: 'Education & Obesity',
             main: '',
-            detail: 'Schools provide critical physical education and nutrition knowledge. Additionally, higher education often leads to jobs with better work-life balance, allowing time for exercise and healthy cooking.'
+            detail: 'Enter explanation here.'
         },
         'poverty': {
             title: 'The Education-Poverty Cycle',
             main: '',
-            detail: 'Without a high school diploma, residents are often locked out of the living-wage job market, creating a generational cycle of poverty that is difficult to break.'
+            detail: 'Enter explanation here.'
         },
         'mentalDistress': {
             title: 'Education & Mental Health',
             main: '',
-            detail: 'Education provides social capital and problem-solving skills. The stress of economic insecurity combined with limited career options weighs heavily on mental well-being.'
+            detail: 'Enter explanation here.'
         },
         'income': {
             title: 'Education & Income',
             main: '',
-            detail: 'This chart validates the need for investment in Camden\'s schools. Every percentage point increase in graduation rates translates directly into economic growth for the community.'
+            detail: 'Enter explanation here.'
         }
     };
 
@@ -531,32 +531,32 @@ function createHousingHealthChart() {
         'asthma': {
             title: 'Housing & Asthma',
             main: '',
-            detail: 'Substandard housing often contains triggers like mold, pests, and poor ventilation. When combined with economic stress, it creates a perfect storm for respiratory issues.'
+            detail: 'Enter explanation here.'
         },
         'leadRisk': {
             title: 'Housing & Lead Risk',
             main: '',
-            detail: 'Lead poisoning is entirely preventable. The data suggests that inspection and remediation resources must be concentrated in the specific neighborhoods showing this high-risk overlap.'
+            detail: 'Enter explanation here.'
         },
         'mentalDistress': {
             title: 'Housing & Mental Health',
             main: '',
-            detail: 'The constant anxiety of unsafe living conditions, eviction risk, or overcrowding directly impacts mental wellbeing, creating a cycle of stress and poor health.'
+            detail: 'Enter explanation here.'
         },
         'diabetes': {
             title: 'Housing & Diabetes',
             main: '',
-            detail: 'Lack of safe storage for medication (like insulin), no space for indoor exercise, and the stress of unstable housing all make managing complex chronic conditions much harder.'
+            detail: 'Enter explanation here.'
         },
         'obesity': {
             title: 'Housing & Obesity',
             main: '',
-            detail: 'When residents don’t feel safe exercising in their neighborhood or lack space at home, sedentary behaviors increase, contributing to higher obesity rates.'
+            detail: 'Enter explanation here.'
         },
         'highBloodPressure': {
             title: 'Housing & Hypertension',
             main: '',
-            detail: 'Crowding, noise pollution, and financial strain trigger the body’s "fight or flight" response. Chronic activation of this stress response drives up blood pressure permanently.'
+            detail: 'Enter explanation here.'
         }
     };
 
@@ -710,27 +710,27 @@ function createMentalHealthChart() {
         'mentalDistress': {
             title: 'Poverty & Mental Health',
             main: '',
-            detail: 'Financial instability acts as a chronic stressor. The "cognitive load" of worrying about bills, housing, and food directly contributes to anxiety and depression.'
+            detail: 'Enter explanation here.'
         },
         'highBloodPressure': {
             title: 'Stress & The Heart',
             main: '',
-            detail: 'This is known as "Allostatic Load"—the wear and tear on the body caused by chronic stress. Living in poverty keeps the body in a constant "fight or flight" mode, damaging the cardiovascular system.'
+            detail: 'Enter explanation here.'
         },
         'obesity': {
             title: 'Stress & Nutrition',
             main: '',
-            detail: 'Stress triggers cortisol release, which increases appetite for high-calorie comfort foods. Combined with "food deserts" in poor areas, this creates a cycle of stress-induced weight gain.'
+            detail: 'Enter explanation here.'
         },
         'diabetes': {
             title: 'Stress & Diabetes',
             main: '',
-            detail: 'The daily crisis management required by poverty leaves little mental bandwidth for the complex self-care (diet, monitoring, medication) that diabetes requires.'
+            detail: 'Enter explanation here.'
         },
         'asthma': {
             title: 'Stress & Inflammation',
             main: '',
-            detail: 'Psychological stress increases inflammation in the body, which can trigger or worsen asthma attacks, making the condition harder to control in distressed neighborhoods.'
+            detail: 'Enter explanation here.'
         }
     };
 
