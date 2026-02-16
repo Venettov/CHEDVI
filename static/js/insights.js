@@ -104,34 +104,34 @@ function createIncomeHealthChart() {
     const explanations = {
         'diabetes': {
             title: 'Income & Diabetes',
-            main: 'Residents in the lowest income brackets experience significantly higher diabetes rates compared to those in the highest brackets.',
-            detail: 'Economic stability is key to prevention. Higher income allows for better access to nutritious food, preventative healthcare, and safe exercise environments.'
+            main: '',
+            detail: 'Enter explanation here.'
         },
         'obesity': {
             title: 'Income & Obesity',
-            main: 'There is a clear inverse relationship: as neighborhood income rises, obesity rates tend to fall.',
-            detail: 'Low-income areas often lack affordable gyms and fresh produce markets (food deserts), making a healthy lifestyle prohibitively expensive for many residents.'
+            main: '',
+            detail: 'Enter explanation here.'
         },
         'highBloodPressure': {
             title: 'Income & Hypertension',
-            main: 'Financial stress and lower income are strong predictors of high blood pressure in Camden neighborhoods.',
-            detail: 'Chronic financial stress releases cortisol, which raises blood pressure. Additionally, cheaper processed foods are often high in sodium, a major risk factor.'
+            main: '',
+            detail: 'Enter explanation here.'
         },
         'mentalDistress': {
             title: 'Income & Mental Health',
-            main: 'Mental distress reports are nearly double in the lowest-income neighborhoods compared to the wealthiest ones.',
-            detail: 'The daily burden of poverty—housing instability, bill anxiety, and lack of resources—takes a severe toll on mental well-being.'
+            main: '',
+            detail: 'Enter explanation here.'
         },
         'asthma': {
             title: 'Income & Asthma',
-            main: 'Lower-income neighborhoods often face higher asthma rates due to environmental housing factors.',
-            detail: 'Substandard housing in poorer areas is more likely to have mold, pests, and poor ventilation, which are primary triggers for asthma attacks.'
+            main: '',
+            detail: 'Enter explanation here.'
         },
         // NEW POVERTY EXPLANATION
         'poverty': {
             title: 'Income & Poverty Gap',
-            main: 'The data reveals a stark divide: as median income drops, the percentage of residents trapped in poverty skyrockets.',
-            detail: 'In the most distressed neighborhoods, over 50% of families live below the poverty line, creating a cycle where essential health resources become unaffordable luxuries.'
+            main: '',
+            detail: 'Enter explanation here.'
         }
     };
 
