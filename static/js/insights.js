@@ -298,39 +298,21 @@ document.addEventListener('DOMContentLoaded', function() {
 // --- 4. HOUSING & HEALTH CHART ---
 function createHousingHealthChart() {
     const ctx = document.getElementById('housingHealthChart');
-    if (!ctx) return;
+    if (!ctx || !window.dbData || window.dbData.length === 0) return;
     if (housingHealthChart) housingHealthChart.destroy();
-    if (!window.dbData || window.dbData.length === 0) return;
 
     const selector = document.getElementById('housingOutcomeSelector');
     let outcomeKey = selector ? selector.value : 'asthma';
     let yDataKey = outcomeKey === 'leadRisk' ? 'poverty' : outcomeKey; 
     
-    // --- TEXT UPDATES ---
-    const explanations = {
-        'asthma': { title: 'Housing & Asthma', main: '', detail: 'Enter explanation here.' },
-        'leadRisk': { title: 'Housing & Lead Risk', main: '', detail: 'Enter explanation here.' },
-        'mentalDistress': { title: 'Housing & Mental Health', main: '', detail: 'Enter explanation here.' },
-        'diabetes': { title: 'Housing & Diabetes', main: '', detail: 'Enter explanation here.' },
-        'obesity': { title: 'Housing & Obesity', main: '', detail: 'Enter explanation here.' },
-        'highBloodPressure': { title: 'Housing & Hypertension', main: '', detail: 'Enter explanation here.' }
-    };
-
-    const textData = explanations[outcomeKey];
-    if (textData) {
-        if (document.getElementById('housing-text-title')) document.getElementById('housing-text-title').textContent = textData.title;
-        if (document.getElementById('housing-text-main')) document.getElementById('housing-text-main').textContent = textData.main;
-        if (document.getElementById('housing-text-detail')) document.getElementById('housing-text-detail').textContent = textData.detail;
-    }
-
-    // MAP FROM DB & CALCULATE PERCENTAGE
+    // MAP FROM DB & CALCULATE VACANCY RATE
     const bubbleData = window.dbData.map(d => {
-        // Prevent division by zero and calculate vacancy rate
-        const totalHousing = d.housing_total || 1; 
-        const vacantRate = ((d.housing_vacant || 0) / totalHousing) * 100;
+        // Calculate the percentage of vacant units
+        const total = d.housing_total || 1; 
+        const percentage = ((d.housing_vacant || 0) / total) * 100;
         
         return {
-            x: parseFloat(vacantRate.toFixed(1)), // Perfect X-axis percentage
+            x: parseFloat(percentage.toFixed(1)), // The X-axis percentage
             y: d[yDataKey] || 0, 
             r: d.poverty / 4, 
             name: d.name, 
@@ -355,11 +337,11 @@ function createHousingHealthChart() {
         options: {
             responsive: true, maintainAspectRatio: false,
             plugins: {
-                tooltip: { callbacks: { label: function(context) { const raw = context.raw; return `${raw.name}: Vacancy Rate ${raw.x}%, ${labels[outcomeKey]} ${raw.y}%, Poverty ${raw.poverty}%`; } } },
+                tooltip: { callbacks: { label: function(context) { const raw = context.raw; return `${raw.name}: Vacancy ${raw.x}%, ${labels[outcomeKey]} ${raw.y}%, Poverty ${raw.poverty}%`; } } },
                 legend: { display: false }
             },
             scales: {
-                x: { title: { display: true, text: 'Housing Vacancy Rate (%)' }, min: 0 },
+                x: { title: { display: true, text: 'Neighborhood Housing Vacancy Rate (%)' }, min: 0 },
                 y: { title: { display: true, text: labels[outcomeKey] }, beginAtZero: false }
             }
         }
