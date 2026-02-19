@@ -4,7 +4,6 @@ from app import app, db
 from models import NeighborhoodHealth
 
 # --- CONFIGURATION ---
-# We use the exact filename you have in your folder
 CSV_FILENAME = 'neighborhood_data.csv' 
 # ---------------------
 

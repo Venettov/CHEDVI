@@ -34,30 +34,50 @@ def verify_admin(username, password):
 
 def clean_dataframe_columns(df):
     """
-    Standardizes column names and maps common variations to database keys.
+    Standardizes column names and maps Camden-specific CSV headers to database keys.
+    This ensures no data is lost during the migration from CSV to Database.
     """
     # 1. Basic cleaning: lowercase, underscore, strip spaces, remove symbols
     df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.replace('%', '').str.replace('$', '')
     
-    # 2. FLEXIBLE MAPPING (The Translator)
+    # 2. COMPLETE MAPPING (Generic Variations + Specific Camden Dataset Headers)
+    # The right side of these pairs exactly matches your database columns
     column_map = {
+        # Core Identifiers
         'neighborhood': 'name',
         'neighborhood_name': 'name',
+        'census_tract': 'census_tract',
+        
+        # Economic & Population Metrics
         'total_pop': 'total_population',
         'population': 'total_population',
         'income': 'median_income',
         'median_household_income': 'median_income',
+        'median_annual_household_income': 'median_income',  
         'poverty': 'poverty_rate',
+        'unemployment_rate': 'unemployment_rate',
+        
+        # Health Outcome Mappings
         'diabetes': 'diabetes_rate',
+        'percentage_reported_diabetes': 'diabetes_rate',     
         'obesity': 'obesity_rate',
+        'percentage_reported_obesity': 'obesity_rate',       
         'asthma': 'asthma_rate',
+        'percentage_reported_asthma': 'asthma_rate',         
         'mental_distress': 'mental_distress_rate',
+        'percentage_reported_mental_distress': 'mental_distress_rate',
+        'high_blood_pressure': 'high_blood_pressure',
+        'percentage_reported_high_blood_pressure': 'high_blood_pressure',
+        
+        # Social Determinant Mappings
         'food_access': 'food_access_score',
+        'low_food_access_score': 'food_access_score',        
         'insurance': 'lack_health_insurance',
-        'uninsured': 'lack_health_insurance'
+        'uninsured': 'lack_health_insurance',
+        'lack_health_insurance': 'lack_health_insurance'
     }
     
-    # Rename columns if they match our map
+    # 3. Apply the mapping
     df.rename(columns=column_map, inplace=True)
     return df
 
@@ -79,6 +99,10 @@ def clean_numeric(value):
     return value
 
 def reload_database_from_csv():
+    """
+    Clears existing data and re-populates the database using ALL available 
+    metrics from neighborhood_data.csv, including census tracts and unemployment.
+    """
     try:
         if not os.path.exists(DATA_FILE):
             return False, "Data file not found."
@@ -86,7 +110,7 @@ def reload_database_from_csv():
         df = pd.read_csv(DATA_FILE)
         df = clean_dataframe_columns(df) 
         
-        # FINAL SANITY CHECK: Replace any remaining NaNs across the whole DataFrame with 0
+        # Ensure no NaNs exist to prevent database insertion crashes
         df = df.fillna(0) 
 
         db.session.query(NeighborhoodHealth).delete()
@@ -94,9 +118,11 @@ def reload_database_from_csv():
         for _, row in df.iterrows():
             neighborhood = NeighborhoodHealth(
                 name=row.get('name', 'Unknown'),
+                census_tract=row.get('census_tract', 'N/A'), 
                 total_population=clean_numeric(row.get('total_population', 0)),
                 median_income=clean_numeric(row.get('median_income', 0)),
                 poverty_rate=clean_numeric(row.get('poverty_rate', 0.0)),
+                unemployment_rate=clean_numeric(row.get('unemployment_rate', 0.0)), 
                 diabetes_rate=clean_numeric(row.get('diabetes_rate', 0.0)),
                 obesity_rate=clean_numeric(row.get('obesity_rate', 0.0)),
                 asthma_rate=clean_numeric(row.get('asthma_rate', 0.0)),
@@ -108,14 +134,17 @@ def reload_database_from_csv():
             db.session.add(neighborhood)
         
         db.session.commit()
-        return True, "Database successfully updated."
+        return True, "Database successfully updated with all census and health metrics."
+
     except SQLAlchemyError as e:
         db.session.rollback()
         # Report the specific SQL error for better debugging
-        return False, f"Database Error: Could not insert data. {e.__cause__}"
+        print(f"DATABASE ERROR: {e}", file=sys.stderr)
+        return False, f"Database Error: Could not insert data. {str(e.__cause__) if e.__cause__ else str(e)}"
     except Exception as e:
         db.session.rollback()
         # Report a generic error
+        print(f"CRITICAL ERROR: {e}", file=sys.stderr)
         return False, f"Critical Python Error during reload: {str(e)}"
 
 # --- ROUTES ---
