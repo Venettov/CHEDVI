@@ -34,15 +34,16 @@ def verify_admin(username, password):
 
 def clean_dataframe_columns(df):
     """
-    Standardizes column names to match the database saving logic exactly.
+    Standardizes column names and maps Camden-specific CSV headers to database keys.
+    Works for both raw Camden spreadsheets and exported database CSVs.
     """
-    # 1. Standardize all headers to lowercase with underscores
+    # 1. Clean headers: lowercase, underscores, remove symbols
     df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.replace('%', '').str.replace('$', '')
     
-    # 2. Map the actual CSV headers found in your file to the database keys
+    # 2. COMPLETE MAPPING (CSV Headers -> Database Model Fields)
     column_map = {
         'median_annual_household_income': 'median_income',
-        'public_health_insurance': 'public_insurance',
+        'low_food_access_score': 'food_access_score',
         'high_school_or_higher': 'high_school_higher',
         'percentage_reported_diabetes': 'diabetes_rate',
         'percentage_reported_obesity': 'obesity_rate',
@@ -54,58 +55,22 @@ def clean_dataframe_columns(df):
         'percentage_reported_current_smoking': 'current_smoking',
         'percentage_visited_dr_for_check_up': 'dr_checkup_rate',
         'percentage_visited_dentist': 'visited_dentist',
+        'public_health_insurance': 'public_insurance',
+        'private_health_insurance': 'private_insurance',
+        'black_or_african_american_alone': 'black_alone',
+        'some_other_race_alone': 'other_race',
+        'two_or_more_races': 'two_plus_races',
         'renter_occupied_housing_units': 'renter_occupied',
         'vacant_housing_units': 'vacant_housing',
         'median_gross_rent_(/month)': 'median_rent',
-        'percentage_overcrowded_housing_units': 'overcrowded_housing',
-        'low_food_access_score': 'food_access_score',
-        'lack_health_insurance': 'lack_health_insurance'
+        'percentage_overcrowded_housing_units': 'overcrowded_housing'
     }
     
-    # Only rename columns that exist in the file
+    # Only rename if the source column exists to avoid errors
     existing_map = {k: v for k, v in column_map.items() if k in df.columns}
     df.rename(columns=existing_map, inplace=True)
+    
     return df
-
-def reload_database_from_csv():
-    try:
-        if not os.path.exists(DATA_FILE):
-            return False, "Data file not found."
-
-        df = pd.read_csv(DATA_FILE)
-        df = clean_dataframe_columns(df).fillna(0) 
-
-        db.session.query(NeighborhoodHealth).delete()
-        
-        for _, row in df.iterrows():
-            neighborhood = NeighborhoodHealth(
-                name=row.get('name', 'Unknown'),
-                census_tract=row.get('census_tract', 'N/A'),
-                latitude=clean_numeric(row.get('latitude', 0.0)),
-                longitude=clean_numeric(row.get('longitude', 0.0)),
-                total_population=clean_numeric(row.get('total_population', 0)),
-                median_income=clean_numeric(row.get('median_income', 0)),
-                poverty_rate=clean_numeric(row.get('poverty_rate', 0.0)),
-                unemployment_rate=clean_numeric(row.get('unemployment_rate', 0.0)),
-                high_school_higher=clean_numeric(row.get('high_school_higher', 0.0)), # Match mapping above
-                diabetes_rate=clean_numeric(row.get('diabetes_rate', 0.0)),
-                obesity_rate=clean_numeric(row.get('obesity_rate', 0.0)),
-                asthma_rate=clean_numeric(row.get('asthma_rate', 0.0)),
-                mental_distress_rate=clean_numeric(row.get('mental_distress_rate', 0.0)),
-                high_blood_pressure=clean_numeric(row.get('high_blood_pressure', 0.0)),
-                food_access_score=clean_numeric(row.get('food_access_score', 0.0)),
-                lack_health_insurance=clean_numeric(row.get('lack_health_insurance', 0.0)),
-                housing_units=clean_numeric(row.get('housing_units', 0)),
-                vacant_housing=clean_numeric(row.get('vacant_housing', 0))
-                # ... Add other fields as needed, following this same pattern
-            )
-            db.session.add(neighborhood)
-        
-        db.session.commit()
-        return True, "Success: Database reloaded with verified mapping."
-    except Exception as e:
-        db.session.rollback()
-        return False, f"Reload failed: {str(e)}"
 
 def clean_numeric(value):
     """
