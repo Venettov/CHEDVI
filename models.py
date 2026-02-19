@@ -24,42 +24,32 @@ class Newsletter(db.Model):
     subscribed_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class NeighborhoodHealth(db.Model):
+    __tablename__ = 'neighborhood_health'
+    
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     census_tract = db.Column(db.String(50))
-    
-    # Demographics - NOW FLOAT TO PREVENT NUMERIC OUT OF RANGE ERRORS
-    total_population = db.Column(db.Float) 
-    median_income = db.Column(db.Float)
-    poverty_rate = db.Column(db.Float)
-    unemployment_rate = db.Column(db.Float)
-    
-    # Health Metrics
-    diabetes_rate = db.Column(db.Float)
-    obesity_rate = db.Column(db.Float)
-    asthma_rate = db.Column(db.Float)
-    mental_distress_rate = db.Column(db.Float)
-    high_blood_pressure = db.Column(db.Float)
-    
-    # Access Metrics
-    food_access_score = db.Column(db.Float)
-    lack_health_insurance = db.Column(db.Float)
-    
-    # Metadata
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
-
-    def to_dict(self):
-        """Helper to convert the row to JSON for the graphs"""
-        return {
-            'name': self.name,
-            'income': self.median_income,
-            'poverty': self.poverty_rate,
-            'diabetes': self.diabetes_rate,
-            'obesity': self.obesity_rate,
-            'asthma': self.asthma_rate,
-            'mental_distress': self.mental_distress_rate,
-            'population': self.total_population
-        }
+    lack_health_insurance = db.Column(db.Float, default=0.0)
+    latitude = db.Column(db.Float, default=0.0)
+    longitude = db.Column(db.Float, default=0.0)
+    high_school_higher = db.Column(db.Float, default=0.0)
+    public_insurance = db.Column(db.Integer, default=0)
+    private_insurance = db.Column(db.Integer, default=0)
+    black_alone = db.Column(db.Integer, default=0)
+    asian_alone = db.Column(db.Integer, default=0)
+    other_race = db.Column(db.Integer, default=0)
+    two_plus_races = db.Column(db.Integer, default=0)
+    visited_dentist = db.Column(db.Float, default=0.0)
+    depression_rate = db.Column(db.Float, default=0.0)
+    no_physical_leisure = db.Column(db.Float, default=0.0)
+    current_smoking = db.Column(db.Float, default=0.0)
+    dr_checkup_rate = db.Column(db.Float, default=0.0)
+    renter_occupied = db.Column(db.Integer, default=0)
+    vacant_housing = db.Column(db.Integer, default=0)
+    median_rent = db.Column(db.Integer, default=0)
+    housing_units = db.Column(db.Integer, default=0)
+    overcrowded_housing = db.Column(db.Float, default=0.0)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class Admin(db.Model):
     id = db.Column(db.Integer, primary_key=True)

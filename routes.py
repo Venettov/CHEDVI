@@ -33,51 +33,27 @@ def verify_admin(username, password):
     return False
 
 def clean_dataframe_columns(df):
-    """
-    Standardizes column names and maps Camden-specific CSV headers to database keys.
-    This ensures no data is lost during the migration from CSV to Database.
-    """
-    # 1. Basic cleaning: lowercase, underscore, strip spaces, remove symbols
     df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.replace('%', '').str.replace('$', '')
     
-    # 2. COMPLETE MAPPING (Generic Variations + Specific Camden Dataset Headers)
-    # The right side of these pairs exactly matches your database columns
     column_map = {
-        # Core Identifiers
-        'neighborhood': 'name',
-        'neighborhood_name': 'name',
-        'census_tract': 'census_tract',
-        
-        # Economic & Population Metrics
-        'total_pop': 'total_population',
-        'population': 'total_population',
-        'income': 'median_income',
-        'median_household_income': 'median_income',
-        'median_annual_household_income': 'median_income',  
-        'poverty': 'poverty_rate',
-        'unemployment_rate': 'unemployment_rate',
-        
-        # Health Outcome Mappings
-        'diabetes': 'diabetes_rate',
-        'percentage_reported_diabetes': 'diabetes_rate',     
-        'obesity': 'obesity_rate',
-        'percentage_reported_obesity': 'obesity_rate',       
-        'asthma': 'asthma_rate',
-        'percentage_reported_asthma': 'asthma_rate',         
-        'mental_distress': 'mental_distress_rate',
+        'median_annual_household_income': 'median_income',
+        'percentage_reported_diabetes': 'diabetes_rate',
+        'percentage_reported_obesity': 'obesity_rate',
+        'percentage_reported_asthma': 'asthma_rate',
         'percentage_reported_mental_distress': 'mental_distress_rate',
-        'high_blood_pressure': 'high_blood_pressure',
         'percentage_reported_high_blood_pressure': 'high_blood_pressure',
-        
-        # Social Determinant Mappings
-        'food_access': 'food_access_score',
-        'low_food_access_score': 'food_access_score',        
-        'insurance': 'lack_health_insurance',
-        'uninsured': 'lack_health_insurance',
-        'lack_health_insurance': 'lack_health_insurance'
+        'low_food_access_score': 'food_access_score',
+        'percentage_reported_depression': 'depression_rate',
+        'percentage_reported_no_physical_leisure': 'no_physical_leisure',
+        'percentage_reported_current_smoking': 'current_smoking',
+        'percentage_visited_dr_for_check_up': 'dr_checkup_rate',
+        'percentage_visited_dentist': 'visited_dentist',
+        'percentage_overcrowded_housing_units': 'overcrowded_housing',
+        'median_gross_rent_(/month)': 'median_rent',
+        'black_or_african_american_alone': 'black_alone',
+        'some_other_race_alone': 'other_race',
+        'two_or_more_races': 'two_plus_races'
     }
-    
-    # 3. Apply the mapping
     df.rename(columns=column_map, inplace=True)
     return df
 
@@ -99,53 +75,52 @@ def clean_numeric(value):
     return value
 
 def reload_database_from_csv():
-    """
-    Clears existing data and re-populates the database using ALL available 
-    metrics from neighborhood_data.csv, including census tracts and unemployment.
-    """
     try:
-        if not os.path.exists(DATA_FILE):
-            return False, "Data file not found."
-
         df = pd.read_csv(DATA_FILE)
-        df = clean_dataframe_columns(df) 
-        
-        # Ensure no NaNs exist to prevent database insertion crashes
-        df = df.fillna(0) 
-
+        df = clean_dataframe_columns(df).fillna(0)
         db.session.query(NeighborhoodHealth).delete()
         
         for _, row in df.iterrows():
-            neighborhood = NeighborhoodHealth(
-                name=row.get('name', 'Unknown'),
-                census_tract=row.get('census_tract', 'N/A'), 
-                total_population=clean_numeric(row.get('total_population', 0)),
-                median_income=clean_numeric(row.get('median_income', 0)),
-                poverty_rate=clean_numeric(row.get('poverty_rate', 0.0)),
-                unemployment_rate=clean_numeric(row.get('unemployment_rate', 0.0)), 
-                diabetes_rate=clean_numeric(row.get('diabetes_rate', 0.0)),
-                obesity_rate=clean_numeric(row.get('obesity_rate', 0.0)),
-                asthma_rate=clean_numeric(row.get('asthma_rate', 0.0)),
-                mental_distress_rate=clean_numeric(row.get('mental_distress_rate', 0.0)),
-                high_blood_pressure=clean_numeric(row.get('high_blood_pressure', 0.0)),
-                food_access_score=clean_numeric(row.get('food_access_score', 0.0)),
-                lack_health_insurance=clean_numeric(row.get('lack_health_insurance', 0.0))
+            n = NeighborhoodHealth(
+                name=row.get('name'),
+                census_tract=row.get('census_tract'),
+                latitude=row.get('latitude'),
+                longitude=row.get('longitude'),
+                total_population=clean_numeric(row.get('total_population')),
+                median_income=clean_numeric(row.get('median_income')),
+                poverty_rate=clean_numeric(row.get('poverty_rate')),
+                unemployment_rate=clean_numeric(row.get('unemployment_rate')),
+                high_school_higher=clean_numeric(row.get('high_school_or_higher')),
+                # Health
+                diabetes_rate=clean_numeric(row.get('diabetes_rate')),
+                obesity_rate=clean_numeric(row.get('obesity_rate')),
+                asthma_rate=clean_numeric(row.get('asthma_rate')),
+                depression_rate=clean_numeric(row.get('depression_rate')),
+                high_blood_pressure=clean_numeric(row.get('high_blood_pressure')),
+                mental_distress_rate=clean_numeric(row.get('mental_distress_rate')),
+                # Insurance & Access
+                lack_health_insurance=clean_numeric(row.get('lack_health_insurance')),
+                public_insurance=clean_numeric(row.get('public_health_insurance')),
+                private_insurance=clean_numeric(row.get('private_health_insurance')),
+                food_access_score=clean_numeric(row.get('food_access_score')),
+                # Demographics
+                black_alone=clean_numeric(row.get('black_alone')),
+                asian_alone=clean_numeric(row.get('asian_alone')),
+                other_race=clean_numeric(row.get('other_race')),
+                two_plus_races=clean_numeric(row.get('two_plus_races')),
+                # Housing
+                housing_units=clean_numeric(row.get('housing_units')),
+                renter_occupied=clean_numeric(row.get('renter_occupied_housing_units')),
+                vacant_housing=clean_numeric(row.get('vacant_housing_units')),
+                median_rent=clean_numeric(row.get('median_rent')),
+                overcrowded_housing=clean_numeric(row.get('overcrowded_housing'))
             )
-            db.session.add(neighborhood)
-        
+            db.session.add(n)
         db.session.commit()
-        return True, "Database successfully updated with all census and health metrics."
-
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        # Report the specific SQL error for better debugging
-        print(f"DATABASE ERROR: {e}", file=sys.stderr)
-        return False, f"Database Error: Could not insert data. {str(e.__cause__) if e.__cause__ else str(e)}"
+        return True, "Full data sync complete."
     except Exception as e:
         db.session.rollback()
-        # Report a generic error
-        print(f"CRITICAL ERROR: {e}", file=sys.stderr)
-        return False, f"Critical Python Error during reload: {str(e)}"
+        return False, str(e)
 
 # --- ROUTES ---
 
