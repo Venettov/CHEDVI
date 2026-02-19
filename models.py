@@ -29,6 +29,16 @@ class NeighborhoodHealth(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     census_tract = db.Column(db.String(50))
+    total_population = db.Column(db.Integer, default=0)
+    median_income = db.Column(db.Integer, default=0)
+    poverty_rate = db.Column(db.Float, default=0.0)
+    unemployment_rate = db.Column(db.Float, default=0.0)
+    diabetes_rate = db.Column(db.Float, default=0.0)
+    obesity_rate = db.Column(db.Float, default=0.0)
+    asthma_rate = db.Column(db.Float, default=0.0)
+    mental_distress_rate = db.Column(db.Float, default=0.0)
+    high_blood_pressure = db.Column(db.Float, default=0.0)
+    food_access_score = db.Column(db.Float, default=0.0)
     lack_health_insurance = db.Column(db.Float, default=0.0)
     latitude = db.Column(db.Float, default=0.0)
     longitude = db.Column(db.Float, default=0.0)
@@ -49,6 +59,7 @@ class NeighborhoodHealth(db.Model):
     median_rent = db.Column(db.Integer, default=0)
     housing_units = db.Column(db.Integer, default=0)
     overcrowded_housing = db.Column(db.Float, default=0.0)
+    
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class Admin(db.Model):

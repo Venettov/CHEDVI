@@ -33,27 +33,46 @@ def verify_admin(username, password):
     return False
 
 def clean_dataframe_columns(df):
+    """
+    Standardizes column names and maps Camden-specific CSV headers to database keys.
+    This ensures all 32 columns are captured without any mismatch.
+    """
+    # 1. Basic cleaning: lowercase, underscore, strip spaces, remove symbols
     df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.replace('%', '').str.replace('$', '')
     
+    # 2. COMPLETE MAPPING (Bridges CSV headers to Model field names)
     column_map = {
+        # Core & Economic
         'median_annual_household_income': 'median_income',
+        'low_food_access_score': 'food_access_score',
+        'high_school_or_higher': 'high_school_higher',
+        
+        # Health Outcomes
         'percentage_reported_diabetes': 'diabetes_rate',
         'percentage_reported_obesity': 'obesity_rate',
         'percentage_reported_asthma': 'asthma_rate',
         'percentage_reported_mental_distress': 'mental_distress_rate',
         'percentage_reported_high_blood_pressure': 'high_blood_pressure',
-        'low_food_access_score': 'food_access_score',
         'percentage_reported_depression': 'depression_rate',
         'percentage_reported_no_physical_leisure': 'no_physical_leisure',
         'percentage_reported_current_smoking': 'current_smoking',
         'percentage_visited_dr_for_check_up': 'dr_checkup_rate',
         'percentage_visited_dentist': 'visited_dentist',
-        'percentage_overcrowded_housing_units': 'overcrowded_housing',
-        'median_gross_rent_(/month)': 'median_rent',
+        
+        # Demographics & Insurance
+        'public_health_insurance': 'public_insurance',
+        'private_health_insurance': 'private_insurance',
         'black_or_african_american_alone': 'black_alone',
         'some_other_race_alone': 'other_race',
-        'two_or_more_races': 'two_plus_races'
+        'two_or_more_races': 'two_plus_races',
+        
+        # Housing
+        'renter_occupied_housing_units': 'renter_occupied',
+        'vacant_housing_units': 'vacant_housing',
+        'median_gross_rent_(/month)': 'median_rent',
+        'percentage_overcrowded_housing_units': 'overcrowded_housing'
     }
+    
     df.rename(columns=column_map, inplace=True)
     return df
 
@@ -75,52 +94,66 @@ def clean_numeric(value):
     return value
 
 def reload_database_from_csv():
+    """
+    Clears existing data and re-populates the database using ALL 32 
+    metrics from neighborhood_data.csv.
+    """
     try:
+        if not os.path.exists(DATA_FILE):
+            return False, "Data file not found."
+
         df = pd.read_csv(DATA_FILE)
-        df = clean_dataframe_columns(df).fillna(0)
+        df = clean_dataframe_columns(df).fillna(0) 
+
         db.session.query(NeighborhoodHealth).delete()
         
         for _, row in df.iterrows():
-            n = NeighborhoodHealth(
-                name=row.get('name'),
-                census_tract=row.get('census_tract'),
-                latitude=row.get('latitude'),
-                longitude=row.get('longitude'),
-                total_population=clean_numeric(row.get('total_population')),
-                median_income=clean_numeric(row.get('median_income')),
-                poverty_rate=clean_numeric(row.get('poverty_rate')),
-                unemployment_rate=clean_numeric(row.get('unemployment_rate')),
-                high_school_higher=clean_numeric(row.get('high_school_or_higher')),
-                # Health
-                diabetes_rate=clean_numeric(row.get('diabetes_rate')),
-                obesity_rate=clean_numeric(row.get('obesity_rate')),
-                asthma_rate=clean_numeric(row.get('asthma_rate')),
-                depression_rate=clean_numeric(row.get('depression_rate')),
-                high_blood_pressure=clean_numeric(row.get('high_blood_pressure')),
-                mental_distress_rate=clean_numeric(row.get('mental_distress_rate')),
-                # Insurance & Access
-                lack_health_insurance=clean_numeric(row.get('lack_health_insurance')),
-                public_insurance=clean_numeric(row.get('public_health_insurance')),
-                private_insurance=clean_numeric(row.get('private_health_insurance')),
-                food_access_score=clean_numeric(row.get('food_access_score')),
-                # Demographics
-                black_alone=clean_numeric(row.get('black_alone')),
-                asian_alone=clean_numeric(row.get('asian_alone')),
-                other_race=clean_numeric(row.get('other_race')),
-                two_plus_races=clean_numeric(row.get('two_plus_races')),
+            neighborhood = NeighborhoodHealth(
+                name=row.get('name', 'Unknown'),
+                census_tract=row.get('census_tract', 'N/A'),
+                latitude=row.get('latitude', 0.0),
+                longitude=row.get('longitude', 0.0),
+                total_population=clean_numeric(row.get('total_population', 0)),
+                median_income=clean_numeric(row.get('median_income', 0)),
+                poverty_rate=clean_numeric(row.get('poverty_rate', 0.0)),
+                unemployment_rate=clean_numeric(row.get('unemployment_rate', 0.0)),
+                high_school_higher=clean_numeric(row.get('high_school_higher', 0.0)),
+                # Health Metrics
+                diabetes_rate=clean_numeric(row.get('diabetes_rate', 0.0)),
+                obesity_rate=clean_numeric(row.get('obesity_rate', 0.0)),
+                asthma_rate=clean_numeric(row.get('asthma_rate', 0.0)),
+                mental_distress_rate=clean_numeric(row.get('mental_distress_rate', 0.0)),
+                high_blood_pressure=clean_numeric(row.get('high_blood_pressure', 0.0)),
+                depression_rate=clean_numeric(row.get('depression_rate', 0.0)),
+                visited_dentist=clean_numeric(row.get('visited_dentist', 0.0)),
+                no_physical_leisure=clean_numeric(row.get('no_physical_leisure', 0.0)),
+                current_smoking=clean_numeric(row.get('current_smoking', 0.0)),
+                dr_checkup_rate=clean_numeric(row.get('dr_checkup_rate', 0.0)),
+                # Access & Demographics
+                food_access_score=clean_numeric(row.get('food_access_score', 0.0)),
+                lack_health_insurance=clean_numeric(row.get('lack_health_insurance', 0.0)),
+                public_insurance=clean_numeric(row.get('public_insurance', 0)),
+                private_insurance=clean_numeric(row.get('private_insurance', 0)),
+                black_alone=clean_numeric(row.get('black_alone', 0)),
+                asian_alone=clean_numeric(row.get('asian_alone', 0)),
+                other_race=clean_numeric(row.get('other_race', 0)),
+                two_plus_races=clean_numeric(row.get('two_plus_races', 0)),
                 # Housing
-                housing_units=clean_numeric(row.get('housing_units')),
-                renter_occupied=clean_numeric(row.get('renter_occupied_housing_units')),
-                vacant_housing=clean_numeric(row.get('vacant_housing_units')),
-                median_rent=clean_numeric(row.get('median_rent')),
-                overcrowded_housing=clean_numeric(row.get('overcrowded_housing'))
+                housing_units=clean_numeric(row.get('housing_units', 0)),
+                renter_occupied=clean_numeric(row.get('renter_occupied', 0)),
+                vacant_housing=clean_numeric(row.get('vacant_housing', 0)),
+                median_rent=clean_numeric(row.get('median_rent', 0)),
+                overcrowded_housing=clean_numeric(row.get('overcrowded_housing', 0.0))
             )
-            db.session.add(n)
+            db.session.add(neighborhood)
+        
         db.session.commit()
-        return True, "Full data sync complete."
+        return True, "Success: All 32 census and health metrics imported."
+
     except Exception as e:
         db.session.rollback()
-        return False, str(e)
+        print(f"RELOAD ERROR: {e}", file=sys.stderr)
+        return False, f"Reload failed: {str(e)}"
 
 # --- ROUTES ---
 
