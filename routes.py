@@ -555,13 +555,15 @@ def get_neighborhood_data():
                 'obesity': n.obesity_rate,
                 'asthma': n.asthma_rate,
                 'mentalDistress': n.mental_distress_rate,
-                'highBloodPressure': n.high_blood_pressure, # Fixed
-                'foodAccess': n.food_access_score,           # Fixed
-                'uninsured': n.lack_health_insurance,       # Fixed
+                'highBloodPressure': n.high_blood_pressure,
+                'foodAccess': n.food_access_score,
+                'uninsured': n.lack_health_insurance,
                 'education': n.high_school_higher,
-                'housing_vacant': n.vacant_housing,          # Updated for math
-                'housing_total': n.housing_units             # Added for math
+                'unemployment': n.unemployment_rate,    # Ensure this matches the JS d.unemployment
+                'housing_vacant': n.vacant_housing,     # Used for the housing math
+                'housing_total': n.housing_units        # Used for the housing math
             })
+
         return jsonify(data_list)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

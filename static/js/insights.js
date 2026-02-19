@@ -384,52 +384,52 @@ function createHealthcareAccessChart() {
 // --- 6. SOCIAL STRESSORS / MENTAL HEALTH CHART ---
 function createMentalHealthChart() {
     const ctx = document.getElementById('mentalHealthChart');
-    if (!ctx) return;
+    if (!ctx || !window.dbData || window.dbData.length === 0) return;
     if (mentalHealthChart) mentalHealthChart.destroy();
-    if (!window.dbData || window.dbData.length === 0) return;
 
     const selector = document.getElementById('socialOutcomeSelector');
     const outcomeKey = selector ? selector.value : 'mentalDistress';
     
-    // --- TEXT UPDATES ---
-    const explanations = {
-        'mentalDistress': { title: 'Poverty & Mental Health', main: '', detail: 'Enter explanation here.' },
-        'highBloodPressure': { title: 'Stress & The Heart', main: '', detail: 'Enter explanation here.' },
-        'obesity': { title: 'Stress & Nutrition', main: '', detail: 'Enter explanation here.' },
-        'diabetes': { title: 'Stress & Diabetes', main: '', detail: 'Enter explanation here.' },
-        'asthma': { title: 'Stress & Inflammation', main: '', detail: 'Enter explanation here.' }
-    };
-
-    const textData = explanations[outcomeKey];
-    if (textData) {
-        if (document.getElementById('social-text-title')) document.getElementById('social-text-title').textContent = textData.title;
-        if (document.getElementById('social-text-main')) document.getElementById('social-text-main').textContent = textData.main;
-        if (document.getElementById('social-text-detail')) document.getElementById('social-text-detail').textContent = textData.detail;
-    }
-
-    // MAP FROM DB
+    // MAP FROM DB - Ensuring no undefined values for 'r'
     const bubbleData = window.dbData.map(d => ({
-        x: d.poverty, y: d[outcomeKey] || 0, r: d.unemployment / 3, name: d.name, unemployment: d.unemployment
+        x: d.poverty || 0, 
+        y: d[outcomeKey] || 0, 
+        r: (d.unemployment || 5) / 2, // Using unemployment rate for bubble size
+        name: d.name,
+        unemployment: d.unemployment || 0
     }));
 
     const labels = {
-        'mentalDistress': 'Mental Distress (%)', 'highBloodPressure': 'High Blood Pressure (%)',
-        'obesity': 'Obesity Rate (%)', 'diabetes': 'Diabetes Rate (%)', 'asthma': 'Asthma Rate (%)'
+        'mentalDistress': 'Mental Distress (%)',
+        'highBloodPressure': 'High Blood Pressure (%)',
+        'obesity': 'Obesity Rate (%)',
+        'diabetes': 'Diabetes Rate (%)',
+        'asthma': 'Asthma Rate (%)'
     };
 
     mentalHealthChart = new Chart(ctx, {
         type: 'bubble',
         data: {
             datasets: [{
-                label: `Poverty vs ${labels[outcomeKey]}`, data: bubbleData,
-                backgroundColor: 'rgba(111, 66, 193, 0.6)', borderColor: 'rgba(111, 66, 193, 1)',     
-                borderWidth: 1, hoverBackgroundColor: 'rgba(111, 66, 193, 0.9)'
+                label: `Poverty vs ${labels[outcomeKey]}`,
+                data: bubbleData,
+                backgroundColor: 'rgba(111, 66, 193, 0.6)', 
+                borderColor: 'rgba(111, 66, 193, 1)',     
+                borderWidth: 1
             }]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: {
-                tooltip: { callbacks: { label: function(context) { const raw = context.raw; return `${raw.name}: Poverty ${raw.x}%, ${labels[outcomeKey]} ${raw.y}%, Unempl. ${raw.unemployment}%`; } } },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const raw = context.raw;
+                            return `${raw.name}: Poverty ${raw.x}%, ${labels[outcomeKey]} ${raw.y}%, Unemployment ${raw.unemployment}%`;
+                        }
+                    }
+                },
                 legend: { display: false }
             },
             scales: {
