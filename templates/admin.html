@@ -106,6 +106,18 @@
                                     </button>
                                 </form>
                             </div>
+                            <div class="card mt-4">
+                                <div class="card-header bg-warning text-dark">
+                                    <h5 class="mb-0">Database Management</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted">Use this to update the database structure if you've added new columns to your models.</p>
+                                    <a href="{{ url_for('admin_db_fix') }}" class="btn btn-danger" 
+                                    onclick="return confirm('WARNING: This will wipe all current neighborhood data to reset the structure. Continue?')">
+                                    <i class="fas fa-tools me-2"></i>DB Fix/Reset
+                                    </a>
+                                </div>
+                            </div>
 
                         {% endif %}
 

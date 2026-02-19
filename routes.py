@@ -154,14 +154,19 @@ def admin_logout():
 
 @app.route('/admin/db-fix')
 def admin_db_fix():
-    """Run this ONCE to force the live database to adopt new column sizes."""
+    # Only allow logged-in admins
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin_login'))
+    
     try:
-        Admin.__table__.drop(db.engine)
-        NeighborhoodHealth.__table__.drop(db.engine) # Also drop the Neighborhood table to fix column type
+        # This clears and recreates the tables based on your new Model fields
+        db.drop_all()
         db.create_all()
-        return "SUCCESS: All data tables reset and recreated with correct types. You must recreate your admin user now."
+        flash("Database structure reset successfully!", "success")
     except Exception as e:
-        return f"Error resetting table: {str(e)}"
+        flash(f"Error resetting database: {str(e)}", "danger")
+        
+    return redirect(url_for('admin_dashboard'))
 
 @app.route('/admin/setup/<username>/<password>')
 def admin_setup(username, password):
