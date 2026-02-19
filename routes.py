@@ -351,24 +351,21 @@ def dashboard():
                            max_poverty=max_poverty,
                            poverty_gap=poverty_gap,
                            dashboard_data=dashboard_data)
+
 @app.route('/insights')
 def insights():
     all_n = NeighborhoodHealth.query.all()
     if not all_n: return render_template('insights.html', total_population="0", insights_data=[])
 
     total_population = sum(n.total_population for n in all_n)
-    
-    # Aggregates for stat cards
-    diabetes_rates = [n.diabetes_rate for n in all_n]
-    avg_diabetes = sum(diabetes_rates) / len(diabetes_rates) if diabetes_rates else 0
-    incomes = [n.median_income for n in all_n]
-    avg_income = sum(incomes) / len(incomes) if incomes else 0
-    poverty_rates = [n.poverty_rate for n in all_n]
-    avg_poverty = sum(poverty_rates) / len(poverty_rates) if poverty_rates else 0
+    avg_diabetes = sum(n.diabetes_rate for n in all_n) / len(all_n) if all_n else 0
+    avg_income = sum(n.median_income for n in all_n) / len(all_n) if all_n else 0
+    avg_poverty = sum(n.poverty_rate for n in all_n) / len(all_n) if all_n else 0
     
     highest_income_n = max(all_n, key=lambda x: x.median_income) if all_n else None
     highest_poverty_n = max(all_n, key=lambda x: x.poverty_rate) if all_n else None
 
+    # Standardized keys for frontend consistency
     insights_data = []
     for n in all_n:
         insights_data.append({
@@ -376,32 +373,25 @@ def insights():
             'income': n.median_income, 
             'poverty': n.poverty_rate, 
             'diabetes': n.diabetes_rate, 
-            'obesity': getattr(n, 'obesity_rate', 0), 
-            'asthma': getattr(n, 'asthma_rate', 0), 
-            'mentalDistress': getattr(n, 'mental_distress_rate', 0), 
-            'foodAccess': getattr(n, 'food_access_score', 0), 
-            'insurance': getattr(n, 'lack_health_insurance', 0),
-            'unemployment': getattr(n, 'unemployment_rate', 0), # Added
-            'education': getattr(n, 'high_school_higher', 0),   # Added
-            'housing': getattr(n, 'vacant_housing', 0),         # Added
-            'highBloodPressure': getattr(n, 'high_blood_pressure', 0) # Added
+            'obesity': n.obesity_rate, 
+            'asthma': n.asthma_rate, 
+            'mentalDistress': n.mental_distress_rate, 
+            'highBloodPressure': n.high_blood_pressure,
+            'foodAccess': n.food_access_score, 
+            'uninsured': n.lack_health_insurance,
+            'education': n.high_school_higher,
+            'housing': n.vacant_housing,
+            'unemployment': n.unemployment_rate
         })
 
     return render_template('insights.html',
                            total_population=f"{total_population:,}",
-                           neighborhood_count=len(all_n),
                            avg_diabetes=f"{avg_diabetes:.1f}",
-                           min_diabetes=min(diabetes_rates) if diabetes_rates else 0,
-                           max_diabetes=max(diabetes_rates) if diabetes_rates else 0,
                            avg_income=f"{avg_income:,.0f}",
-                           min_income=min(incomes) if incomes else 0,
-                           max_income=max(incomes) if incomes else 0,
                            avg_poverty=f"{avg_poverty:.1f}",
-                           min_poverty=min(poverty_rates) if poverty_rates else 0,
-                           max_poverty=max(poverty_rates) if poverty_rates else 0,
                            highest_income_n=highest_income_n,
                            highest_poverty_n=highest_poverty_n,
-                           insights_data=insights_data) # <--- This is the key payload for the chart
+                           insights_data=insights_data)
 
 @app.route('/neighborhoods')
 def neighborhoods():
@@ -553,10 +543,6 @@ def debug_email():
 
 @app.route('/api/neighborhood-data')
 def get_neighborhood_data():
-    """
-    Returns all neighborhood data for the charts.
-    Keys are standardized to camelCase for insights.js compatibility.
-    """
     try:
         neighborhoods = NeighborhoodHealth.query.all()
         data_list = []
@@ -565,21 +551,20 @@ def get_neighborhood_data():
                 'name': n.name,
                 'income': n.median_income,
                 'poverty': n.poverty_rate,
-                'unemployment': n.unemployment_rate,
                 'diabetes': n.diabetes_rate,
                 'obesity': n.obesity_rate,
                 'asthma': n.asthma_rate,
                 'mentalDistress': n.mental_distress_rate,
                 'highBloodPressure': n.high_blood_pressure,
-                'foodAccess': n.food_access_score,       
-                'uninsured': n.lack_health_insurance,    
-                'education': n.high_school_higher,      
-                'housing': n.vacant_housing,             
+                'foodAccess': n.food_access_score, 
+                'uninsured': n.lack_health_insurance,
+                'education': n.high_school_higher,
+                'housing': n.vacant_housing,
+                'unemployment': n.unemployment_rate
             })
         return jsonify(data_list)
     except Exception as e:
-        print(f"API Error: {str(e)}", file=sys.stderr)
-        return jsonify({"error": "Could not fetch data"}), 500
+        return jsonify({"error": str(e)}), 500
     
 
 @app.errorhandler(404)

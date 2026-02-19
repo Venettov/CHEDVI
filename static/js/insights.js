@@ -177,13 +177,34 @@ function createFoodObesityChart() {
     });
 }
 
-// --- EDUCATION & HEALTH CHART (Fixed Mapping) ---
+// --- 3. EDUCATION & HEALTH CHART ---
 function createEducationHealthChart() {
     const ctx = document.getElementById('educationHealthChart');
-    if (!ctx || !window.dbData.length) return;
+    if (!ctx) return;
     if (educationHealthChart) educationHealthChart.destroy();
+    
+    // Safety check - do not attempt to draw if data isn't loaded
+    if (!window.dbData || window.dbData.length === 0) return;
 
-    const outcomeKey = document.getElementById('educationOutcomeSelector')?.value || 'diabetes';
+    const selector = document.getElementById('educationOutcomeSelector');
+    const outcomeKey = selector ? selector.value : 'diabetes';
+
+    // --- TEXT UPDATES ---
+    const explanations = {
+        'diabetes': { title: 'Education & Diabetes', main: '', detail: 'Enter explanation here.' },
+        'obesity': { title: 'Education & Obesity', main: '', detail: 'Enter explanation here.' },
+        'poverty': { title: 'The Education-Poverty Cycle', main: '', detail: 'Enter explanation here.' },
+        'mentalDistress': { title: 'Education & Mental Health', main: '', detail: 'Enter explanation here.' },
+        'income': { title: 'Education & Income', main: '', detail: 'Enter explanation here.' }
+    };
+
+    const textData = explanations[outcomeKey];
+    if (textData) {
+        if (document.getElementById('edu-text-title')) document.getElementById('edu-text-title').textContent = textData.title;
+        if (document.getElementById('edu-text-main')) document.getElementById('edu-text-main').textContent = textData.main;
+        if (document.getElementById('edu-text-detail')) document.getElementById('edu-text-detail').textContent = textData.detail;
+    }
+
     const labels = {
         'diabetes': 'Diabetes Rate (%)',
         'obesity': 'Obesity Rate (%)',
@@ -192,28 +213,57 @@ function createEducationHealthChart() {
         'income': 'Median Income ($)'
     };
 
+    // MAP FROM DB
+    const scatterData = window.dbData.map(d => ({
+        x: d.education, 
+        y: d[outcomeKey] || 0, 
+        name: d.name
+    }));
+
+    // DRAW CHART
     educationHealthChart = new Chart(ctx, {
         type: 'scatter',
         data: {
             datasets: [{
                 label: `Education vs. ${labels[outcomeKey]}`,
-                data: window.dbData.map(d => ({
-                    x: d.education, 
-                    y: d[outcomeKey] || 0, 
-                    name: d.name
-                })),
+                data: scatterData,
                 backgroundColor: 'rgba(13, 202, 240, 0.6)',
                 borderColor: 'rgba(13, 202, 240, 1)',
                 borderWidth: 1,
-                pointRadius: 6
+                pointRadius: 6,
+                pointHoverRadius: 8
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let yVal = context.raw.y;
+                            if (outcomeKey === 'income') yVal = '$' + yVal.toLocaleString();
+                            else yVal = yVal + '%';
+                            return `${context.raw.name}: Grad Rate ${context.raw.x}%, ${yVal}`;
+                        }
+                    }
+                },
+                legend: { position: 'bottom' }
+            },
             scales: {
-                x: { title: { display: true, text: 'High School Graduation Rate (%)' }, min: 20, max: 100 },
-                y: { title: { display: true, text: labels[outcomeKey] } }
+                x: { 
+                    title: { display: true, text: 'High School Graduation Rate (%)' }, 
+                    min: 20, 
+                    max: 100 
+                },
+                y: {
+                    title: { display: true, text: labels[outcomeKey] },
+                    ticks: {
+                        callback: function(value) {
+                            return outcomeKey === 'income' ? '$' + value.toLocaleString() : value + '%';
+                        }
+                    }
+                }
             }
         }
     });
@@ -525,13 +575,13 @@ function createTemporalTrendsChart() {
     });
 }
 
-// Advanced Insight 2: Spatial Analysis (Geo-Map Scatter Plot) - REPLACES RANDOM BUBBLE CHART
+// Advanced Insight 2: Spatial Analysis (Geo-Map Scatter Plot)
 function createSpatialAnalysisChart() {
     const ctx = document.getElementById('spatialAnalysisChart');
-    if (!ctx) return;
+    // Added safety check to ensure dbData is loaded
+    if (!ctx || !window.dbData || window.dbData.length === 0) return;
     
     // 1. Define Approximate Map Coordinates for Camden Neighborhoods (0-100 Grid)
-    // North is high Y, East is high X.
     const geoMap = {
         'Pyne Point': {x: 30, y: 85}, 'Cooper Poynt': {x: 35, y: 80}, 'Cramer Hill': {x: 75, y: 85}, 'Beideman': {x: 85, y: 80},
         'Cooper Grant': {x: 20, y: 65}, 'Lanning Square': {x: 25, y: 55}, 'Gateway': {x: 35, y: 50}, 'Bergen Square': {x: 45, y: 45},
@@ -541,9 +591,10 @@ function createSpatialAnalysisChart() {
     };
 
     // 2. Map Data to Coordinates and Assign Colors based on Diabetes Rate
-    const spatialData = camdenData.neighborhoods.map((name, i) => {
-        const coords = geoMap[name] || {x: 50, y: 50}; // Fallback to center if missing
-        const rate = camdenData.diabetes[i];
+    // CHANGED: Now uses window.dbData instead of camdenData
+    const spatialData = window.dbData.map(d => {
+        const coords = geoMap[d.name] || {x: 50, y: 50}; // Fallback to center if missing
+        const rate = d.diabetes;
         
         // Color Logic: Low (<15) = Green, Med (15-20) = Yellow, High (>20) = Red
         let color = 'rgba(25, 135, 84, 0.7)'; // Green
@@ -554,7 +605,7 @@ function createSpatialAnalysisChart() {
             x: coords.x,
             y: coords.y,
             r: 10, // Fixed radius for cleanliness
-            neighborhood: name,
+            neighborhood: d.name,
             diabetes: rate,
             bgColor: color
         };
@@ -580,7 +631,7 @@ function createSpatialAnalysisChart() {
                     title: { display: true, text: 'West ⟷ East' },
                     min: 0, max: 100,
                     grid: { display: false },
-                    ticks: { display: false } // Hide numbers for abstract map look
+                    ticks: { display: false } 
                 },
                 y: {
                     title: { display: true, text: 'South ⟷ North' },
@@ -655,13 +706,13 @@ function createIntersectionalChart() {
 // Advanced Insight 4: Resource Allocation (Bar + Line Chart) - POPULATED WITH ALL 19 NEIGHBORHOODS
 function createResourceAllocationChart() {
     const ctx = document.getElementById('resourceAllocationChart');
-    if (!ctx) return;
+    if (!ctx || !window.dbData || window.dbData.length === 0) return;
     
     // 1. Calculate "Preventable Cases" Score for all neighborhoods
     // Logic: High Poverty + High Disease = Higher potential for impact per $ invested
-    const resourceData = camdenData.neighborhoods.map((name, i) => {
-        const diabetes = camdenData.diabetes[i];
-        const poverty = camdenData.poverty[i];
+    const resourceData = window.dbData.map(d => {
+        const diabetes = d.diabetes;
+        const poverty = d.poverty;
         
         // Synthetic metric: "Impact Score"
         // We scale this to look like "Cases per $1M" (approx range 200-1000)
@@ -672,7 +723,7 @@ function createResourceAllocationChart() {
         const costPerCase = Math.round(1000000 / (impactScore + 10)); // +10 avoids div by zero
 
         return {
-            neighborhood: name,
+            neighborhood: d.name,
             preventable: impactScore,
             cost: costPerCase
         };
@@ -752,13 +803,13 @@ function createResourceAllocationChart() {
 // Advanced Insight 5: Community Resilience (Scatter Plot) - POPULATED WITH ALL 19 NEIGHBORHOODS
 function createResilienceChart() {
     const ctx = document.getElementById('resilienceChart');
-    if (!ctx) return;
+    if (!ctx || !window.dbData || window.dbData.length === 0) return;
 
     // 1. Calculate a "Resilience Index" for ALL 19 neighborhoods
     // Formula: Average of (Education Rate) and (100 - Poverty Rate), scaled to 1-10
-    const resilienceData = camdenData.neighborhoods.map((name, i) => {
-        const edu = camdenData.education[i];
-        const poverty = camdenData.poverty[i];
+    const resilienceData = window.dbData.map(d => {
+        const edu = d.education;
+        const poverty = d.poverty;
         
         // Higher Education + Lower Poverty = Higher Resilience
         // We normalize this to a roughly 0-10 scale for the "Index"
@@ -767,8 +818,8 @@ function createResilienceChart() {
 
         return {
             x: indexScore,
-            y: camdenData.diabetes[i],
-            neighborhood: name
+            y: d.diabetes,
+            neighborhood: d.name
         };
     });
 
@@ -821,18 +872,18 @@ function createResilienceChart() {
 // Advanced Insight 6: Environmental Health Justice - POPULATED WITH ALL 19 NEIGHBORHOODS
 function createEnvironmentalChart() {
     const ctx = document.getElementById('environmentalChart');
-    if (!ctx) return;
+    if (!ctx || !window.dbData || window.dbData.length === 0) return;
     
     // 1. Calculate "Environmental Risk Score" (Proxy)
     // Logic: Combine Poverty (Industrial proximity) + Housing (Indoor air quality)
-    const envData = camdenData.neighborhoods.map((name, i) => {
+    const envData = window.dbData.map(d => {
         // Formula: Weighted average scaled to look like an Index (0-150)
-        const riskScore = Math.round((camdenData.poverty[i] * 1.5) + (camdenData.housing[i] * 3) + 20);
+        const riskScore = Math.round((d.poverty * 1.5) + (d.housing * 3) + 20);
         
         return {
-            neighborhood: name,
+            neighborhood: d.name,
             risk: riskScore,
-            asthma: camdenData.asthma[i]
+            asthma: d.asthma
         };
     });
 

@@ -697,17 +697,24 @@
 <script src="{{ url_for('static', filename='js/insights.js') }}"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-    // INJECT DATA FROM PYTHON
-    const insightsData = {{ insights_data | tojson | safe }};
+    // 1. Change to 'let' so the fetch call can overwrite this with live database data
+    let insightsData = {{ insights_data | tojson | safe }};
     
     // --- 1. CORRELATION CHART LOGIC ---
     let correlationChart = null;
 
     function renderCorrelationChart() {
-        const xVar = document.getElementById('xVariable').value;
-        const yVar = document.getElementById('yVariable').value;
-        const ctx = document.getElementById('interactiveCorrelationChart').getContext('2d');
+        const xVarEl = document.getElementById('xVariable');
+        const yVarEl = document.getElementById('yVariable');
+        const ctxEl = document.getElementById('interactiveCorrelationChart');
+        
+        if (!xVarEl || !yVarEl || !ctxEl) return;
+
+        const xVar = xVarEl.value;
+        const yVar = yVarEl.value;
+        const ctx = ctxEl.getContext('2d');
 
         const plotData = insightsData.map(item => ({
             x: item[xVar],
@@ -723,7 +730,8 @@
             'diabetes': 'Diabetes Rate (%)',
             'obesity': 'Obesity Rate (%)',
             'asthma': 'Asthma Rate (%)',
-            'mentalDistress': 'Mental Distress (%)'
+            'mentalDistress': 'Mental Distress (%)',
+            'education': 'High School or Higher (%)' // Added for mapping consistency
         };
 
         if (correlationChart) {
@@ -734,7 +742,7 @@
             type: 'scatter',
             data: {
                 datasets: [{
-                    label: `${labelsMap[yVar]} vs ${labelsMap[xVar]}`,
+                    label: `${labelsMap[yVar] || yVar} vs ${labelsMap[xVar] || xVar}`,
                     data: plotData,
                     backgroundColor: 'rgba(54, 162, 235, 0.6)',
                     borderColor: 'rgba(54, 162, 235, 1)',
@@ -749,10 +757,10 @@
                     x: {
                         type: 'linear',
                         position: 'bottom',
-                        title: { display: true, text: labelsMap[xVar] }
+                        title: { display: true, text: labelsMap[xVar] || xVar }
                     },
                     y: {
-                        title: { display: true, text: labelsMap[yVar] }
+                        title: { display: true, text: labelsMap[yVar] || yVar }
                     }
                 },
                 plugins: {
@@ -767,19 +775,19 @@
                 }
             }
         });
-        
     }
 
     // --- 2. NEW DATA TABLE LOGIC ---
     function renderDataTable() {
         const tbody = document.getElementById('tableBody');
+        if (!tbody) return;
         tbody.innerHTML = ''; // Clear existing
 
         insightsData.forEach(row => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${row.name}</strong></td>
-                <td>$${row.income.toLocaleString()}</td>
+                <td>$${row.income ? row.income.toLocaleString() : 0}</td>
                 <td>${row.poverty}%</td>
                 <td>${row.diabetes}%</td>
                 <td>${row.obesity}%</td>
@@ -792,23 +800,35 @@
 
     // --- 3. EVENT LISTENERS ---
     document.addEventListener('DOMContentLoaded', function() {
+        // Chart Listeners
+        const xVarEl = document.getElementById('xVariable');
+        const yVarEl = document.getElementById('yVariable');
+        
+        if (xVarEl) xVarEl.addEventListener('change', renderCorrelationChart);
+        if (yVarEl) yVarEl.addEventListener('change', renderCorrelationChart);
+        
+        // Fetch Live DB Data
         fetch('/api/neighborhood-data')
             .then(response => response.json())
             .then(data => {
-                // This is the global variable for your table/correlation tool
-                window.insightsData = data; 
-
-                // TRIGGER THE CHARTS
-                if (window.initializeAllVisualizations) {
+                // 1. Overwrite the HTML insightsData variable with fresh DB data
+                insightsData = data; 
+                
+                // 2. Trigger the 6 main charts in insights.js
+                if (typeof window.initializeAllVisualizations === 'function') {
                     window.initializeAllVisualizations(data);
                 }
 
-                // TRIGGER THE TABLE & CORRELATION
+                // 3. Render the interactive table and correlation tool using the updated data
                 renderDataTable();
                 renderCorrelationChart();
             })
-            .catch(error => console.error('Data Load Error:', error));
+            .catch(error => {
+                console.error('Data Load Error:', error);
+                // Fallback to the initial Jinja injected data if the fetch fails
+                renderDataTable();
+                renderCorrelationChart();
+            });
     });
-
 </script>
 {% endblock %}
