@@ -567,17 +567,17 @@ def get_neighborhood_data():
                 'asthma': n.asthma_rate,
                 'mentalDistress': n.mental_distress_rate,
                 'highBloodPressure': n.high_blood_pressure,
-                'foodAccess': n.food_access_score,       # Fixed
-                'uninsured': n.lack_health_insurance,    # Fixed to match JS
-                'education': n.high_school_higher,      # Fixed
-                'housing': n.vacant_housing,             # Fixed
+                'foodAccess': n.food_access_score,       
+                'uninsured': n.lack_health_insurance,    
+                'education': n.high_school_higher,      
+                'housing': n.vacant_housing,          
                 'unemployment': n.unemployment_rate
             })
         return jsonify(data_list)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-    
+
 @app.errorhandler(404)
 def not_found_error(error): return render_template('404.html'), 404
 
