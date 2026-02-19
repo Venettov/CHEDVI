@@ -33,43 +33,35 @@ def verify_admin(username, password):
     return False
 
 def clean_dataframe_columns(df):
-    """
-    Standardizes column names and maps Camden-specific CSV headers to database keys.
-    Works for both raw Camden spreadsheets and exported database CSVs.
-    """
-    # 1. Clean headers: lowercase, underscores, remove symbols
+    # 1. Basic cleaning: lowercase, underscores, strip symbols
     df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.replace('%', '').str.replace('$', '')
     
-    # 2. COMPLETE MAPPING (CSV Headers -> Database Model Fields)
+    # 2. UPDATED ROBUST MAPPING
     column_map = {
+        # Core & Economic
         'median_annual_household_income': 'median_income',
         'low_food_access_score': 'food_access_score',
         'high_school_or_higher': 'high_school_higher',
+        
+        # Add mappings for the names you see in your CSV to ensure they aren't missed
+        'public_health_insurance': 'public_insurance',
+        'lack_health_insurance': 'lack_health_insurance', # Matches database key
+        
+        # Health Outcomes
         'percentage_reported_diabetes': 'diabetes_rate',
         'percentage_reported_obesity': 'obesity_rate',
         'percentage_reported_asthma': 'asthma_rate',
         'percentage_reported_mental_distress': 'mental_distress_rate',
         'percentage_reported_high_blood_pressure': 'high_blood_pressure',
-        'percentage_reported_depression': 'depression_rate',
-        'percentage_reported_no_physical_leisure': 'no_physical_leisure',
-        'percentage_reported_current_smoking': 'current_smoking',
-        'percentage_visited_dr_for_check_up': 'dr_checkup_rate',
-        'percentage_visited_dentist': 'visited_dentist',
-        'public_health_insurance': 'public_insurance',
-        'private_health_insurance': 'private_insurance',
-        'black_or_african_american_alone': 'black_alone',
-        'some_other_race_alone': 'other_race',
-        'two_or_more_races': 'two_plus_races',
-        'renter_occupied_housing_units': 'renter_occupied',
+        
+        # Housing
         'vacant_housing_units': 'vacant_housing',
-        'median_gross_rent_(/month)': 'median_rent',
         'percentage_overcrowded_housing_units': 'overcrowded_housing'
     }
     
-    # Only rename if the source column exists to avoid errors
+    # NEW: Safety check to only rename columns that actually exist in your CSV
     existing_map = {k: v for k, v in column_map.items() if k in df.columns}
     df.rename(columns=existing_map, inplace=True)
-    
     return df
 
 def clean_numeric(value):
