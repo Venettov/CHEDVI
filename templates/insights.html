@@ -796,9 +796,14 @@
         document.getElementById('xVariable').addEventListener('change', renderCorrelationChart);
         document.getElementById('yVariable').addEventListener('change', renderCorrelationChart);
         
-        // Initial Renders
+        // 1. Initial Renders for Correlation and Table (Already using insightsData)
         renderCorrelationChart();
         renderDataTable();
+
+        // 2. NEW: Trigger the charts in insights.js using the database data
+        if (typeof initializeAllVisualizations === 'function') {
+            initializeAllVisualizations(insightsData);
+        }
     });
 </script>
 {% endblock %}

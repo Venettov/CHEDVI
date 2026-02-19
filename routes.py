@@ -369,7 +369,6 @@ def insights():
     highest_income_n = max(all_n, key=lambda x: x.median_income) if all_n else None
     highest_poverty_n = max(all_n, key=lambda x: x.poverty_rate) if all_n else None
 
-    # CRITICAL CHANGE: Prepare Data for the Interactive Chart
     insights_data = []
     for n in all_n:
         insights_data.append({
@@ -381,7 +380,11 @@ def insights():
             'asthma': getattr(n, 'asthma_rate', 0), 
             'mentalDistress': getattr(n, 'mental_distress_rate', 0), 
             'foodAccess': getattr(n, 'food_access_score', 0), 
-            'insurance': getattr(n, 'lack_health_insurance', 0)
+            'insurance': getattr(n, 'lack_health_insurance', 0),
+            'unemployment': getattr(n, 'unemployment_rate', 0), # Added
+            'education': getattr(n, 'high_school_higher', 0),   # Added
+            'housing': getattr(n, 'vacant_housing', 0),         # Added
+            'highBloodPressure': getattr(n, 'high_blood_pressure', 0) # Added
         })
 
     return render_template('insights.html',
@@ -547,6 +550,44 @@ def debug_email():
     except Exception as e:
         # Catch the error and print it to the screen
         return f"<h1>EMAIL FAILED</h1><p>Error details: {str(e)}</p>", 200
+
+@app.route('/api/neighborhood-data')
+def get_neighborhood_data():
+    """
+    Fetches all neighborhood records from the database and returns them as JSON.
+    This replaces the hardcoded data in insights.js.
+    """
+    try:
+        # Query all records from the NeighborhoodHealth table
+        neighborhoods = NeighborhoodHealth.query.all()
+        
+        # Convert database objects into a list of dictionaries
+        data_list = []
+        for n in neighborhoods:
+            data_list.append({
+                'name': n.name,
+                'census_tract': n.census_tract,
+                'population': n.total_population,
+                'income': n.median_income,
+                'poverty': n.poverty_rate,
+                'unemployment': n.unemployment_rate,
+                'diabetes': n.diabetes_rate,
+                'obesity': n.obesity_rate,
+                'asthma': n.asthma_rate,
+                'mentalDistress': n.mental_distress_rate,
+                'high_blood_pressure': n.high_blood_pressure,
+                'food_access': n.food_access_score,
+                'insurance_lack': n.lack_health_insurance,
+                'education': n.high_school_higher,
+                'vacant_housing': n.vacant_housing,
+                'median_rent': n.median_rent
+            })
+            
+        return jsonify(data_list)
+        
+    except Exception as e:
+        print(f"API Error: {str(e)}", file=sys.stderr)
+        return jsonify({"error": "Could not fetch data"}), 500
 
 @app.errorhandler(404)
 def not_found_error(error): return render_template('404.html'), 404

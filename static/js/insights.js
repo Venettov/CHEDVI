@@ -8,43 +8,6 @@ let housingHealthChart;
 let healthcareAccessChart;
 let mentalHealthChart;
 
-// Camden neighborhood data for visualizations - authentic data from provided CSV
-const camdenData = {
-    neighborhoods: [
-        'Gateway', 'Bergen Square', 'Cooper Poynt', 'Pyne Point', 'Cramer Hill', 
-        'Beideman', 'Dudley', 'Rosedale', 'Stockton', 'Marlton', 
-        'Parkside', 'Whitman Park', 'Liberty Park', 'Centerville', 'Waterfront South',
-        'Morgan Village', 'Fairview', 'Cooper Grant', 'Lanning Square'
-    ],
-    income: [26750, 12104, 29789, 19412, 28198, 58983, 35491, 51741, 44357, 31312,
-             45662, 31941, 29210, 22181, 54324, 34796, 41840, 51635, 38447],
-    diabetes: [17.0, 15.7, 18.9, 21.4, 18.4, 13.4, 22.2, 16.9, 17.9, 19.2,
-               15.0, 21.5, 23.1, 14.7, 20.3, 17.5, 17.3, 19.4, 18.0],
-    obesity: [43.9, 47.6, 44.8, 46.6, 44.8, 40.2, 41.8, 38.8, 41.9, 43.2,
-              46.1, 44.8, 48.7, 51.4, 44.3, 45.7, 43.6, 36.0, 41.3],
-    education: [69.34, 57.70, 41.41, 36.94, 25.47, 43.14, 37.81, 44.01, 49.38, 45.20,
-                48.07, 60.14, 55.44, 41.57, 43.90, 61.16, 62.64, 90.55, 61.43],
-    asthma: [20.3, 24.1, 22.3, 22.9, 25.6, 19.1, 20.9, 18.6, 20.1, 21.0,
-             21.9, 22.0, 24.9, 25.5, 22.1, 22.4, 20.9, 19.2, 21.0],
-    poverty: [30.78, 54.36, 36.71, 39.82, 38.68, 11.91, 24.96, 19.22, 20.17, 30.43,
-              19.40, 28.40, 26.21, 42.97, 40.45, 32.57, 20.76, 41.01, 18.62],
-    mentalDistress: [20.3, 24.1, 22.3, 22.9, 25.6, 19.1, 20.9, 18.6, 20.1, 21.0,
-                     21.9, 22.0, 24.9, 25.5, 22.1, 22.4, 20.9, 19.2, 21.0],
-    unemployment: [28.59, 34.22, 11.43, 14.21, 9.42, 9.73, 3.93, 13.15, 5.94, 16.67,
-                   26.16, 18.81, 11.37, 25.90, 8.51, 9.16, 24.87, 14.15, 8.24],
-    highBloodPressure: [37.4, 40.4, 41.0, 35.6, 48.5, 45.1, 48.7, 38.6, 36.3, 42.7,
-                        40.2, 35.1, 43.6, 35.4, 36.4, 46.7, 40.4, 38.5, 47.7],
-    // Food access approximated from low food access data in CSV
-    foodAccess: [3.1, 2.2, 3.7, 2.8, 3.5, 7.2, 5.1, 6.8, 6.2, 4.8,
-                 5.9, 4.9, 4.2, 2.8, 6.7, 5.2, 6.1, 6.9, 5.7],
-    // Housing problems calculated from vacant housing percentage
-    housing: [15.4, 9.7, 6.1, 5.4, 1.5, 2.1, 1.5, 1.9, 0.9, 2.5,
-              8.8, 7.6, 3.2, 2.5, 15.0, 8.4, 6.2, 3.5, 4.3],
-    // Insurance access (inverted public health insurance rate for better visualization)
-    uninsured: [36.2, 25.1, 25.6, 30.1, 21.2, 45.7, 41.8, 48.5, 47.3, 37.6,
-                31.9, 36.2, 37.6, 15.6, 45.6, 34.8, 28.3, 70.4, 62.7]
-};
-
 // Initialize insights page
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Loading insights page - checking Chart.js availability');
@@ -71,10 +34,61 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 100);
 });
 
-// Initialize all 6 visualizations
-function initializeAllVisualizations() {
-    console.log('Initializing 6 health equity visualizations with Camden data');
+// --- UPDATE 1: Update the specific chart functions to accept parameters ---
+// Example for Income vs Health (Apply this pattern to your other 5 chart functions)
+function createIncomeHealthChart(labels, incomeData, healthData) {
+    const ctx = document.getElementById('incomeHealthChart');
+    if (!ctx) return;
     
+    // Destroy existing chart instance if it exists to allow re-renders
+    if (incomeHealthChart) incomeHealthChart.destroy();
+    
+    incomeHealthChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels, // Use the passed labels
+            datasets: [{
+                label: 'Median Income ($)',
+                data: incomeData, // Use the passed income
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                yAxisID: 'y',
+                fill: true
+            }, {
+                label: 'Diabetes Rate (%)',
+                data: healthData, // Use the passed health data
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                yAxisID: 'y1'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            // ... keep your existing scales/options ...
+        }
+    });
+}
+
+function initializeAllVisualizations(data) {
+    // If dynamic data is passed from the database, use it to update camdenData
+    if (data && Array.isArray(data) && data.length > 0) {
+        camdenData.neighborhoods = data.map(d => d.name);
+        camdenData.income = data.map(d => d.income);
+        camdenData.diabetes = data.map(d => d.diabetes);
+        camdenData.obesity = data.map(d => d.obesity);
+        camdenData.asthma = data.map(d => d.asthma);
+        camdenData.poverty = data.map(d => d.poverty);
+        camdenData.mentalDistress = data.map(d => d.mentalDistress);
+        camdenData.foodAccess = data.map(d => d.foodAccess);
+        camdenData.uninsured = data.map(d => d.insurance);
+        camdenData.unemployment = data.map(d => d.unemployment);
+        camdenData.education = data.map(d => d.education);
+        camdenData.housing = data.map(d => d.housing);
+        camdenData.highBloodPressure = data.map(d => d.highBloodPressure);
+    }
+
+    console.log('Initializing 6 health equity visualizations with dynamic data');
     try {
         createIncomeHealthChart();
         createFoodObesityChart();
@@ -82,168 +96,12 @@ function initializeAllVisualizations() {
         createHousingHealthChart();
         createHealthcareAccessChart();
         createMentalHealthChart();
-        console.log('All 6 visualizations initialized successfully');
+        // createCommunityVoiceChart(); // Keep this one if it's static
     } catch (error) {
         console.error('Error initializing visualizations:', error);
     }
 }
 
-// --- 1. INCOME & HEALTH CHART (Revolutionary Combo Chart) ---
-function createIncomeHealthChart() {
-    const ctx = document.getElementById('incomeHealthChart');
-    if (!ctx) return;
-
-    if (incomeHealthChart) {
-        incomeHealthChart.destroy();
-    }
-
-    const selector = document.getElementById('incomeOutcomeSelector');
-    const outcomeKey = selector ? selector.value : 'diabetes';
-    
-    // --- A. TEXT UPDATES (Updated with Poverty) ---
-    const explanations = {
-        'diabetes': {
-            title: 'Income & Diabetes',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'obesity': {
-            title: 'Income & Obesity',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'highBloodPressure': {
-            title: 'Income & Hypertension',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'mentalDistress': {
-            title: 'Income & Mental Health',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'asthma': {
-            title: 'Income & Asthma',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        // NEW POVERTY EXPLANATION
-        'poverty': {
-            title: 'Income & Poverty Gap',
-            main: '',
-            detail: 'Enter explanation here.'
-        }
-    };
-
-    const textData = explanations[outcomeKey];
-    const titleEl = document.getElementById('income-text-title');
-    const mainEl = document.getElementById('income-text-main');
-    const detailEl = document.getElementById('income-text-detail');
-
-    if (titleEl && textData) {
-        titleEl.textContent = textData.title;
-        mainEl.textContent = textData.main;
-        detailEl.textContent = textData.detail;
-    }
-
-    // --- B. PREPARE SORTED DATA ---
-    let combinedData = camdenData.neighborhoods.map((name, i) => ({
-        name: name,
-        income: camdenData.income[i],
-        health: camdenData[outcomeKey] ? camdenData[outcomeKey][i] : 0
-    }));
-
-    // Sort by Income (Lowest to Highest)
-    combinedData.sort((a, b) => a.income - b.income);
-
-    const labels = combinedData.map(d => d.name);
-    const incomeData = combinedData.map(d => d.income);
-    const healthData = combinedData.map(d => d.health);
-
-    const healthLabels = {
-        'diabetes': 'Diabetes Rate (%)',
-        'obesity': 'Obesity Rate (%)',
-        'highBloodPressure': 'High Blood Pressure (%)',
-        'mentalDistress': 'Mental Distress (%)',
-        'asthma': 'Asthma Rate (%)',
-        'poverty': 'Poverty Rate (%)' // Updated Label
-    };
-
-    // --- C. DRAW COMBO CHART ---
-    incomeHealthChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: healthLabels[outcomeKey], // The Line (Health/Poverty)
-                    data: healthData,
-                    type: 'line',
-                    borderColor: '#dc3545', 
-                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
-                    borderWidth: 3,
-                    yAxisID: 'yHealth', 
-                    tension: 0.3, 
-                    pointRadius: 4,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#dc3545'
-                },
-                {
-                    label: 'Median Income ($)', // The Bars (Income)
-                    data: incomeData,
-                    backgroundColor: 'rgba(54, 162, 235, 0.7)', 
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                    yAxisID: 'yIncome', 
-                    borderRadius: 4
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
-            plugins: {
-                legend: { position: 'bottom' },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                            if (label) label += ': ';
-                            if (context.dataset.yAxisID === 'yIncome') {
-                                return label + '$' + context.raw.toLocaleString();
-                            }
-                            return label + context.raw + '%';
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: { display: false },
-                    grid: { display: false }
-                },
-                yIncome: { 
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
-                    title: { display: true, text: 'Median Income ($)', color: '#36a2eb' },
-                    grid: { display: false }
-                },
-                yHealth: { 
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    title: { display: true, text: healthLabels[outcomeKey], color: '#dc3545' },
-                    grid: { color: 'rgba(0,0,0,0.05)' } 
-                }
-            }
-        }
-    });
-}
 
 // --- ADD LISTENER ---
 document.addEventListener('DOMContentLoaded', function() {
