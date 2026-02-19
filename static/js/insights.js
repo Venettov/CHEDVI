@@ -8,6 +8,27 @@ let housingHealthChart;
 let healthcareAccessChart;
 let mentalHealthChart;
 
+// This will hold our database data globally for this file
+window.dbData = [];
+
+window.initializeAllVisualizations = function(data) {
+    console.log('Syncing database data to 6 key insights...');
+    window.dbData = data; // Store the fetched data
+    
+    try {
+        // Trigger each chart - they will now pull from window.dbData
+        createIncomeHealthChart();
+        createFoodObesityChart();
+        createEducationHealthChart();
+        createHousingHealthChart();
+        createHealthcareAccessChart();
+        createMentalHealthChart();
+        console.log('All dynamic charts rendered successfully');
+    } catch (error) {
+        console.error('Chart Initialization Error:', error);
+    }
+};
+
 // Initialize insights page
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Loading insights page - checking Chart.js availability');
@@ -34,295 +55,204 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 100);
 });
 
-// --- UPDATE 1: Update the specific chart functions to accept parameters ---
-// Example for Income vs Health (Apply this pattern to your other 5 chart functions)
-function createIncomeHealthChart(labels, incomeData, healthData) {
+// --- 1. INCOME & HEALTH CHART ---
+function createIncomeHealthChart() {
     const ctx = document.getElementById('incomeHealthChart');
     if (!ctx) return;
-    
-    // Destroy existing chart instance if it exists to allow re-renders
     if (incomeHealthChart) incomeHealthChart.destroy();
     
+    // Safety check
+    if (!window.dbData || window.dbData.length === 0) return;
+
+    const selector = document.getElementById('incomeOutcomeSelector');
+    const outcomeKey = selector ? selector.value : 'diabetes';
+    
+    // --- TEXT UPDATES ---
+    const explanations = {
+        'diabetes': { title: 'Income & Diabetes', main: '', detail: 'Enter explanation here.' },
+        'obesity': { title: 'Income & Obesity', main: '', detail: 'Enter explanation here.' },
+        'highBloodPressure': { title: 'Income & Hypertension', main: '', detail: 'Enter explanation here.' },
+        'mentalDistress': { title: 'Income & Mental Health', main: '', detail: 'Enter explanation here.' },
+        'asthma': { title: 'Income & Asthma', main: '', detail: 'Enter explanation here.' },
+        'poverty': { title: 'Income & Poverty Gap', main: '', detail: 'Enter explanation here.' }
+    };
+
+    const textData = explanations[outcomeKey];
+    if (textData) {
+        if (document.getElementById('income-text-title')) document.getElementById('income-text-title').textContent = textData.title;
+        if (document.getElementById('income-text-main')) document.getElementById('income-text-main').textContent = textData.main;
+        if (document.getElementById('income-text-detail')) document.getElementById('income-text-detail').textContent = textData.detail;
+    }
+
+    // --- MAP FROM DB & SORT ---
+    let combinedData = window.dbData.map(d => ({
+        name: d.name,
+        income: d.income,
+        health: d[outcomeKey] || 0
+    }));
+
+    combinedData.sort((a, b) => a.income - b.income);
+
+    const labels = combinedData.map(d => d.name);
+    const incomeData = combinedData.map(d => d.income);
+    const healthData = combinedData.map(d => d.health);
+
+    const healthLabels = {
+        'diabetes': 'Diabetes Rate (%)', 'obesity': 'Obesity Rate (%)',
+        'highBloodPressure': 'High Blood Pressure (%)', 'mentalDistress': 'Mental Distress (%)',
+        'asthma': 'Asthma Rate (%)', 'poverty': 'Poverty Rate (%)'
+    };
+
+    // --- DRAW CHART ---
     incomeHealthChart = new Chart(ctx, {
-        type: 'line',
+        type: 'bar',
         data: {
-            labels: labels, // Use the passed labels
-            datasets: [{
-                label: 'Median Income ($)',
-                data: incomeData, // Use the passed income
-                borderColor: 'rgba(75, 192, 192, 1)',
-                backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                yAxisID: 'y',
-                fill: true
-            }, {
-                label: 'Diabetes Rate (%)',
-                data: healthData, // Use the passed health data
-                borderColor: 'rgba(255, 99, 132, 1)',
-                backgroundColor: 'rgba(255, 99, 132, 0.1)',
-                yAxisID: 'y1'
-            }]
+            labels: labels,
+            datasets: [
+                {
+                    label: healthLabels[outcomeKey], data: healthData, type: 'line',
+                    borderColor: '#dc3545', backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    borderWidth: 3, yAxisID: 'yHealth', tension: 0.3, pointRadius: 4,
+                    pointBackgroundColor: '#fff', pointBorderColor: '#dc3545'
+                },
+                {
+                    label: 'Median Income ($)', data: incomeData,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)', borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1, yAxisID: 'yIncome', borderRadius: 4
+                }
+            ]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            // ... keep your existing scales/options ...
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) label += ': ';
+                            if (context.dataset.yAxisID === 'yIncome') return label + '$' + context.raw.toLocaleString();
+                            return label + context.raw + '%';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { ticks: { display: false }, grid: { display: false } },
+                yIncome: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'Median Income ($)', color: '#36a2eb' }, grid: { display: false } },
+                yHealth: { type: 'linear', display: true, position: 'right', title: { display: true, text: healthLabels[outcomeKey], color: '#dc3545' }, grid: { color: 'rgba(0,0,0,0.05)' } }
+            }
         }
     });
 }
 
-function initializeAllVisualizations(data) {
-    // If dynamic data is passed from the database, use it to update camdenData
-    if (data && Array.isArray(data) && data.length > 0) {
-        camdenData.neighborhoods = data.map(d => d.name);
-        camdenData.income = data.map(d => d.income);
-        camdenData.diabetes = data.map(d => d.diabetes);
-        camdenData.obesity = data.map(d => d.obesity);
-        camdenData.asthma = data.map(d => d.asthma);
-        camdenData.poverty = data.map(d => d.poverty);
-        camdenData.mentalDistress = data.map(d => d.mentalDistress);
-        camdenData.foodAccess = data.map(d => d.foodAccess);
-        camdenData.uninsured = data.map(d => d.insurance);
-        camdenData.unemployment = data.map(d => d.unemployment);
-        camdenData.education = data.map(d => d.education);
-        camdenData.housing = data.map(d => d.housing);
-        camdenData.highBloodPressure = data.map(d => d.highBloodPressure);
-    }
-
-    console.log('Initializing 6 health equity visualizations with dynamic data');
-    try {
-        createIncomeHealthChart();
-        createFoodObesityChart();
-        createEducationHealthChart();
-        createHousingHealthChart();
-        createHealthcareAccessChart();
-        createMentalHealthChart();
-        // createCommunityVoiceChart(); // Keep this one if it's static
-    } catch (error) {
-        console.error('Error initializing visualizations:', error);
-    }
-}
-
-
-// --- ADD LISTENER ---
-document.addEventListener('DOMContentLoaded', function() {
-    // ... existing init code ...
-    
-    const incomeSelector = document.getElementById('incomeOutcomeSelector');
-    if (incomeSelector) {
-        incomeSelector.addEventListener('change', createIncomeHealthChart);
-    }
-});
-
-// --- 2. FOOD ACCESS & HEALTH CHART (Dynamic) ---
+// --- 2. FOOD ACCESS & HEALTH CHART ---
 function createFoodObesityChart() {
     const ctx = document.getElementById('foodObesityChart');
     if (!ctx) return;
+    if (foodObesityChart) foodObesityChart.destroy();
+    if (!window.dbData || window.dbData.length === 0) return;
 
-    if (foodObesityChart) {
-        foodObesityChart.destroy();
-    }
-
-    const outcomeKey = document.getElementById('foodOutcomeSelector').value;
+    const outcomeKey = document.getElementById('foodOutcomeSelector') ? document.getElementById('foodOutcomeSelector').value : 'obesity';
     
-    // --- A. THE EXPLANATION LIBRARY ---
+    // --- TEXT UPDATES ---
     const explanations = {
-        'obesity': {
-            title: 'Food Access & Obesity',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'diabetes': {
-            title: 'Food Access & Diabetes',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'highBloodPressure': {
-            title: 'Food Access & Hypertension',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'mentalDistress': {
-            title: 'Food Access & Mental Health',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'asthma': {
-            title: 'Food Access & Asthma',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'poverty': {
-            title: 'Food Access & Poverty',
-            main: '',
-            detail: 'Enter explanation here.'
-        }
+        'obesity': { title: 'Food Access & Obesity', main: '', detail: 'Enter explanation here.' },
+        'diabetes': { title: 'Food Access & Diabetes', main: '', detail: 'Enter explanation here.' },
+        'highBloodPressure': { title: 'Food Access & Hypertension', main: '', detail: 'Enter explanation here.' },
+        'mentalDistress': { title: 'Food Access & Mental Health', main: '', detail: 'Enter explanation here.' },
+        'asthma': { title: 'Food Access & Asthma', main: '', detail: 'Enter explanation here.' },
+        'poverty': { title: 'Food Access & Poverty', main: '', detail: 'Enter explanation here.' }
     };
-
-    // --- B. UPDATE THE TEXT ---
+    
     const textData = explanations[outcomeKey];
-    const titleEl = document.getElementById('food-text-title');
-    const mainEl = document.getElementById('food-text-main');
-    const detailEl = document.getElementById('food-text-detail');
-
-    // Check if elements exist before trying to update them
-    if (titleEl && textData) {
-        titleEl.textContent = textData.title;
-        mainEl.textContent = textData.main;
-        detailEl.textContent = textData.detail;
+    if (textData) {
+        if (document.getElementById('food-text-title')) document.getElementById('food-text-title').textContent = textData.title;
+        if (document.getElementById('food-text-main')) document.getElementById('food-text-main').textContent = textData.main;
+        if (document.getElementById('food-text-detail')) document.getElementById('food-text-detail').textContent = textData.detail;
     }
 
-    // --- C. DRAW THE CHART ---
     const labels = {
-        'obesity': 'Obesity Rate (%)',
-        'diabetes': 'Diabetes Rate (%)',
-        'highBloodPressure': 'High Blood Pressure (%)',
-        'mentalDistress': 'Mental Distress (%)',
-        'asthma': 'Asthma Rate (%)',
-        'poverty': 'Poverty Rate (%)'
+        'obesity': 'Obesity Rate (%)', 'diabetes': 'Diabetes Rate (%)', 'highBloodPressure': 'High Blood Pressure (%)',
+        'mentalDistress': 'Mental Distress (%)', 'asthma': 'Asthma Rate (%)', 'poverty': 'Poverty Rate (%)'
     };
 
-    const scatterData = camdenData.neighborhoods.map((name, i) => ({
-        x: camdenData.foodAccess[i],
-        y: camdenData[outcomeKey][i],
-        name: name
+    // MAP FROM DB
+    const scatterData = window.dbData.map(d => ({
+        x: d.foodAccess, y: d[outcomeKey] || 0, name: d.name
     }));
 
     foodObesityChart = new Chart(ctx, {
         type: 'scatter',
         data: {
             datasets: [{
-                label: `Food Access vs. ${labels[outcomeKey]}`,
-                data: scatterData,
-                backgroundColor: 'rgba(40, 167, 69, 0.6)',
-                borderColor: 'rgba(40, 167, 69, 1)',
-                borderWidth: 1,
-                pointRadius: 6,
-                pointHoverRadius: 8
+                label: `Food Access vs. ${labels[outcomeKey]}`, data: scatterData,
+                backgroundColor: 'rgba(40, 167, 69, 0.6)', borderColor: 'rgba(40, 167, 69, 1)',
+                borderWidth: 1, pointRadius: 6, pointHoverRadius: 8
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.raw.name}: Score ${context.raw.x}, ${labels[outcomeKey]} ${context.raw.y}%`;
-                        }
-                    }
-                },
+                tooltip: { callbacks: { label: function(context) { return `${context.raw.name}: Score ${context.raw.x}, ${labels[outcomeKey]} ${context.raw.y}%`; } } },
                 legend: { position: 'bottom' }
             },
             scales: {
-                x: {
-                    title: { display: true, text: 'Food Access Score (Higher is Better)' },
-                    min: 0, max: 10
-                },
-                y: {
-                    title: { display: true, text: labels[outcomeKey] },
-                    beginAtZero: false
-                }
+                x: { title: { display: true, text: 'Food Access Score (Higher is Better)' }, min: 0, max: 10 },
+                y: { title: { display: true, text: labels[outcomeKey] }, beginAtZero: false }
             }
         }
     });
 }
 
-// --- ADD EVENT LISTENER ---
-// Place this at the bottom of the file, inside the init() function or where other listeners are
-document.addEventListener('DOMContentLoaded', function() {
-    // ... existing init code ...
-    
-    // Listener for the new Food Dropdown
-    const foodSelector = document.getElementById('foodOutcomeSelector');
-    if (foodSelector) {
-        foodSelector.addEventListener('change', createFoodObesityChart);
-    }
-});
-
-// --- 3. EDUCATION & HEALTH CHART (Dynamic) ---
+// --- 3. EDUCATION & HEALTH CHART ---
 function createEducationHealthChart() {
     const ctx = document.getElementById('educationHealthChart');
     if (!ctx) return;
-
-    if (educationHealthChart) {
-        educationHealthChart.destroy();
-    }
+    if (educationHealthChart) educationHealthChart.destroy();
+    if (!window.dbData || window.dbData.length === 0) return;
 
     const selector = document.getElementById('educationOutcomeSelector');
     const outcomeKey = selector ? selector.value : 'diabetes';
 
-    // --- A. EXPLANATION LIBRARY ---
+    // --- TEXT UPDATES ---
     const explanations = {
-        'diabetes': {
-            title: 'Education & Diabetes',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'obesity': {
-            title: 'Education & Obesity',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'poverty': {
-            title: 'The Education-Poverty Cycle',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'mentalDistress': {
-            title: 'Education & Mental Health',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'income': {
-            title: 'Education & Income',
-            main: '',
-            detail: 'Enter explanation here.'
-        }
+        'diabetes': { title: 'Education & Diabetes', main: '', detail: 'Enter explanation here.' },
+        'obesity': { title: 'Education & Obesity', main: '', detail: 'Enter explanation here.' },
+        'poverty': { title: 'The Education-Poverty Cycle', main: '', detail: 'Enter explanation here.' },
+        'mentalDistress': { title: 'Education & Mental Health', main: '', detail: 'Enter explanation here.' },
+        'income': { title: 'Education & Income', main: '', detail: 'Enter explanation here.' }
     };
 
-    // --- B. UPDATE TEXT ---
     const textData = explanations[outcomeKey];
-    const titleEl = document.getElementById('edu-text-title');
-    const mainEl = document.getElementById('edu-text-main');
-    const detailEl = document.getElementById('edu-text-detail');
-
-    if (titleEl && textData) {
-        titleEl.textContent = textData.title;
-        mainEl.textContent = textData.main;
-        detailEl.textContent = textData.detail;
+    if (textData) {
+        if (document.getElementById('edu-text-title')) document.getElementById('edu-text-title').textContent = textData.title;
+        if (document.getElementById('edu-text-main')) document.getElementById('edu-text-main').textContent = textData.main;
+        if (document.getElementById('edu-text-detail')) document.getElementById('edu-text-detail').textContent = textData.detail;
     }
 
-    // --- C. DRAW CHART ---
     const labels = {
-        'diabetes': 'Diabetes Rate (%)',
-        'obesity': 'Obesity Rate (%)',
-        'poverty': 'Poverty Rate (%)',
-        'mentalDistress': 'Mental Distress (%)',
-        'income': 'Median Income ($)'
+        'diabetes': 'Diabetes Rate (%)', 'obesity': 'Obesity Rate (%)', 'poverty': 'Poverty Rate (%)',
+        'mentalDistress': 'Mental Distress (%)', 'income': 'Median Income ($)'
     };
 
-    const scatterData = camdenData.neighborhoods.map((name, i) => ({
-        x: camdenData.education[i],
-        y: camdenData[outcomeKey][i], // Dynamic Y
-        name: name
+    // MAP FROM DB
+    const scatterData = window.dbData.map(d => ({
+        x: d.education, y: d[outcomeKey] || 0, name: d.name
     }));
 
     educationHealthChart = new Chart(ctx, {
         type: 'scatter',
         data: {
             datasets: [{
-                label: `Education vs. ${labels[outcomeKey]}`,
-                data: scatterData,
-                backgroundColor: 'rgba(13, 202, 240, 0.6)', // Info Cyan
-                borderColor: 'rgba(13, 202, 240, 1)',
-                borderWidth: 1,
-                pointRadius: 6,
-                pointHoverRadius: 8
+                label: `Education vs. ${labels[outcomeKey]}`, data: scatterData,
+                backgroundColor: 'rgba(13, 202, 240, 0.6)', borderColor: 'rgba(13, 202, 240, 1)',
+                borderWidth: 1, pointRadius: 6, pointHoverRadius: 8
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             plugins: {
                 tooltip: {
                     callbacks: {
@@ -330,7 +260,6 @@ function createEducationHealthChart() {
                             let yVal = context.raw.y;
                             if (outcomeKey === 'income') yVal = '$' + yVal.toLocaleString();
                             else yVal = yVal + '%';
-                            
                             return `${context.raw.name}: Grad Rate ${context.raw.x}%, ${yVal}`;
                         }
                     }
@@ -338,340 +267,166 @@ function createEducationHealthChart() {
                 legend: { position: 'bottom' }
             },
             scales: {
-                x: {
-                    title: { display: true, text: 'High School Graduation Rate (%)' },
-                    min: 20,
-                    max: 100
-                },
-                y: {
-                    title: { display: true, text: labels[outcomeKey] },
-                    // Smart formatting for Income vs Percentages
-                    ticks: {
-                        callback: function(value) {
-                            return outcomeKey === 'income' ? '$' + value.toLocaleString() : value + '%';
-                        }
-                    }
-                }
+                x: { title: { display: true, text: 'High School Graduation Rate (%)' }, min: 20, max: 100 },
+                y: { title: { display: true, text: labels[outcomeKey] }, ticks: { callback: function(value) { return outcomeKey === 'income' ? '$' + value.toLocaleString() : value + '%'; } } }
             }
         }
     });
 }
 
-// --- ADD LISTENER ---
-document.addEventListener('DOMContentLoaded', function() {
-    // ... existing init code ...
-    
-    // Check if the selector exists before adding listener
-    const eduSelector = document.getElementById('educationOutcomeSelector');
-    if (eduSelector) {
-        eduSelector.addEventListener('change', createEducationHealthChart);
-    }
-});
-
-// --- 4. HOUSING & HEALTH CHART (Bubble Chart) ---
+// --- 4. HOUSING & HEALTH CHART ---
 function createHousingHealthChart() {
     const ctx = document.getElementById('housingHealthChart');
     if (!ctx) return;
-
-    if (housingHealthChart) {
-        housingHealthChart.destroy();
-    }
+    if (housingHealthChart) housingHealthChart.destroy();
+    if (!window.dbData || window.dbData.length === 0) return;
 
     const selector = document.getElementById('housingOutcomeSelector');
     let outcomeKey = selector ? selector.value : 'asthma';
-
-    // Handle "Lead Risk" proxy
-    let yDataKey = outcomeKey;
-    if (outcomeKey === 'leadRisk') yDataKey = 'poverty'; 
-
-    // --- A. EXPANDED EXPLANATION LIBRARY ---
+    let yDataKey = outcomeKey === 'leadRisk' ? 'poverty' : outcomeKey; 
+    
+    // --- TEXT UPDATES ---
     const explanations = {
-        'asthma': {
-            title: 'Housing & Asthma',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'leadRisk': {
-            title: 'Housing & Lead Risk',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'mentalDistress': {
-            title: 'Housing & Mental Health',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'diabetes': {
-            title: 'Housing & Diabetes',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'obesity': {
-            title: 'Housing & Obesity',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'highBloodPressure': {
-            title: 'Housing & Hypertension',
-            main: '',
-            detail: 'Enter explanation here.'
-        }
+        'asthma': { title: 'Housing & Asthma', main: '', detail: 'Enter explanation here.' },
+        'leadRisk': { title: 'Housing & Lead Risk', main: '', detail: 'Enter explanation here.' },
+        'mentalDistress': { title: 'Housing & Mental Health', main: '', detail: 'Enter explanation here.' },
+        'diabetes': { title: 'Housing & Diabetes', main: '', detail: 'Enter explanation here.' },
+        'obesity': { title: 'Housing & Obesity', main: '', detail: 'Enter explanation here.' },
+        'highBloodPressure': { title: 'Housing & Hypertension', main: '', detail: 'Enter explanation here.' }
     };
 
-    // --- B. UPDATE TEXT ---
     const textData = explanations[outcomeKey];
-    const titleEl = document.getElementById('housing-text-title');
-    const mainEl = document.getElementById('housing-text-main');
-    const detailEl = document.getElementById('housing-text-detail');
-
-    if (titleEl && textData) {
-        titleEl.textContent = textData.title;
-        mainEl.textContent = textData.main;
-        detailEl.textContent = textData.detail;
+    if (textData) {
+        if (document.getElementById('housing-text-title')) document.getElementById('housing-text-title').textContent = textData.title;
+        if (document.getElementById('housing-text-main')) document.getElementById('housing-text-main').textContent = textData.main;
+        if (document.getElementById('housing-text-detail')) document.getElementById('housing-text-detail').textContent = textData.detail;
     }
 
-    // --- C. PREPARE BUBBLE DATA ---
-    const bubbleData = camdenData.neighborhoods.map((name, i) => ({
-        x: camdenData.housing[i], // X = Housing Problems %
-        y: camdenData[yDataKey] ? camdenData[yDataKey][i] : 0, // Y = Health Outcome
-        r: camdenData.poverty[i] / 4, // Radius = Poverty scaled down
-        name: name,
-        poverty: camdenData.poverty[i]
+    // MAP FROM DB
+    const bubbleData = window.dbData.map(d => ({
+        x: d.housing, y: d[yDataKey] || 0, r: d.poverty / 4, name: d.name, poverty: d.poverty
     }));
 
     const labels = {
-        'asthma': 'Asthma Rate (%)',
-        'leadRisk': 'Lead Exposure Risk Index',
-        'mentalDistress': 'Mental Distress (%)',
-        'diabetes': 'Diabetes Rate (%)',
-        'obesity': 'Obesity Rate (%)',
-        'highBloodPressure': 'High Blood Pressure (%)'
+        'asthma': 'Asthma Rate (%)', 'leadRisk': 'Lead Exposure Risk Index', 'mentalDistress': 'Mental Distress (%)',
+        'diabetes': 'Diabetes Rate (%)', 'obesity': 'Obesity Rate (%)', 'highBloodPressure': 'High Blood Pressure (%)'
     };
 
-    // --- D. DRAW CHART ---
     housingHealthChart = new Chart(ctx, {
         type: 'bubble',
         data: {
             datasets: [{
-                label: `Housing Problems vs ${labels[outcomeKey]}`,
-                data: bubbleData,
-                backgroundColor: 'rgba(255, 193, 7, 0.6)', // Warning Yellow
-                borderColor: 'rgba(255, 193, 7, 1)',
-                borderWidth: 1,
-                hoverBackgroundColor: 'rgba(255, 193, 7, 0.9)'
+                label: `Housing Problems vs ${labels[outcomeKey]}`, data: bubbleData,
+                backgroundColor: 'rgba(255, 193, 7, 0.6)', borderColor: 'rgba(255, 193, 7, 1)',
+                borderWidth: 1, hoverBackgroundColor: 'rgba(255, 193, 7, 0.9)'
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const raw = context.raw;
-                            return `${raw.name}: Housing ${raw.x}%, ${labels[outcomeKey]} ${raw.y}%, Poverty ${raw.poverty}%`;
-                        }
-                    }
-                },
+                tooltip: { callbacks: { label: function(context) { const raw = context.raw; return `${raw.name}: Housing ${raw.x}%, ${labels[outcomeKey]} ${raw.y}%, Poverty ${raw.poverty}%`; } } },
                 legend: { display: false }
             },
             scales: {
-                x: {
-                    title: { display: true, text: 'Housing Problems Rate (Vacant/Overcrowded %)' },
-                    min: 0
-                },
-                y: {
-                    title: { display: true, text: labels[outcomeKey] },
-                    beginAtZero: false
-                }
+                x: { title: { display: true, text: 'Housing Problems Rate (Vacant/Overcrowded %)' }, min: 0 },
+                y: { title: { display: true, text: labels[outcomeKey] }, beginAtZero: false }
             }
         }
     });
 }
 
-// --- ADD LISTENER ---
-document.addEventListener('DOMContentLoaded', function() {
-    // ... existing init code ...
-    
-    const housingSelector = document.getElementById('housingOutcomeSelector');
-    if (housingSelector) {
-        housingSelector.addEventListener('change', createHousingHealthChart);
-    }
-});
-
-// Visualization 5: Uninsured Rates by Neighborhood (Horizontal Bar Chart) - REPLACES DOUGHNUT
+// --- 5. HEALTHCARE ACCESS CHART ---
 function createHealthcareAccessChart() {
     const ctx = document.getElementById('healthcareAccessChart');
     if (!ctx) return;
-    
-    // 1. Prepare Data and Sort by Uninsured Rate (Highest/Worst First)
-    const accessData = camdenData.neighborhoods.map((name, i) => ({
-        rate: camdenData.uninsured[i],
-        neighborhood: name
+    if (healthcareAccessChart) healthcareAccessChart.destroy();
+    if (!window.dbData || window.dbData.length === 0) return;
+
+    // MAP FROM DB & SORT DESCENDING
+    const accessData = window.dbData.map(d => ({
+        rate: d.uninsured, neighborhood: d.name
     }));
+    accessData.sort((a, b) => b.rate - a.rate); 
 
-    accessData.sort((a, b) => b.rate - a.rate); // Descending sort
-
-    const labels = accessData.map(d => d.neighborhood);
-    const data = accessData.map(d => d.rate);
-
-    // 2. Create Chart
     healthcareAccessChart = new Chart(ctx, {
-        type: 'bar',
-        indexAxis: 'y', // Horizontal Bar Chart
+        type: 'bar', indexAxis: 'y', 
         data: {
-            labels: labels,
+            labels: accessData.map(d => d.neighborhood),
             datasets: [{
-                label: 'Uninsured Rate (%)',
-                data: data,
-                backgroundColor: 'rgba(13, 202, 240, 0.7)', 
-                borderColor: 'rgba(13, 202, 240, 1)',
-                borderWidth: 1
+                label: 'Uninsured Rate (%)', data: accessData.map(d => d.rate),
+                backgroundColor: 'rgba(13, 202, 240, 0.7)', borderColor: 'rgba(13, 202, 240, 1)', borderWidth: 1
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             plugins: {
-                title: {
-                    display: true,
-                    text: 'Uninsured Rates by Neighborhood',
-                    font: { size: 16, weight: 'bold' }
-                },
+                title: { display: true, text: 'Uninsured Rates by Neighborhood', font: { size: 16, weight: 'bold' } },
                 legend: { display: false }
             },
-            scales: {
-                x: {
-                    title: { display: true, text: 'Percentage of Residents Without Health Insurance' },
-                    min: 0,
-                    max: 80 // Set max to accommodate the high 70% values
-                }
-            }
+            scales: { x: { title: { display: true, text: 'Percentage of Residents Without Health Insurance' }, min: 0, max: 80 } }
         }
     });
 }
 
-// --- 6. SOCIAL STRESSORS CHART (Bubble Chart: Poverty vs Health, Size=Unemployment) ---
+// --- 6. SOCIAL STRESSORS / MENTAL HEALTH CHART ---
 function createMentalHealthChart() {
     const ctx = document.getElementById('mentalHealthChart');
     if (!ctx) return;
-
-    if (mentalHealthChart) {
-        mentalHealthChart.destroy();
-    }
+    if (mentalHealthChart) mentalHealthChart.destroy();
+    if (!window.dbData || window.dbData.length === 0) return;
 
     const selector = document.getElementById('socialOutcomeSelector');
     const outcomeKey = selector ? selector.value : 'mentalDistress';
-
-    // --- A. EXPLANATION LIBRARY ---
+    
+    // --- TEXT UPDATES ---
     const explanations = {
-        'mentalDistress': {
-            title: 'Poverty & Mental Health',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'highBloodPressure': {
-            title: 'Stress & The Heart',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'obesity': {
-            title: 'Stress & Nutrition',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'diabetes': {
-            title: 'Stress & Diabetes',
-            main: '',
-            detail: 'Enter explanation here.'
-        },
-        'asthma': {
-            title: 'Stress & Inflammation',
-            main: '',
-            detail: 'Enter explanation here.'
-        }
+        'mentalDistress': { title: 'Poverty & Mental Health', main: '', detail: 'Enter explanation here.' },
+        'highBloodPressure': { title: 'Stress & The Heart', main: '', detail: 'Enter explanation here.' },
+        'obesity': { title: 'Stress & Nutrition', main: '', detail: 'Enter explanation here.' },
+        'diabetes': { title: 'Stress & Diabetes', main: '', detail: 'Enter explanation here.' },
+        'asthma': { title: 'Stress & Inflammation', main: '', detail: 'Enter explanation here.' }
     };
 
-    // --- B. UPDATE TEXT ---
     const textData = explanations[outcomeKey];
-    const titleEl = document.getElementById('social-text-title');
-    const mainEl = document.getElementById('social-text-main');
-    const detailEl = document.getElementById('social-text-detail');
-
-    if (titleEl && textData) {
-        titleEl.textContent = textData.title;
-        mainEl.textContent = textData.main;
-        detailEl.textContent = textData.detail;
+    if (textData) {
+        if (document.getElementById('social-text-title')) document.getElementById('social-text-title').textContent = textData.title;
+        if (document.getElementById('social-text-main')) document.getElementById('social-text-main').textContent = textData.main;
+        if (document.getElementById('social-text-detail')) document.getElementById('social-text-detail').textContent = textData.detail;
     }
 
-    // --- C. PREPARE BUBBLE DATA ---
-    const bubbleData = camdenData.neighborhoods.map((name, i) => ({
-        x: camdenData.poverty[i], // X = Poverty Rate (The Stressor)
-        y: camdenData[outcomeKey][i], // Y = Health Outcome
-        r: camdenData.unemployment[i] / 3, // Radius = Unemployment Rate (Scaled for visibility)
-        name: name,
-        unemployment: camdenData.unemployment[i]
+    // MAP FROM DB
+    const bubbleData = window.dbData.map(d => ({
+        x: d.poverty, y: d[outcomeKey] || 0, r: d.unemployment / 3, name: d.name, unemployment: d.unemployment
     }));
 
     const labels = {
-        'mentalDistress': 'Mental Distress (%)',
-        'highBloodPressure': 'High Blood Pressure (%)',
-        'obesity': 'Obesity Rate (%)',
-        'diabetes': 'Diabetes Rate (%)',
-        'asthma': 'Asthma Rate (%)'
+        'mentalDistress': 'Mental Distress (%)', 'highBloodPressure': 'High Blood Pressure (%)',
+        'obesity': 'Obesity Rate (%)', 'diabetes': 'Diabetes Rate (%)', 'asthma': 'Asthma Rate (%)'
     };
 
-    // --- D. DRAW CHART ---
     mentalHealthChart = new Chart(ctx, {
         type: 'bubble',
         data: {
             datasets: [{
-                label: `Poverty vs ${labels[outcomeKey]}`,
-                data: bubbleData,
-                backgroundColor: 'rgba(111, 66, 193, 0.6)', // Purple (Transparent)
-                borderColor: 'rgba(111, 66, 193, 1)',     // Purple (Solid)
-                borderWidth: 1,
-                hoverBackgroundColor: 'rgba(111, 66, 193, 0.9)'
+                label: `Poverty vs ${labels[outcomeKey]}`, data: bubbleData,
+                backgroundColor: 'rgba(111, 66, 193, 0.6)', borderColor: 'rgba(111, 66, 193, 1)',     
+                borderWidth: 1, hoverBackgroundColor: 'rgba(111, 66, 193, 0.9)'
             }]
         },
         options: {
-            responsive: true,
-            maintainAspectRatio: false,
+            responsive: true, maintainAspectRatio: false,
             plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const raw = context.raw;
-                            return `${raw.name}: Poverty ${raw.x}%, ${labels[outcomeKey]} ${raw.y}%, Unempl. ${raw.unemployment}%`;
-                        }
-                    }
-                },
+                tooltip: { callbacks: { label: function(context) { const raw = context.raw; return `${raw.name}: Poverty ${raw.x}%, ${labels[outcomeKey]} ${raw.y}%, Unempl. ${raw.unemployment}%`; } } },
                 legend: { display: false }
             },
             scales: {
-                x: {
-                    title: { display: true, text: 'Poverty Rate (%)' },
-                    min: 0
-                },
-                y: {
-                    title: { display: true, text: labels[outcomeKey] },
-                    beginAtZero: false
-                }
+                x: { title: { display: true, text: 'Poverty Rate (%)' }, min: 0 },
+                y: { title: { display: true, text: labels[outcomeKey] }, beginAtZero: false }
             }
         }
     });
 }
 
-// --- ADD LISTENER ---
-document.addEventListener('DOMContentLoaded', function() {
-    // ... existing init code ...
-    
-    // Social Stressors Listener
-    const socialSelector = document.getElementById('socialOutcomeSelector');
-    if (socialSelector) {
-        socialSelector.addEventListener('change', createMentalHealthChart);
-    }
-});
 
 // Initialize stat cards with animation
 function initializeStatCards() {

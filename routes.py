@@ -575,11 +575,11 @@ def get_neighborhood_data():
                 'obesity': n.obesity_rate,
                 'asthma': n.asthma_rate,
                 'mentalDistress': n.mental_distress_rate,
-                'high_blood_pressure': n.high_blood_pressure,
-                'food_access': n.food_access_score,
-                'insurance_lack': n.lack_health_insurance,
+                'highBloodPressure': n.high_blood_pressure,
+                'foodAccess': n.food_access_score,
+                'uninsured': n.lack_health_insurance,
                 'education': n.high_school_higher,
-                'vacant_housing': n.vacant_housing,
+                'housing': n.vacant_housing,
                 'median_rent': n.median_rent
             })
             

@@ -792,18 +792,23 @@
 
     // --- 3. EVENT LISTENERS ---
     document.addEventListener('DOMContentLoaded', function() {
-        // Chart Listeners
-        document.getElementById('xVariable').addEventListener('change', renderCorrelationChart);
-        document.getElementById('yVariable').addEventListener('change', renderCorrelationChart);
-        
-        // 1. Initial Renders for Correlation and Table (Already using insightsData)
-        renderCorrelationChart();
-        renderDataTable();
+        fetch('/api/neighborhood-data')
+            .then(response => response.json())
+            .then(data => {
+                // This is the global variable for your table/correlation tool
+                window.insightsData = data; 
 
-        // 2. NEW: Trigger the charts in insights.js using the database data
-        if (typeof initializeAllVisualizations === 'function') {
-            initializeAllVisualizations(insightsData);
-        }
+                // TRIGGER THE CHARTS
+                if (window.initializeAllVisualizations) {
+                    window.initializeAllVisualizations(data);
+                }
+
+                // TRIGGER THE TABLE & CORRELATION
+                renderDataTable();
+                renderCorrelationChart();
+            })
+            .catch(error => console.error('Data Load Error:', error));
     });
+
 </script>
 {% endblock %}
