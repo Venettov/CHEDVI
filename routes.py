@@ -553,7 +553,10 @@ def debug_email():
 
 @app.route('/api/neighborhood-data')
 def get_neighborhood_data():
-    """Returns all neighborhood data for the charts with consistent naming."""
+    """
+    Returns all neighborhood data for the charts.
+    Keys are standardized to camelCase for insights.js compatibility.
+    """
     try:
         neighborhoods = NeighborhoodHealth.query.all()
         data_list = []
@@ -562,6 +565,7 @@ def get_neighborhood_data():
                 'name': n.name,
                 'income': n.median_income,
                 'poverty': n.poverty_rate,
+                'unemployment': n.unemployment_rate,
                 'diabetes': n.diabetes_rate,
                 'obesity': n.obesity_rate,
                 'asthma': n.asthma_rate,
@@ -570,12 +574,12 @@ def get_neighborhood_data():
                 'foodAccess': n.food_access_score,       
                 'uninsured': n.lack_health_insurance,    
                 'education': n.high_school_higher,      
-                'housing': n.vacant_housing,          
-                'unemployment': n.unemployment_rate
+                'housing': n.vacant_housing,             
             })
         return jsonify(data_list)
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(f"API Error: {str(e)}", file=sys.stderr)
+        return jsonify({"error": "Could not fetch data"}), 500
     
 
 @app.errorhandler(404)

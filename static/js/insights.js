@@ -12,9 +12,7 @@ let mentalHealthChart;
 window.dbData = [];
 
 window.initializeAllVisualizations = function(data) {
-    console.log('Syncing database data to charts...');
     window.dbData = data; 
-    
     try {
         createIncomeHealthChart();
         createFoodObesityChart();
@@ -22,6 +20,7 @@ window.initializeAllVisualizations = function(data) {
         createHousingHealthChart();
         createHealthcareAccessChart();
         createMentalHealthChart();
+        console.log('Main charts successfully synced to database.');
     } catch (error) {
         console.error('Chart Initialization Error:', error);
     }
@@ -178,15 +177,13 @@ function createFoodObesityChart() {
     });
 }
 
-// --- 3. EDUCATION & HEALTH CHART ---
+// --- EDUCATION & HEALTH CHART (Fixed Mapping) ---
 function createEducationHealthChart() {
     const ctx = document.getElementById('educationHealthChart');
-    if (!ctx || !window.dbData || window.dbData.length === 0) return;
+    if (!ctx || !window.dbData.length) return;
     if (educationHealthChart) educationHealthChart.destroy();
 
-    const selector = document.getElementById('educationOutcomeSelector');
-    const outcomeKey = selector ? selector.value : 'diabetes';
-
+    const outcomeKey = document.getElementById('educationOutcomeSelector')?.value || 'diabetes';
     const labels = {
         'diabetes': 'Diabetes Rate (%)',
         'obesity': 'Obesity Rate (%)',
@@ -195,37 +192,25 @@ function createEducationHealthChart() {
         'income': 'Median Income ($)'
     };
 
-    // Correctly map from dynamic dbData
-    const scatterData = window.dbData.map(d => ({
-        x: d.education, 
-        y: d[outcomeKey] || 0, 
-        name: d.name
-    }));
-
     educationHealthChart = new Chart(ctx, {
         type: 'scatter',
         data: {
             datasets: [{
                 label: `Education vs. ${labels[outcomeKey]}`,
-                data: scatterData,
+                data: window.dbData.map(d => ({
+                    x: d.education, 
+                    y: d[outcomeKey] || 0, 
+                    name: d.name
+                })),
                 backgroundColor: 'rgba(13, 202, 240, 0.6)',
                 borderColor: 'rgba(13, 202, 240, 1)',
                 borderWidth: 1,
-                pointRadius: 6,
-                pointHoverRadius: 8
+                pointRadius: 6
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom' },
-                tooltip: {
-                    callbacks: {
-                        label: (c) => `${c.raw.name}: Grad Rate ${c.raw.x}%, ${outcomeKey==='income'?'$'+c.raw.y.toLocaleString():c.raw.y+'%'}`
-                    }
-                }
-            },
             scales: {
                 x: { title: { display: true, text: 'High School Graduation Rate (%)' }, min: 20, max: 100 },
                 y: { title: { display: true, text: labels[outcomeKey] } }
@@ -1167,46 +1152,33 @@ function createCommunityVoiceChart() {
     });
 }
 
-// Initialize insights page
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Loading insights page - checking Chart.js availability');
+    if (typeof Chart === 'undefined') return;
+
+    // Set up dropdown listeners
+    const selectors = {
+        'incomeOutcomeSelector': createIncomeHealthChart,
+        'foodOutcomeSelector': createFoodObesityChart,
+        'educationOutcomeSelector': createEducationHealthChart,
+        'housingOutcomeSelector': createHousingHealthChart,
+        'socialOutcomeSelector': createMentalHealthChart
+    };
+
+    Object.keys(selectors).forEach(id => {
+        document.getElementById(id)?.addEventListener('change', selectors[id]);
+    });
+
+    if (typeof initializeStatCards === 'function') initializeStatCards();
     
-    // Check if Chart.js is loaded
-    if (typeof Chart === 'undefined') {
-        console.error('Chart.js not loaded - visualizations will not display');
-        return;
-    }
-    
-    // --- WIRE UP ALL DROPDOWN MENUS ---
-    const incomeSelector = document.getElementById('incomeOutcomeSelector');
-    if (incomeSelector) incomeSelector.addEventListener('change', createIncomeHealthChart);
-
-    const foodSelector = document.getElementById('foodOutcomeSelector');
-    if (foodSelector) foodSelector.addEventListener('change', createFoodObesityChart);
-
-    const eduSelector = document.getElementById('educationOutcomeSelector');
-    if (eduSelector) eduSelector.addEventListener('change', createEducationHealthChart);
-
-    const housingSelector = document.getElementById('housingOutcomeSelector');
-    if (housingSelector) housingSelector.addEventListener('change', createHousingHealthChart);
-
-    const socialSelector = document.getElementById('socialOutcomeSelector');
-    if (socialSelector) socialSelector.addEventListener('change', createMentalHealthChart);
-    
-    // NOTE: initializeAllVisualizations() was removed from here because 
-    // it is now safely triggered from insights.html AFTER the database fetch completes.
-
-    // Initialize stat cards
-    if (typeof initializeStatCards === 'function') {
-        initializeStatCards();
-    }
-    
-    // Initialize advanced insights slightly later
-    setTimeout(() => {
-        if (typeof initializeAdvancedInsights === 'function') {
-            initializeAdvancedInsights();
+    // Safety check: wait for data before running Advanced Insights
+    let dataWaitInterval = setInterval(() => {
+        if (window.dbData && window.dbData.length > 0) {
+            clearInterval(dataWaitInterval);
+            if (typeof initializeAdvancedInsights === 'function') {
+                initializeAdvancedInsights();
+            }
         }
-    }, 100);
+    }, 200);
 });
 
 // Export functions
