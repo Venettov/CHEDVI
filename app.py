@@ -68,6 +68,10 @@ db.init_app(app)
 mail = Mail(app) 
 
 with app.app_context():
+    # IMPORT BOTH THE MODEL AND THE RELOAD FUNCTION LOCALLY
+    from models import NeighborhoodHealth
+    from routes import reload_database_from_csv
+
     # Only run the reload if the database table is TOTALLY empty
     if NeighborhoodHealth.query.count() == 0:
         print("Database empty. Initializing data from CSV...")
