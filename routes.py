@@ -166,7 +166,7 @@ def admin_db_fix():
     except Exception as e:
         flash(f"Error resetting database: {str(e)}", "danger")
         
-    return redirect(url_for('admin_dashboard'))
+    return redirect(url_for('admin_dashboard')) 
 
 @app.route('/admin/setup/<username>/<password>')
 def admin_setup(username, password):
