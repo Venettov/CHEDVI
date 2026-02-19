@@ -34,42 +34,60 @@ def verify_admin(username, password):
 
 def clean_dataframe_columns(df):
     """
-    Standardizes column names and maps Camden-specific CSV headers to database keys.
-    Works for both raw Camden spreadsheets and exported database CSVs.
+    Exhaustive mapping to ensure no zeros on redeploy.
+    Maps CSV headers from neighborhood_data.csv to Database fields.
     """
-    # 1. Clean headers: lowercase, underscores, remove symbols
+    # 1. Clean headers: lowercase, underscores, remove %, remove $
     df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.replace('%', '').str.replace('$', '')
     
-    # 2. COMPLETE MAPPING (CSV Headers -> Database Model Fields)
+    # 2. THE MASTER MAP (Matches your CSV content exactly)
     column_map = {
+        # Geography
+        'latitude': 'latitude',
+        'longitude': 'longitude',
+        
+        # Core & Economic
         'median_annual_household_income': 'median_income',
-        'low_food_access_score': 'food_access_score',
+        'poverty_rate': 'poverty_rate',
+        'unemployment_rate': 'unemployment_rate',
+        'total_population': 'total_population',
+        
+        # Education & Insurance
         'high_school_or_higher': 'high_school_higher',
+        'public_health_insurance': 'public_insurance',
+        'private_health_insurance': 'private_insurance',
+        'lack_health_insurance': 'lack_health_insurance',
+        
+        # Health Metrics
         'percentage_reported_diabetes': 'diabetes_rate',
         'percentage_reported_obesity': 'obesity_rate',
         'percentage_reported_asthma': 'asthma_rate',
         'percentage_reported_mental_distress': 'mental_distress_rate',
         'percentage_reported_high_blood_pressure': 'high_blood_pressure',
         'percentage_reported_depression': 'depression_rate',
+        'percentage_visited_dentist': 'visited_dentist',
         'percentage_reported_no_physical_leisure': 'no_physical_leisure',
         'percentage_reported_current_smoking': 'current_smoking',
         'percentage_visited_dr_for_check_up': 'dr_checkup_rate',
-        'percentage_visited_dentist': 'visited_dentist',
-        'public_health_insurance': 'public_insurance',
-        'private_health_insurance': 'private_insurance',
+        'low_food_access_score': 'food_access_score',
+        
+        # Demographics
         'black_or_african_american_alone': 'black_alone',
+        'asian_alone': 'asian_alone',
         'some_other_race_alone': 'other_race',
         'two_or_more_races': 'two_plus_races',
+        
+        # Housing
+        'housing_units': 'housing_units',
         'renter_occupied_housing_units': 'renter_occupied',
         'vacant_housing_units': 'vacant_housing',
         'median_gross_rent_(/month)': 'median_rent',
         'percentage_overcrowded_housing_units': 'overcrowded_housing'
     }
     
-    # Only rename if the source column exists to avoid errors
+    # Only rename if the column actually exists in the dataframe
     existing_map = {k: v for k, v in column_map.items() if k in df.columns}
     df.rename(columns=existing_map, inplace=True)
-    
     return df
 
 def clean_numeric(value):
