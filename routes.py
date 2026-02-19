@@ -35,19 +35,16 @@ def verify_admin(username, password):
 def clean_dataframe_columns(df):
     """
     Standardizes column names and maps Camden-specific CSV headers to database keys.
-    This ensures all 32 columns are captured without any mismatch.
+    Works for both raw Camden spreadsheets and exported database CSVs.
     """
-    # 1. Basic cleaning: lowercase, underscore, strip spaces, remove symbols
+    # 1. Clean headers: lowercase, underscores, remove symbols
     df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_').str.replace('%', '').str.replace('$', '')
     
-    # 2. COMPLETE MAPPING (Bridges CSV headers to Model field names)
+    # 2. COMPLETE MAPPING (CSV Headers -> Database Model Fields)
     column_map = {
-        # Core & Economic
         'median_annual_household_income': 'median_income',
         'low_food_access_score': 'food_access_score',
         'high_school_or_higher': 'high_school_higher',
-        
-        # Health Outcomes
         'percentage_reported_diabetes': 'diabetes_rate',
         'percentage_reported_obesity': 'obesity_rate',
         'percentage_reported_asthma': 'asthma_rate',
@@ -58,22 +55,21 @@ def clean_dataframe_columns(df):
         'percentage_reported_current_smoking': 'current_smoking',
         'percentage_visited_dr_for_check_up': 'dr_checkup_rate',
         'percentage_visited_dentist': 'visited_dentist',
-        
-        # Demographics & Insurance
         'public_health_insurance': 'public_insurance',
         'private_health_insurance': 'private_insurance',
         'black_or_african_american_alone': 'black_alone',
         'some_other_race_alone': 'other_race',
         'two_or_more_races': 'two_plus_races',
-        
-        # Housing
         'renter_occupied_housing_units': 'renter_occupied',
         'vacant_housing_units': 'vacant_housing',
         'median_gross_rent_(/month)': 'median_rent',
         'percentage_overcrowded_housing_units': 'overcrowded_housing'
     }
     
-    df.rename(columns=column_map, inplace=True)
+    # Only rename if the source column exists to avoid errors
+    existing_map = {k: v for k, v in column_map.items() if k in df.columns}
+    df.rename(columns=existing_map, inplace=True)
+    
     return df
 
 def clean_numeric(value):
