@@ -323,10 +323,20 @@ function createHousingHealthChart() {
         if (document.getElementById('housing-text-detail')) document.getElementById('housing-text-detail').textContent = textData.detail;
     }
 
-    // MAP FROM DB
-    const bubbleData = window.dbData.map(d => ({
-        x: d.housing, y: d[yDataKey] || 0, r: d.poverty / 4, name: d.name, poverty: d.poverty
-    }));
+    // MAP FROM DB & CALCULATE PERCENTAGE
+    const bubbleData = window.dbData.map(d => {
+        // Prevent division by zero and calculate vacancy rate
+        const totalHousing = d.housing_total || 1; 
+        const vacantRate = ((d.housing_vacant || 0) / totalHousing) * 100;
+        
+        return {
+            x: parseFloat(vacantRate.toFixed(1)), // Perfect X-axis percentage
+            y: d[yDataKey] || 0, 
+            r: d.poverty / 4, 
+            name: d.name, 
+            poverty: d.poverty
+        };
+    });
 
     const labels = {
         'asthma': 'Asthma Rate (%)', 'leadRisk': 'Lead Exposure Risk Index', 'mentalDistress': 'Mental Distress (%)',
@@ -345,11 +355,11 @@ function createHousingHealthChart() {
         options: {
             responsive: true, maintainAspectRatio: false,
             plugins: {
-                tooltip: { callbacks: { label: function(context) { const raw = context.raw; return `${raw.name}: Housing ${raw.x}%, ${labels[outcomeKey]} ${raw.y}%, Poverty ${raw.poverty}%`; } } },
+                tooltip: { callbacks: { label: function(context) { const raw = context.raw; return `${raw.name}: Vacancy Rate ${raw.x}%, ${labels[outcomeKey]} ${raw.y}%, Poverty ${raw.poverty}%`; } } },
                 legend: { display: false }
             },
             scales: {
-                x: { title: { display: true, text: 'Housing Problems Rate (Vacant/Overcrowded %)' }, min: 0 },
+                x: { title: { display: true, text: 'Housing Vacancy Rate (%)' }, min: 0 },
                 y: { title: { display: true, text: labels[outcomeKey] }, beginAtZero: false }
             }
         }
