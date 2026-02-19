@@ -8,22 +8,20 @@ let housingHealthChart;
 let healthcareAccessChart;
 let mentalHealthChart;
 
-// This will hold our database data globally for this file
+// Global storage for database data
 window.dbData = [];
 
 window.initializeAllVisualizations = function(data) {
-    console.log('Syncing database data to 6 key insights...');
-    window.dbData = data; // Store the fetched data
+    console.log('Syncing database data to charts...');
+    window.dbData = data; 
     
     try {
-        // Trigger each chart - they will now pull from window.dbData
         createIncomeHealthChart();
         createFoodObesityChart();
         createEducationHealthChart();
         createHousingHealthChart();
         createHealthcareAccessChart();
         createMentalHealthChart();
-        console.log('All dynamic charts rendered successfully');
     } catch (error) {
         console.error('Chart Initialization Error:', error);
     }
@@ -183,70 +181,84 @@ function createFoodObesityChart() {
 // --- 3. EDUCATION & HEALTH CHART ---
 function createEducationHealthChart() {
     const ctx = document.getElementById('educationHealthChart');
-    if (!ctx) return;
+    if (!ctx || !window.dbData || window.dbData.length === 0) return;
     if (educationHealthChart) educationHealthChart.destroy();
-    if (!window.dbData || window.dbData.length === 0) return;
 
     const selector = document.getElementById('educationOutcomeSelector');
     const outcomeKey = selector ? selector.value : 'diabetes';
 
-    // --- TEXT UPDATES ---
-    const explanations = {
-        'diabetes': { title: 'Education & Diabetes', main: '', detail: 'Enter explanation here.' },
-        'obesity': { title: 'Education & Obesity', main: '', detail: 'Enter explanation here.' },
-        'poverty': { title: 'The Education-Poverty Cycle', main: '', detail: 'Enter explanation here.' },
-        'mentalDistress': { title: 'Education & Mental Health', main: '', detail: 'Enter explanation here.' },
-        'income': { title: 'Education & Income', main: '', detail: 'Enter explanation here.' }
-    };
-
-    const textData = explanations[outcomeKey];
-    if (textData) {
-        if (document.getElementById('edu-text-title')) document.getElementById('edu-text-title').textContent = textData.title;
-        if (document.getElementById('edu-text-main')) document.getElementById('edu-text-main').textContent = textData.main;
-        if (document.getElementById('edu-text-detail')) document.getElementById('edu-text-detail').textContent = textData.detail;
-    }
-
     const labels = {
-        'diabetes': 'Diabetes Rate (%)', 'obesity': 'Obesity Rate (%)', 'poverty': 'Poverty Rate (%)',
-        'mentalDistress': 'Mental Distress (%)', 'income': 'Median Income ($)'
+        'diabetes': 'Diabetes Rate (%)',
+        'obesity': 'Obesity Rate (%)',
+        'poverty': 'Poverty Rate (%)',
+        'mentalDistress': 'Mental Distress (%)',
+        'income': 'Median Income ($)'
     };
 
-    // MAP FROM DB
+    // Correctly map from dynamic dbData
     const scatterData = window.dbData.map(d => ({
-        x: d.education, y: d[outcomeKey] || 0, name: d.name
+        x: d.education, 
+        y: d[outcomeKey] || 0, 
+        name: d.name
     }));
 
     educationHealthChart = new Chart(ctx, {
         type: 'scatter',
         data: {
             datasets: [{
-                label: `Education vs. ${labels[outcomeKey]}`, data: scatterData,
-                backgroundColor: 'rgba(13, 202, 240, 0.6)', borderColor: 'rgba(13, 202, 240, 1)',
-                borderWidth: 1, pointRadius: 6, pointHoverRadius: 8
+                label: `Education vs. ${labels[outcomeKey]}`,
+                data: scatterData,
+                backgroundColor: 'rgba(13, 202, 240, 0.6)',
+                borderColor: 'rgba(13, 202, 240, 1)',
+                borderWidth: 1,
+                pointRadius: 6,
+                pointHoverRadius: 8
             }]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
+            responsive: true,
+            maintainAspectRatio: false,
             plugins: {
+                legend: { position: 'bottom' },
                 tooltip: {
                     callbacks: {
-                        label: function(context) {
-                            let yVal = context.raw.y;
-                            if (outcomeKey === 'income') yVal = '$' + yVal.toLocaleString();
-                            else yVal = yVal + '%';
-                            return `${context.raw.name}: Grad Rate ${context.raw.x}%, ${yVal}`;
-                        }
+                        label: (c) => `${c.raw.name}: Grad Rate ${c.raw.x}%, ${outcomeKey==='income'?'$'+c.raw.y.toLocaleString():c.raw.y+'%'}`
                     }
-                },
-                legend: { position: 'bottom' }
+                }
             },
             scales: {
                 x: { title: { display: true, text: 'High School Graduation Rate (%)' }, min: 20, max: 100 },
-                y: { title: { display: true, text: labels[outcomeKey] }, ticks: { callback: function(value) { return outcomeKey === 'income' ? '$' + value.toLocaleString() : value + '%'; } } }
+                y: { title: { display: true, text: labels[outcomeKey] } }
             }
         }
     });
 }
+
+// Consolidate all listeners into ONE block
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Chart === 'undefined') return;
+
+    // Toggles for all charts
+    const selectors = {
+        'incomeOutcomeSelector': createIncomeHealthChart,
+        'foodOutcomeSelector': createFoodObesityChart,
+        'educationOutcomeSelector': createEducationHealthChart,
+        'housingOutcomeSelector': createHousingHealthChart,
+        'socialOutcomeSelector': createMentalHealthChart
+    };
+
+    Object.keys(selectors).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', selectors[id]);
+    });
+
+    if (typeof initializeStatCards === 'function') initializeStatCards();
+    
+    // Trigger Advanced Insights (Updated to use window.dbData)
+    setTimeout(() => {
+        if (typeof initializeAdvancedInsights === 'function') initializeAdvancedInsights();
+    }, 200);
+});
 
 // --- 4. HOUSING & HEALTH CHART ---
 function createHousingHealthChart() {

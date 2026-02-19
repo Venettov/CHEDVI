@@ -553,42 +553,31 @@ def debug_email():
 
 @app.route('/api/neighborhood-data')
 def get_neighborhood_data():
-    """
-    Fetches all neighborhood records from the database and returns them as JSON.
-    This replaces the hardcoded data in insights.js.
-    """
+    """Returns all neighborhood data for the charts with consistent naming."""
     try:
-        # Query all records from the NeighborhoodHealth table
         neighborhoods = NeighborhoodHealth.query.all()
-        
-        # Convert database objects into a list of dictionaries
         data_list = []
         for n in neighborhoods:
             data_list.append({
                 'name': n.name,
-                'census_tract': n.census_tract,
-                'population': n.total_population,
                 'income': n.median_income,
                 'poverty': n.poverty_rate,
-                'unemployment': n.unemployment_rate,
                 'diabetes': n.diabetes_rate,
                 'obesity': n.obesity_rate,
                 'asthma': n.asthma_rate,
                 'mentalDistress': n.mental_distress_rate,
                 'highBloodPressure': n.high_blood_pressure,
-                'foodAccess': n.food_access_score,
-                'uninsured': n.lack_health_insurance,
-                'education': n.high_school_higher,
-                'housing': n.vacant_housing,
-                'median_rent': n.median_rent
+                'foodAccess': n.food_access_score,       # Fixed
+                'uninsured': n.lack_health_insurance,    # Fixed to match JS
+                'education': n.high_school_higher,      # Fixed
+                'housing': n.vacant_housing,             # Fixed
+                'unemployment': n.unemployment_rate
             })
-            
         return jsonify(data_list)
-        
     except Exception as e:
-        print(f"API Error: {str(e)}", file=sys.stderr)
-        return jsonify({"error": "Could not fetch data"}), 500
-
+        return jsonify({"error": str(e)}), 500
+    
+    
 @app.errorhandler(404)
 def not_found_error(error): return render_template('404.html'), 404
 
