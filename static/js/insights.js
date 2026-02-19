@@ -29,32 +29,6 @@ window.initializeAllVisualizations = function(data) {
     }
 };
 
-// Initialize insights page
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Loading insights page - checking Chart.js availability');
-    
-    // Check if Chart.js is loaded
-    if (typeof Chart === 'undefined') {
-        console.error('Chart.js not loaded - visualizations will not display');
-        return;
-    }
-    
-    console.log('Chart.js loaded successfully, initializing visualizations');
-    initializeAllVisualizations();
-    
-    // REMOVED: initializeCorrelationChart(); (Handled in HTML now)
-    // REMOVED: initializeFilters(); (Handled in HTML now)
-    
-    initializeStatCards();
-    
-    // Initialize advanced insights after basic charts are loaded
-    setTimeout(() => {
-        if (typeof initializeAdvancedInsights === 'function') {
-            initializeAdvancedInsights();
-        }
-    }, 100);
-});
-
 // --- 1. INCOME & HEALTH CHART ---
 function createIncomeHealthChart() {
     const ctx = document.getElementById('incomeHealthChart');
@@ -1180,6 +1154,48 @@ function createCommunityVoiceChart() {
         }
     });
 }
+
+// Initialize insights page
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Loading insights page - checking Chart.js availability');
+    
+    // Check if Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js not loaded - visualizations will not display');
+        return;
+    }
+    
+    // --- WIRE UP ALL DROPDOWN MENUS ---
+    const incomeSelector = document.getElementById('incomeOutcomeSelector');
+    if (incomeSelector) incomeSelector.addEventListener('change', createIncomeHealthChart);
+
+    const foodSelector = document.getElementById('foodOutcomeSelector');
+    if (foodSelector) foodSelector.addEventListener('change', createFoodObesityChart);
+
+    const eduSelector = document.getElementById('educationOutcomeSelector');
+    if (eduSelector) eduSelector.addEventListener('change', createEducationHealthChart);
+
+    const housingSelector = document.getElementById('housingOutcomeSelector');
+    if (housingSelector) housingSelector.addEventListener('change', createHousingHealthChart);
+
+    const socialSelector = document.getElementById('socialOutcomeSelector');
+    if (socialSelector) socialSelector.addEventListener('change', createMentalHealthChart);
+    
+    // NOTE: initializeAllVisualizations() was removed from here because 
+    // it is now safely triggered from insights.html AFTER the database fetch completes.
+
+    // Initialize stat cards
+    if (typeof initializeStatCards === 'function') {
+        initializeStatCards();
+    }
+    
+    // Initialize advanced insights slightly later
+    setTimeout(() => {
+        if (typeof initializeAdvancedInsights === 'function') {
+            initializeAdvancedInsights();
+        }
+    }, 100);
+});
 
 // Export functions
 window.InsightsAPI = {
