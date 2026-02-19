@@ -121,57 +121,71 @@ function createIncomeHealthChart() {
 // --- 2. FOOD ACCESS & HEALTH CHART ---
 function createFoodObesityChart() {
     const ctx = document.getElementById('foodObesityChart');
-    if (!ctx) return;
+    if (!ctx || !window.dbData || window.dbData.length === 0) return;
     if (foodObesityChart) foodObesityChart.destroy();
-    if (!window.dbData || window.dbData.length === 0) return;
 
-    const outcomeKey = document.getElementById('foodOutcomeSelector') ? document.getElementById('foodOutcomeSelector').value : 'obesity';
+    const selector = document.getElementById('foodOutcomeSelector');
+    const outcomeKey = selector ? selector.value : 'obesity';
     
-    // --- TEXT UPDATES ---
-    const explanations = {
-        'obesity': { title: 'Food Access & Obesity', main: '', detail: 'Enter explanation here.' },
-        'diabetes': { title: 'Food Access & Diabetes', main: '', detail: 'Enter explanation here.' },
-        'highBloodPressure': { title: 'Food Access & Hypertension', main: '', detail: 'Enter explanation here.' },
-        'mentalDistress': { title: 'Food Access & Mental Health', main: '', detail: 'Enter explanation here.' },
-        'asthma': { title: 'Food Access & Asthma', main: '', detail: 'Enter explanation here.' },
-        'poverty': { title: 'Food Access & Poverty', main: '', detail: 'Enter explanation here.' }
-    };
-    
-    const textData = explanations[outcomeKey];
-    if (textData) {
-        if (document.getElementById('food-text-title')) document.getElementById('food-text-title').textContent = textData.title;
-        if (document.getElementById('food-text-main')) document.getElementById('food-text-main').textContent = textData.main;
-        if (document.getElementById('food-text-detail')) document.getElementById('food-text-detail').textContent = textData.detail;
-    }
-
     const labels = {
-        'obesity': 'Obesity Rate (%)', 'diabetes': 'Diabetes Rate (%)', 'highBloodPressure': 'High Blood Pressure (%)',
-        'mentalDistress': 'Mental Distress (%)', 'asthma': 'Asthma Rate (%)', 'poverty': 'Poverty Rate (%)'
+        'obesity': 'Obesity Rate (%)', 'diabetes': 'Diabetes Rate (%)', 
+        'highBloodPressure': 'High Blood Pressure (%)', 'mentalDistress': 'Mental Distress (%)', 
+        'asthma': 'Asthma Rate (%)', 'poverty': 'Poverty Rate (%)'
     };
 
-    // MAP FROM DB
+    // MAP FROM DB - Ensure we handle 0 values gracefully
     const scatterData = window.dbData.map(d => ({
-        x: d.foodAccess, y: d[outcomeKey] || 0, name: d.name
+        x: d.foodAccess || 0, 
+        y: d[outcomeKey] || 0, 
+        name: d.name
     }));
 
     foodObesityChart = new Chart(ctx, {
         type: 'scatter',
         data: {
             datasets: [{
-                label: `Food Access vs. ${labels[outcomeKey]}`, data: scatterData,
-                backgroundColor: 'rgba(40, 167, 69, 0.6)', borderColor: 'rgba(40, 167, 69, 1)',
-                borderWidth: 1, pointRadius: 6, pointHoverRadius: 8
+                label: `Food Access vs. ${labels[outcomeKey]}`, 
+                data: scatterData,
+                backgroundColor: 'rgba(40, 167, 69, 0.6)', 
+                borderColor: 'rgba(40, 167, 69, 1)',
+                borderWidth: 1, 
+                pointRadius: 6, 
+                pointHoverRadius: 8,
+                clip: false // Prevents dots from being cut off at the edge
             }]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
+            responsive: true, 
+            maintainAspectRatio: false,
+            layout: {
+                padding: {
+                    top: 10,
+                    right: 20,
+                    bottom: 10,
+                    left: 10
+                }
+            },
             plugins: {
-                tooltip: { callbacks: { label: function(context) { return `${context.raw.name}: Score ${context.raw.x}, ${labels[outcomeKey]} ${context.raw.y}%`; } } },
+                tooltip: { 
+                    callbacks: { 
+                        label: (c) => `${c.raw.name}: Score ${c.raw.x}, ${labels[outcomeKey]} ${c.raw.y}%` 
+                    } 
+                },
                 legend: { position: 'bottom' }
             },
             scales: {
-                x: { title: { display: true, text: 'Food Access Score (Higher is Better)' }, min: 0, max: 10 },
-                y: { title: { display: true, text: labels[outcomeKey] }, beginAtZero: false }
+                x: { 
+                    title: { display: true, text: 'Food Access Score (Higher is Better)' },
+                    // Added offset to prevent dots from sitting on the Y-axis line
+                    grace: '5%', 
+                    beginAtZero: true
+                },
+                y: { 
+                    title: { display: true, text: labels[outcomeKey] },
+                    // Added grace to prevent dots from sitting on the X-axis line
+                    grace: '5%',
+                    beginAtZero: false 
+                }
             }
         }
     });
