@@ -40,12 +40,36 @@ function createIncomeHealthChart() {
     
     // --- TEXT UPDATES ---
     const explanations = {
-        'diabetes': { title: 'Income & Diabetes', main: '', detail: 'Enter explanation here.' },
-        'obesity': { title: 'Income & Obesity', main: '', detail: 'Enter explanation here.' },
-        'highBloodPressure': { title: 'Income & Hypertension', main: '', detail: 'Enter explanation here.' },
-        'mentalDistress': { title: 'Income & Mental Health', main: '', detail: 'Enter explanation here.' },
-        'asthma': { title: 'Income & Asthma', main: '', detail: 'Enter explanation here.' },
-        'poverty': { title: 'Income & Poverty Gap', main: '', detail: 'Enter explanation here.' }
+        'diabetes': { 
+            title: 'Income & Diabetes', 
+            main: 'Lower-income neighborhoods show up to a 10% higher prevalence of type 2 diabetes.', 
+            detail: 'Limited financial resources create barriers to purchasing nutrient-dense foods and managing medication costs, leading to higher chronic glycemic stress in tracts with incomes below $30,000.' 
+        },
+        'obesity': { 
+            title: 'Income & Obesity', 
+            main: 'Economic strain often forces a reliance on calorie-dense, low-cost processed foods.', 
+            detail: 'In Camden, neighborhoods like Centerville illustrate how lower median incomes correlate with higher obesity rates (over 45%), often due to the "food desert" effect where fresh produce is more expensive than shelf-stable processed goods.' 
+        },
+        'highBloodPressure': { 
+            title: 'Income & Hypertension', 
+            main: 'Financial instability is a primary driver of chronic physiological stress.', 
+            detail: 'The data shows that higher-income tracts like Beideman maintain lower hypertension rates. Conversely, the "Toxic Stress" of living in poverty triggers sustained cortisol levels, which is a direct biological contributor to high blood pressure.' 
+        },
+        'mentalDistress': { 
+            title: 'Income & Mental Health', 
+            main: 'Economic scarcity significantly impacts psychological well-being.', 
+            detail: 'Neighborhoods with the lowest median incomes report the highest levels of mental distress. This reflects the burden of housing insecurity, utility cost stress, and the psychological toll of limited upward mobility.' 
+        },
+        'asthma': { 
+            title: 'Income & Asthma', 
+            main: 'Income levels are often a proxy for environmental quality and housing age.', 
+            detail: 'Lower-income residents are more likely to live in older housing stock with higher triggers (mold, pests, poor ventilation) or in proximity to industrial zones, as seen in the elevated asthma rates in Waterfront South and Liberty Park.' 
+        },
+        'poverty': { 
+            title: 'The Income-Poverty Cycle', 
+            main: 'This correlation highlights the intensity of the wealth gap in Camden.', 
+            detail: 'There is a near-perfect inverse relationship here: as median income drops, the poverty rate spikes exponentially. This creates a "poverty trap" where neighborhoods lack the tax base to fund the very services that could improve health outcomes.' 
+        }
     };
 
     const textData = explanations[outcomeKey];
