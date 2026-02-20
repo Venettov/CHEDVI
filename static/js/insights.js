@@ -42,33 +42,33 @@ function createIncomeHealthChart() {
     const explanations = {
         'diabetes': { 
             title: 'Income & Diabetes', 
-            main: 'Lower-income neighborhoods show up to a 10% higher prevalence of type 2 diabetes.', 
-            detail: 'Limited financial resources create barriers to purchasing nutrient-dense foods and managing medication costs, leading to higher chronic glycemic stress in tracts with incomes below $30,000.' 
+            main: 'Neighborhoods with median incomes under $30,000 see diabetes rates as high as 22%, nearly double the rate of wealthier tracts.', 
+            detail: 'Data confirms a strong inverse correlation: as household income rises, the ability to manage chronic glycemic levels improves significantly due to better medication access and nutritional stability.' 
         },
         'obesity': { 
             title: 'Income & Obesity', 
-            main: 'Economic strain often forces a reliance on calorie-dense, low-cost processed foods.', 
-            detail: 'In Camden, neighborhoods like Centerville illustrate how lower median incomes correlate with higher obesity rates (over 45%), often due to the "food desert" effect where fresh produce is more expensive than shelf-stable processed goods.' 
+            main: 'Obesity prevalence peaks at 47.6% in Bergen Square, Camden’s lowest-income neighborhood.', 
+            detail: 'The economic burden of healthy eating is clear; calorie-dense, shelf-stable foods are often the only affordable option for families living below the $15,000 income threshold.' 
         },
         'highBloodPressure': { 
             title: 'Income & Hypertension', 
-            main: 'Financial instability is a primary driver of chronic physiological stress.', 
-            detail: 'The data shows that higher-income tracts like Beideman maintain lower hypertension rates. Conversely, the "Toxic Stress" of living in poverty triggers sustained cortisol levels, which is a direct biological contributor to high blood pressure.' 
+            main: 'Hypertension affects nearly 1 in 2 adults in Camden’s most economically stressed tracts.', 
+            detail: 'The physiological toll of financial instability—often called "Toxic Stress"—directly contributes to sustained high blood pressure, particularly in areas like Liberty Park and Cramer Hill.' 
         },
         'mentalDistress': { 
             title: 'Income & Mental Health', 
-            main: 'Economic scarcity significantly impacts psychological well-being.', 
-            detail: 'Neighborhoods with the lowest median incomes report the highest levels of mental distress. This reflects the burden of housing insecurity, utility cost stress, and the psychological toll of limited upward mobility.' 
+            main: 'Reports of frequent mental distress are 25% more common in the city’s lowest-earning quadrants.', 
+            detail: 'Financial scarcity is a primary driver of psychological strain. The data reflects the compounding stress of housing insecurity and utility costs on community well-being.' 
         },
         'asthma': { 
             title: 'Income & Asthma', 
-            main: 'Income levels are often a proxy for environmental quality and housing age.', 
-            detail: 'Lower-income residents are more likely to live in older housing stock with higher triggers (mold, pests, poor ventilation) or in proximity to industrial zones, as seen in the elevated asthma rates in Waterfront South and Liberty Park.' 
+            main: 'Asthma rates are localized in lower-income areas near industrial zones and older housing stock.', 
+            detail: 'Income acts as a proxy for environmental quality. Residents in lower-income tracts like Waterfront South face higher exposure to triggers like mold and industrial pollutants.' 
         },
         'poverty': { 
             title: 'The Income-Poverty Cycle', 
-            main: 'This correlation highlights the intensity of the wealth gap in Camden.', 
-            detail: 'There is a near-perfect inverse relationship here: as median income drops, the poverty rate spikes exponentially. This creates a "poverty trap" where neighborhoods lack the tax base to fund the very services that could improve health outcomes.' 
+            main: 'Camden exhibits a sharp poverty cliff where slight drops in median income lead to massive spikes in poverty rates.', 
+            detail: 'This visualization highlights the "Poverty Trap," where neighborhoods lack the economic base to fund local health-improving services, creating a self-perpetuating cycle of health inequity.' 
         }
     };
 
