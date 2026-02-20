@@ -388,320 +388,426 @@ const camdenNeighborhoods = [
     }
 ];
 
-// Initialize maps when page loads
+// --- COLOR SCALES ---
+// Blue Scale for Health Metrics (Diabetes, Asthma, etc.)
+const COLORS_BLUE = ['#eff3ff', '#bdd7e7', '#6baed6', '#3182bd', '#08519c']; 
+
+// Green Scale for "Positive" Social Determinants (Income, Education)
+const COLORS_GREEN = ['#edf8e9', '#bae4b3', '#74c476', '#31a354', '#006d2c'];
+
+// Metrics where "Higher is Better" (Uses Green Scale)
+const POSITIVE_METRICS = ['income', 'education', 'healthcare_access', 'food_access', 'visited_dentist'];
+
+function getColor(value, min, max, scheme) {
+    if (value === undefined || value === null) return '#ccc';
+    if (max === min) return scheme[2]; // Flat data
+    
+    // Normalize value to 0-1 range
+    const pct = (value - min) / (max - min);
+    
+    // Map percentage to color index (0 to 4)
+    let index = Math.floor(pct * (scheme.length));
+    if (index >= scheme.length) index = scheme.length - 1;
+    
+    return scheme[index];
+}
+
+// ==========================================
+// HYBRID DATA ARCHITECTURE (DB + FALLBACK)
+// ==========================================
+
+// 1. Define the Hardcoded "Safety Net" (Your original data)
+const fallbackData = {
+    neighborhoods: [
+        'Gateway', 'Bergen Square', 'Cooper Poynt', 'Pyne Point', 'Cramer Hill', 
+        'Beideman', 'Dudley', 'Rosedale', 'Stockton', 'Marlton', 
+        'Parkside', 'Whitman Park', 'Liberty Park', 'Centerville', 'Waterfront South',
+        'Morgan Village', 'Fairview', 'Cooper Grant', 'Lanning Square'
+    ],
+    income: [26750, 12104, 29789, 19412, 28198, 58983, 35491, 51741, 44357, 31312, 45662, 31941, 29210, 22181, 54324, 34796, 41840, 51635, 38447],
+    poverty: [30.78, 54.36, 36.71, 39.82, 38.68, 11.91, 24.96, 19.22, 20.17, 30.43, 19.40, 28.40, 26.21, 42.97, 40.45, 32.57, 20.76, 41.01, 18.62],
+    unemployment: [28.59, 34.22, 11.43, 14.21, 9.42, 9.73, 3.93, 13.15, 5.94, 16.67, 26.16, 18.81, 11.37, 25.90, 8.51, 9.16, 24.87, 14.15, 8.24],
+    education: [69.34, 57.70, 41.41, 36.94, 25.47, 43.14, 37.81, 44.01, 49.38, 45.20, 48.07, 60.14, 55.44, 41.57, 43.90, 61.16, 62.64, 90.55, 61.43],
+    foodAccess: [3.1, 2.2, 3.7, 2.8, 3.5, 7.2, 5.1, 6.8, 6.2, 4.8, 5.9, 4.9, 4.2, 2.8, 6.7, 5.2, 6.1, 6.9, 5.7],
+    insurance: [36.2, 25.1, 25.6, 30.1, 21.2, 45.7, 41.8, 48.5, 47.3, 37.6, 31.9, 36.2, 37.6, 15.6, 45.6, 34.8, 28.3, 70.4, 62.7],
+    diabetes: [17.0, 15.7, 18.9, 21.4, 18.4, 13.4, 22.2, 16.9, 17.9, 19.2, 15.0, 21.5, 23.1, 14.7, 20.3, 17.5, 17.3, 19.4, 18.0],
+    obesity: [43.9, 47.6, 44.8, 46.6, 44.8, 40.2, 41.8, 38.8, 41.9, 43.2, 46.1, 44.8, 48.7, 51.4, 44.3, 45.7, 43.6, 36.0, 41.3],
+    asthma: [20.3, 24.1, 22.3, 22.9, 25.6, 19.1, 20.9, 18.6, 20.1, 21.0, 21.9, 22.0, 24.9, 25.5, 22.1, 22.4, 20.9, 19.2, 21.0],
+    mentalDistress: [20.3, 24.1, 22.3, 22.9, 25.6, 19.1, 20.9, 18.6, 20.1, 21.0, 21.9, 22.0, 24.9, 25.5, 22.1, 22.4, 20.9, 19.2, 21.0],
+    highBloodPressure: [37.4, 40.4, 41.0, 35.6, 48.5, 45.1, 48.7, 38.6, 36.3, 42.7, 40.2, 35.1, 43.6, 35.4, 36.4, 46.7, 40.4, 38.5, 47.7]
+};
+
+// 2. Initialize Data with Intelligent Merge
+let dashboardData;
+
+if (typeof dbPayload !== 'undefined' && dbPayload !== null) {
+    console.log("✅ Using Live Database Data");
+    
+    // INTELLIGENT MERGE:
+    // This takes the fallback data and OVERWRITES it with database values.
+    // Crucially, since 'education' is missing in your DB, it keeps the fallback 'education' values!
+    dashboardData = { ...fallbackData, ...dbPayload };
+    
+} else {
+    console.warn("⚠️ Database unavailable. Using Fallback Data.");
+    dashboardData = fallbackData;
+}
+
+// --- GLOBAL STATE ---
+// Set your desired defaults here. These will apply immediately on load.
+let currentLeftMetric = 'diabetes';  
+let currentRightMetric = 'income';
+
+// Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Initializing Camden Health Dashboard...');
     
-    // Check if Leaflet is loaded
     if (typeof L === 'undefined') {
         console.error('Leaflet library not loaded');
         return;
     }
     
-    // Initialize maps
+    // Set dropdowns to match our JS defaults (sync UI with Logic)
+    const leftSel = document.getElementById('leftMapSelector');
+    const rightSel = document.getElementById('rightMapSelector');
+    if(leftSel) leftSel.value = currentLeftMetric;
+    if(rightSel) rightSel.value = currentRightMetric;
+
     initializeMaps();
-    
-    // Set up event listeners
     setupEventListeners();
-    
-    // Load initial data
     loadInitialData();
-    
-    // Initialize charts
     initializeAllCharts();
+    
+    if (typeof populateDataExplorer === 'function') {
+        populateDataExplorer(); 
+    }
 });
 
-// Initialize both maps
+// --- STYLING ---
+const STYLE_BLUE = {
+    color: "#2c3e50", weight: 2, opacity: 1, 
+    fillColor: "#87CEEB", fillOpacity: 0.7 
+};
+
+const STYLE_HIGHLIGHT = {
+    color: "#1e8449", weight: 3, opacity: 1, 
+    fillColor: "#2ecc71", fillOpacity: 0.8 
+};
+
+// 3. INITIALIZE MAPS
 function initializeMaps() {
     try {
-        console.log('Creating left map...');
-        leftMap = L.map('leftMap').setView([39.9259, -75.1196], 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(leftMap);
-        
-        console.log('Creating right map...');
-        rightMap = L.map('rightMap').setView([39.9259, -75.1196], 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(rightMap);
-        
-        console.log('Maps initialized successfully');
-    } catch (error) {
-        console.error('Error initializing maps:', error);
+        // Left Map
+        leftMap = L.map('leftMap', { zoomControl: true, scrollWheelZoom: false }).setView([39.9259, -75.1196], 11.5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(leftMap);
+
+        // Right Map
+        rightMap = L.map('rightMap', { zoomControl: true, scrollWheelZoom: false }).setView([39.9259, -75.1196], 11.5);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(rightMap);
+
+        // Render Initial Polygons using the Global Defaults
+        renderMapPolygons(leftMap, leftPolygons, 'left', currentLeftMetric);
+        renderMapPolygons(rightMap, rightPolygons, 'right', currentRightMetric);
+
+        console.log('Maps initialized with:', currentLeftMetric, currentRightMetric);
+
+    } catch (error) { console.error('Error initializing maps:', error); }
+}
+
+// 4. CORE RENDER FUNCTION (UPDATED WITH COLOR SCALES & LEGEND)
+function renderMapPolygons(mapInstance, polygonArray, mapSide, metric) {
+    // 1. Clear existing layers
+    polygonArray.forEach(p => mapInstance.removeLayer(p));
+    polygonArray.length = 0; 
+
+    // 2. Clear existing legend if it exists
+    if (mapInstance.legendControl) {
+        mapInstance.removeControl(mapInstance.legendControl);
     }
-}
 
-// Setup event listeners
-function setupEventListeners() {
-    const leftSelector = document.getElementById('leftMapSelector');
-    const rightSelector = document.getElementById('rightMapSelector');
-    
-    if (leftSelector) {
-        leftSelector.addEventListener('change', function() {
-            updateLeftMap(this.value);
-            updateMetrics();
-        });
-    }
-    
-    if (rightSelector) {
-        rightSelector.addEventListener('change', function() {
-            updateRightMap(this.value);
-            updateMetrics();
-        });
-    }
-}
-
-// Load initial data
-function loadInitialData() {
-    console.log('Loading initial data...');
-    updateLeftMap('diabetes');
-    updateRightMap('income');
-    updateMetrics();
-}
-
-// Update left map
-function updateLeftMap(metric) {
-    if (!leftMap) return;
-    
-    console.log('Updating left map with metric:', metric);
-    
-    // Clear existing polygons
-    leftPolygons.forEach(polygon => leftMap.removeLayer(polygon));
-    leftPolygons = [];
-    
-    // Add neighborhood polygons
-    camdenNeighborhoods.forEach(neighborhood => {
-        const value = neighborhood.data[metric];
-        if (value === undefined) return;
-        
-        const color = getColorForValue(value, metric);
-        
-        const polygon = L.polygon(neighborhood.bounds, {
-            color: '#ffffff',
-            weight: 2,
-            opacity: 0.8,
-            fillColor: color,
-            fillOpacity: 0.7
-        }).addTo(leftMap);
-        
-        polygon.bindPopup(`
-            <div>
-                <h6>${neighborhood.name}</h6>
-                <p><strong>${getMetricLabel(metric)}:</strong> ${formatValue(value, metric)}</p>
-            </div>
-        `);
-        
-        leftPolygons.push(polygon);
-    });
-    
-    console.log(`Added ${leftPolygons.length} polygons to left map`);
-}
-
-// Update right map
-function updateRightMap(metric) {
-    if (!rightMap) return;
-    
-    console.log('Updating right map with metric:', metric);
-    
-    // Clear existing polygons
-    rightPolygons.forEach(polygon => rightMap.removeLayer(polygon));
-    rightPolygons = [];
-    
-    // Add neighborhood polygons
-    camdenNeighborhoods.forEach(neighborhood => {
-        const value = neighborhood.data[metric];
-        if (value === undefined) return;
-        
-        const color = getColorForValue(value, metric);
-        
-        const polygon = L.polygon(neighborhood.bounds, {
-            color: '#ffffff',
-            weight: 2,
-            opacity: 0.8,
-            fillColor: color,
-            fillOpacity: 0.7
-        }).addTo(rightMap);
-        
-        polygon.bindPopup(`
-            <div>
-                <h6>${neighborhood.name}</h6>
-                <p><strong>${getMetricLabel(metric)}:</strong> ${formatValue(value, metric)}</p>
-            </div>
-        `);
-        
-        rightPolygons.push(polygon);
-    });
-    
-    console.log(`Added ${rightPolygons.length} polygons to right map`);
-}
-
-// Get color for value
-function getColorForValue(value, metric) {
+    // 3. Calculate Min/Max for this metric across ALL neighborhoods
+    // We filter out undefined values to prevent errors
     const values = camdenNeighborhoods.map(n => n.data[metric]).filter(v => v !== undefined);
     const min = Math.min(...values);
     const max = Math.max(...values);
-    const normalized = (value - min) / (max - min);
     
-    // Health metrics: red = bad, green = good
-    if (['diabetes', 'obesity', 'asthma', 'mental_distress', 'high_blood_pressure', 'poverty_rate', 'unemployment', 'lack_health_insurance'].includes(metric)) {
-        const red = Math.floor(255 * normalized);
-        const green = Math.floor(255 * (1 - normalized));
-        return `rgb(${red}, ${green}, 0)`;
-    }
-    
-    // Good metrics: green = good, red = bad
-    const green = Math.floor(255 * normalized);
-    const red = Math.floor(255 * (1 - normalized));
-    return `rgb(${red}, ${green}, 0)`;
+    // 4. Determine Color Scheme (Green for good, Red for bad)
+    const scheme = POSITIVE_METRICS.includes(metric) ? COLORS_GREEN : COLORS_BLUE;
+
+    // 5. Add new polygons with Dynamic Colors
+    camdenNeighborhoods.forEach(n => {
+        const val = n.data[metric];
+        const dynamicColor = getColor(val, min, max, scheme);
+        
+        // Create a style object that overrides the default blue
+        const polyStyle = {
+            color: "#2c3e50", 
+            weight: 2, 
+            opacity: 1, 
+            fillColor: dynamicColor, 
+            fillOpacity: 0.7 
+        };
+
+        const popupContent = createPopupContent(n, metric);
+        
+        const poly = L.polygon(n.bounds, polyStyle).addTo(mapInstance);
+        poly.bindPopup(popupContent);
+        
+        // Metadata for interactions
+        poly.neighborhoodName = n.name;
+        poly.defaultStyle = polyStyle; // Save this color so hover effects reset correctly
+        
+        // Click Event
+        poly.on('click', (e) => handlePolygonClick(e, mapSide));
+        
+        polygonArray.push(poly);
+    });
+
+    // 6. Add the Legend Control
+    addLegend(mapInstance, min, max, scheme, metric);
 }
 
-// Get metric label
+function addLegend(mapInstance, min, max, scheme, metric) {
+    const legend = L.control({position: 'bottomright'});
+
+    legend.onAdd = function (map) {
+        const div = L.DomUtil.create('div', 'info legend');
+        
+        // Format numbers (Currency vs Percent)
+        const format = (num) => {
+            if (metric === 'income') return '$' + (num/1000).toFixed(0) + 'k';
+            if (['food_access'].includes(metric)) return num.toFixed(1);
+            return num.toFixed(0) + '%';
+        };
+
+        // CSS for the Legend Box
+        div.style.backgroundColor = 'white';
+        div.style.padding = '10px';
+        div.style.borderRadius = '5px';
+        div.style.boxShadow = '0 0 15px rgba(0,0,0,0.2)';
+        div.style.fontSize = '12px';
+        div.style.lineHeight = '18px';
+
+        div.innerHTML += `<strong>${getMetricLabel(metric)}</strong><br>`;
+
+        // Loop through our color intervals
+        // We divide the range into 5 steps matching our 5 colors
+        const step = (max - min) / scheme.length;
+        
+        for (let i = 0; i < scheme.length; i++) {
+            const rangeStart = min + (i * step);
+            const rangeEnd = min + ((i + 1) * step);
+            
+            div.innerHTML +=
+                `<i style="background:${scheme[i]}; width:18px; height:18px; float:left; margin-right:8px; opacity:0.7"></i> ` +
+                `${format(rangeStart)} – ${format(rangeEnd)}<br>`;
+        }
+
+        return div;
+    };
+
+    legend.addTo(mapInstance);
+    mapInstance.legendControl = legend; // Store reference to remove it later
+}
+
+// 5. CREATE POPUP CONTENT
+function createPopupContent(n, metric) {
+    let statsHtml = '';
+
+    // If we have a valid metric, show ONLY that metric
+    if (metric && metric !== "" && n.data[metric] !== undefined) {
+        const label = getMetricLabel(metric);
+        let value = n.data[metric];
+        
+        if (typeof value === 'number') {
+            value = (metric === 'income') ? `$${value.toLocaleString()}` : `${value.toFixed(1)}%`;
+        } 
+
+        statsHtml = `<div style="font-size: 1.1rem; color: #1e8449; margin-top:5px;">
+                        <strong>${label}:</strong> ${value}
+                     </div>`;
+    } else {
+        // Fallback: This should rarely be seen if defaults are set correctly
+        statsHtml = `<div style="color:#666; font-style:italic;">Select a metric...</div>`;
+    }
+
+    return `
+        <div style="text-align: left; min-width: 150px;">
+            <h6 style="color: #2c3e50; font-weight: bold; margin: 0 0 5px 0; border-bottom: 2px solid #eee; padding-bottom: 5px;">
+                ${n.name}
+            </h6>
+            ${statsHtml}
+        </div>
+    `;
+}
+
+// 6. EVENT LISTENERS
+function setupEventListeners() {
+    const leftSelector = document.getElementById('leftMapSelector');
+    const rightSelector = document.getElementById('rightMapSelector');
+    const overlayToggle = document.getElementById('overlayToggle'); 
+
+    if (leftSelector) {
+        leftSelector.addEventListener('change', function() {
+            currentLeftMetric = this.value; // Update global state
+            renderMapPolygons(leftMap, leftPolygons, 'left', currentLeftMetric);
+            updateMetrics();
+        });
+    }
+
+    if (rightSelector) {
+        rightSelector.addEventListener('change', function() {
+            currentRightMetric = this.value; // Update global state
+            renderMapPolygons(rightMap, rightPolygons, 'right', currentRightMetric);
+            updateMetrics();
+        });
+    }
+
+    // Sync Logic
+    let isSyncing = false;
+    if (overlayToggle) {
+        overlayToggle.addEventListener('change', function() {
+            if (this.checked) rightMap.setView(leftMap.getCenter(), leftMap.getZoom(), { animate: true });
+        });
+        leftMap.on('move', function() {
+            if (overlayToggle.checked && !isSyncing) {
+                isSyncing = true;
+                rightMap.setView(leftMap.getCenter(), leftMap.getZoom(), { animate: false });
+                isSyncing = false;
+            }
+        });
+        rightMap.on('move', function() {
+            if (overlayToggle.checked && !isSyncing) {
+                isSyncing = true;
+                leftMap.setView(rightMap.getCenter(), rightMap.getZoom(), { animate: false });
+                isSyncing = false;
+            }
+        });
+    }
+}
+
+// 7. CLICK HANDLER (Green Highlight)
+function handlePolygonClick(e, sourceMap) {
+    const targetName = e.target.neighborhoodName;
+
+    // --- ADD THIS LINE TO LINK TO DATABASE ---
+    window.currentSelection = targetName; 
+    // -----------------------------------------
+
+    // Reset styles
+    leftPolygons.forEach(p => p.setStyle(p.defaultStyle));
+    rightPolygons.forEach(p => p.setStyle(p.defaultStyle));
+
+    // Highlight targets
+    const leftTarget = leftPolygons.find(p => p.neighborhoodName === targetName);
+    const rightTarget = rightPolygons.find(p => p.neighborhoodName === targetName);
+
+    if (leftTarget) {
+        leftTarget.setStyle(STYLE_HIGHLIGHT);
+        if(sourceMap === 'left') leftTarget.openPopup();
+    }
+    if (rightTarget) {
+        rightTarget.setStyle(STYLE_HIGHLIGHT);
+        if(sourceMap === 'right') rightTarget.openPopup();
+    }
+
+    updateMetrics(targetName);
+}
+
+// 8. HELPERS
+function loadInitialData() {
+    updateMetrics(); 
+}
+
 function getMetricLabel(metric) {
     const labels = {
-        diabetes: 'Diabetes Rate',
-        obesity: 'Obesity Rate',
-        asthma: 'Asthma Rate',
-        mental_distress: 'Mental Distress',
-        high_blood_pressure: 'High Blood Pressure',
-        income: 'Median Income',
-        education: 'Education Level',
-        food_access: 'Food Access Score',
-        poverty_rate: 'Poverty Rate',
-        unemployment: 'Unemployment Rate',
-        healthcare_access: 'Healthcare Access',
-        lack_health_insurance: 'Uninsured Rate',
-        visited_dentist: 'Visited Dentist'
+        diabetes: 'Diabetes Rate', obesity: 'Obesity Rate', asthma: 'Asthma Rate',
+        mental_distress: 'Mental Distress', high_blood_pressure: 'High Blood Pressure',
+        income: 'Median Income', education: 'Education Level', food_access: 'Food Access Score',
+        poverty_rate: 'Poverty Rate', unemployment: 'Unemployment Rate', healthcare_access: 'Healthcare Access',
+        lack_health_insurance: 'Uninsured Rate', visited_dentist: 'Visited Dentist', air_quality: 'Air Quality Index'
     };
     return labels[metric] || metric;
 }
 
-// Format value
-function formatValue(value, metric) {
-    if (metric === 'income') {
-        return `$${value.toLocaleString()}`;
-    }
-    return `${value.toFixed(1)}%`;
-}
-
-// Update metrics
 function updateMetrics() {
-    const leftMetric = document.getElementById('leftMapSelector')?.value || 'diabetes';
-    const rightMetric = document.getElementById('rightMapSelector')?.value || 'income';
-    
-    const leftValues = camdenNeighborhoods.map(n => n.data[leftMetric]).filter(v => v !== undefined);
-    const rightValues = camdenNeighborhoods.map(n => n.data[rightMetric]).filter(v => v !== undefined);
+    // Use the GLOBAL variables instead of reading DOM to be safe
+    const leftValues = camdenNeighborhoods.map(n => n.data[currentLeftMetric]).filter(v => v !== undefined);
+    const rightValues = camdenNeighborhoods.map(n => n.data[currentRightMetric]).filter(v => v !== undefined);
     
     if (leftValues.length === 0 || rightValues.length === 0) return;
     
-    // Calculate disparity index
-    const leftMean = leftValues.reduce((a, b) => a + b) / leftValues.length;
-    const leftStd = Math.sqrt(leftValues.reduce((sum, val) => sum + Math.pow(val - leftMean, 2), 0) / leftValues.length);
-    const disparityIndex = leftMean === 0 ? 0 : (leftStd / leftMean * 100);
+    const leftMean = leftValues.reduce((a, b) => a + b, 0) / leftValues.length;
+    let disparityIndex = 0;
+    if (leftMean > 0) {
+        const leftStd = Math.sqrt(leftValues.reduce((sum, val) => sum + Math.pow(val - leftMean, 2), 0) / leftValues.length);
+        disparityIndex = (leftStd / leftMean * 100);
+    }
     
-    // Calculate correlation
     const correlation = calculateCorrelation(leftValues, rightValues);
-    
-    // Calculate equity gap
     const equityGap = Math.max(...leftValues) - Math.min(...leftValues);
     
-    // Update display
-    updateElement('disparityScore', disparityIndex.toFixed(1));
-    updateElement('correlationScore', correlation.toFixed(2));
-    updateElement('equityScore', equityGap.toFixed(1));
-    
-    console.log('Metrics updated:', {disparityIndex, correlation, equityGap});
+    if(document.getElementById('disparityScore')) document.getElementById('disparityScore').textContent = disparityIndex.toFixed(1);
+    if(document.getElementById('correlationScore')) document.getElementById('correlationScore').textContent = correlation.toFixed(2);
+    if(document.getElementById('equityScore')) document.getElementById('equityScore').textContent = equityGap.toFixed(1);
 }
 
-// Calculate correlation
 function calculateCorrelation(x, y) {
+    if (x.length !== y.length || x.length === 0) return 0;
     const n = x.length;
     const sumX = x.reduce((a, b) => a + b, 0);
     const sumY = y.reduce((a, b) => a + b, 0);
     const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
     const sumX2 = x.reduce((sum, xi) => sum + xi * xi, 0);
     const sumY2 = y.reduce((sum, yi) => sum + yi * yi, 0);
-    
-    const numerator = n * sumXY - sumX * sumY;
     const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
-    
-    return denominator === 0 ? 0 : numerator / denominator;
+    return denominator === 0 ? 0 : (n * sumXY - sumX * sumY) / denominator;
 }
 
-// Update element safely
-function updateElement(id, value) {
-    const element = document.getElementById(id);
-    if (element) {
-        element.textContent = value;
-    }
-}
-
-// Initialize all charts
+// 8. INITIALIZE ALL CHARTS (Full Restoration)
 function initializeAllCharts() {
-    console.log('Initializing charts...');
+    console.log('Initializing all dashboard charts...');
     
-    // Neighborhood chart - Show top 10 neighborhoods by diabetes rate
+    // 1. Neighborhood Chart (Bar: Top 10 Diabetes)
     const neighborhoodCanvas = document.getElementById('neighborhoodChart');
     if (neighborhoodCanvas) {
+        // Destroy existing chart if it exists to prevent overlap
+        if (Chart.getChart(neighborhoodCanvas)) Chart.getChart(neighborhoodCanvas).destroy();
+        
         const ctx = neighborhoodCanvas.getContext('2d');
-        const sortedNeighborhoods = [...camdenNeighborhoods]
-            .sort((a, b) => b.data.diabetes - a.data.diabetes)
-            .slice(0, 10);
+        const sorted = [...camdenNeighborhoods].sort((a, b) => (b.data.diabetes || 0) - (a.data.diabetes || 0)).slice(0, 10);
         
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: sortedNeighborhoods.map(n => n.name),
+                labels: sorted.map(n => n.name),
                 datasets: [{
                     label: 'Diabetes Rate (%)',
-                    data: sortedNeighborhoods.map(n => n.data.diabetes),
-                    backgroundColor: sortedNeighborhoods.map(n => {
-                        const rate = n.data.diabetes;
-                        if (rate > 20) return 'rgba(220, 53, 69, 0.8)';
-                        if (rate > 17) return 'rgba(255, 193, 7, 0.8)';
-                        return 'rgba(25, 135, 84, 0.8)';
-                    }),
-                    borderColor: 'rgba(108, 117, 125, 1)',
-                    borderWidth: 1
+                    data: sorted.map(n => n.data.diabetes),
+                    backgroundColor: sorted.map(n => n.data.diabetes > 20 ? 'rgba(220, 53, 69, 0.8)' : 'rgba(25, 135, 84, 0.8)'),
+                    borderColor: 'rgba(108, 117, 125, 1)', borderWidth: 1
                 }]
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Top 10 Neighborhoods by Diabetes Rate (2022 Data)'
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Diabetes Rate (%)'
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            maxRotation: 45,
-                            minRotation: 45
-                        }
-                    }
-                }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false }, title: { display: true, text: 'Top 10 Neighborhoods by Diabetes Rate' } },
+                scales: { y: { beginAtZero: true, title: { display: true, text: 'Rate (%)' } } }
             }
         });
     }
     
-    // Demographics chart - Income distribution
+    // 2. Demographics Chart (Doughnut: Income Ranges)
     const demographicsCanvas = document.getElementById('demographicsChart');
     if (demographicsCanvas) {
+        if (Chart.getChart(demographicsCanvas)) Chart.getChart(demographicsCanvas).destroy();
+
         const ctx = demographicsCanvas.getContext('2d');
         const incomeRanges = [
-            { range: 'Under $25K', neighborhoods: camdenNeighborhoods.filter(n => n.data.income < 25000) },
-            { range: '$25K - $35K', neighborhoods: camdenNeighborhoods.filter(n => n.data.income >= 25000 && n.data.income < 35000) },
-            { range: '$35K - $45K', neighborhoods: camdenNeighborhoods.filter(n => n.data.income >= 35000 && n.data.income < 45000) },
-            { range: '$45K - $55K', neighborhoods: camdenNeighborhoods.filter(n => n.data.income >= 45000 && n.data.income < 55000) },
-            { range: '$55K+', neighborhoods: camdenNeighborhoods.filter(n => n.data.income >= 55000) }
+            { range: '< $25K', count: camdenNeighborhoods.filter(n => n.data.income < 25000).length },
+            { range: '$25K-35K', count: camdenNeighborhoods.filter(n => n.data.income >= 25000 && n.data.income < 35000).length },
+            { range: '$35K-45K', count: camdenNeighborhoods.filter(n => n.data.income >= 35000 && n.data.income < 45000).length },
+            { range: '$45K+', count: camdenNeighborhoods.filter(n => n.data.income >= 45000).length }
         ];
         
         new Chart(ctx, {
@@ -709,127 +815,338 @@ function initializeAllCharts() {
             data: {
                 labels: incomeRanges.map(r => r.range),
                 datasets: [{
-                    data: incomeRanges.map(r => r.neighborhoods.length),
-                    backgroundColor: [
-                        'rgba(220, 53, 69, 0.8)',
-                        'rgba(255, 193, 7, 0.8)',
-                        'rgba(54, 162, 235, 0.8)',
-                        'rgba(75, 192, 192, 0.8)',
-                        'rgba(25, 135, 84, 0.8)'
-                    ]
+                    data: incomeRanges.map(r => r.count),
+                    backgroundColor: ['#dc3545', '#ffc107', '#17a2b8', '#28a745'],
+                    borderWidth: 1
                 }]
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Camden Neighborhoods by Income Range (2022)'
-                    },
-                    legend: {
-                        position: 'right'
-                    }
-                }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'right' }, title: { display: true, text: 'Neighborhoods by Income Level' } } 
             }
         });
     }
     
-    // Trend chart - Health vs Income correlation
+    // 3. Trend Chart (Scatter: Income vs Diabetes)
     const trendCanvas = document.getElementById('trendChart');
     if (trendCanvas) {
+        if (Chart.getChart(trendCanvas)) Chart.getChart(trendCanvas).destroy();
+
         const ctx = trendCanvas.getContext('2d');
         new Chart(ctx, {
             type: 'scatter',
             data: {
                 datasets: [{
-                    label: 'Diabetes vs Income',
-                    data: camdenNeighborhoods.map(n => ({
-                        x: n.data.income / 1000,
-                        y: n.data.diabetes
-                    })),
-                    backgroundColor: 'rgba(220, 53, 69, 0.6)',
-                    borderColor: 'rgba(220, 53, 69, 1)',
-                    pointRadius: 6
+                    label: 'Neighborhoods',
+                    data: camdenNeighborhoods.map(n => ({ x: n.data.income/1000, y: n.data.diabetes })),
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    pointRadius: 6,
+                    pointHoverRadius: 8
                 }]
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Health vs Income Correlation (2022 Data)'
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { display: false },
+                    title: { display: true, text: 'Correlation: Income vs Diabetes' },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `Income: $${context.parsed.x}k, Diabetes: ${context.parsed.y}%`;
+                            }
+                        }
                     }
                 },
-                scales: {
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Median Income ($1000s)'
-                        }
-                    },
-                    y: {
-                        title: {
-                            display: true,
-                            text: 'Diabetes Rate (%)'
-                        }
-                    }
+                scales: { 
+                    x: { title: { display: true, text: 'Median Income ($1k)' } }, 
+                    y: { title: { display: true, text: 'Diabetes Rate (%)' } } 
                 }
             }
         });
     }
     
-    // SDOH chart - Social determinants comparison
+    // 4. SDOH Chart (Radar: City Averages)
     const sdohCanvas = document.getElementById('sdohChart');
     if (sdohCanvas) {
+        if (Chart.getChart(sdohCanvas)) Chart.getChart(sdohCanvas).destroy();
+
         const ctx = sdohCanvas.getContext('2d');
-        const avgData = {
-            poverty: camdenNeighborhoods.reduce((sum, n) => sum + n.data.poverty_rate, 0) / camdenNeighborhoods.length,
-            unemployment: camdenNeighborhoods.reduce((sum, n) => sum + n.data.unemployment, 0) / camdenNeighborhoods.length,
-            education: camdenNeighborhoods.reduce((sum, n) => sum + n.data.education, 0) / camdenNeighborhoods.length,
-            healthcare: camdenNeighborhoods.reduce((sum, n) => sum + n.data.healthcare_access, 0) / camdenNeighborhoods.length
+        const avgs = {
+            pov: camdenNeighborhoods.reduce((s, n) => s + (n.data.poverty_rate || 0), 0) / 19,
+            unemp: camdenNeighborhoods.reduce((s, n) => s + (n.data.unemployment || 0), 0) / 19,
+            edu: camdenNeighborhoods.reduce((s, n) => s + (n.data.education || 0), 0) / 19,
+            ins: camdenNeighborhoods.reduce((s, n) => s + (n.data.lack_health_insurance || 0), 0) / 19
         };
         
         new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: ['Poverty Rate', 'Unemployment', 'Education Level', 'Healthcare Access'],
+                labels: ['Poverty Rate', 'Unemployment', 'HS Diploma %', 'Uninsured %'],
                 datasets: [{
-                    label: 'Camden Average',
-                    data: [avgData.poverty, avgData.unemployment, avgData.education, avgData.healthcare],
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
+                    label: 'City Average',
+                    data: [avgs.pov, avgs.unemp, avgs.edu, avgs.ins],
+                    backgroundColor: 'rgba(255, 159, 64, 0.2)', 
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    pointBackgroundColor: 'rgba(255, 159, 64, 1)',
                     borderWidth: 2
                 }]
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    title: {
-                        display: true,
-                        text: 'Social Determinants of Health - Camden Average'
-                    }
-                },
-                scales: {
-                    r: {
-                        beginAtZero: true,
-                        max: 100
-                    }
-                }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                scales: { r: { beginAtZero: true, suggestMax: 60 } },
+                plugins: { title: { display: true, text: 'Social Determinants Profile' } }
             }
         });
     }
-    
-    console.log('All charts initialized with authentic Camden data');
 }
 
-// Export functions for template
-window.startTour = function() {
-    alert('Welcome to the Camden Health Equity Dashboard! Use the dropdown menus to explore different health metrics and social determinants across Camden neighborhoods.');
+// --- SEARCH FUNCTIONALITY BRIDGE ---
+
+// 1. Define the function that main.js is trying to call
+window.highlightNeighborhood = function(query) {
+    if (!query) return;
+    
+    // Normalize text (lowercase, trim)
+    const searchTerm = query.toLowerCase().trim();
+    
+    // Find the neighborhood
+    const target = camdenNeighborhoods.find(n => n.name.toLowerCase() === searchTerm);
+    
+    if (target) {
+        console.log("Search found:", target.name);
+        
+        // Find the polygon on the map
+        const poly = leftPolygons.find(p => p.neighborhoodName === target.name);
+        
+        if (poly) {
+            // Trigger the click logic (turns it Green & Updates Stats)
+            poly.fire('click'); 
+            
+            // Zoom to it
+            leftMap.fitBounds(poly.getBounds());
+            rightMap.fitBounds(poly.getBounds());
+        }
+    } else {
+        alert("Neighborhood not found: " + query);
+    }
 };
 
-window.exportData = function(format) {
-    console.log('Exporting data as:', format);
-    alert(`Data export (${format}) functionality will be available soon.`);
-};
+// 2. Check URL for search params (Handle redirect from other pages)
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    
+    if (searchParam) {
+        // Wait 1 second for maps to initialize, then search
+        setTimeout(() => {
+            window.highlightNeighborhood(searchParam);
+            
+            // Fill the search box so user sees what they searched
+            const searchBox = document.getElementById('globalSearchInput');
+            if(searchBox) searchBox.value = searchParam;
+            
+        }, 1000);
+    }
+});
 
-console.log('Dashboard script loaded');
+
+// --- 4. REVOLUTIONARY DATA EXPLORER (Table + Chart + Analytics) ---
+
+// Redefine the existing function so it triggers everything automatically
+function populateDataExplorer() {
+    console.log("Initializing Revolutionary Data Explorer...");
+    
+    // 1. Populate the Data Table
+    const tableBody = document.getElementById('tableBody');
+    if (tableBody) {
+        tableBody.innerHTML = '';
+        dashboardData.neighborhoods.forEach((name, i) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="ps-3 fw-bold">${name}</td>
+                <td>$${dashboardData.income[i].toLocaleString()}</td>
+                <td>${dashboardData.poverty[i]}%</td>
+                <td>${dashboardData.diabetes[i]}%</td>
+                <td>${dashboardData.obesity[i]}%</td>
+                <td>${dashboardData.asthma[i]}%</td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    // 2. Setup Event Listeners for the Command Center
+    const ids = ['xVariable', 'yVariable', 'chartTypeSelector'];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) {
+            // Remove old listeners to be safe, then add new one
+            el.replaceWith(el.cloneNode(true)); 
+            document.getElementById(id).addEventListener('change', renderCorrelationChart);
+        }
+    });
+
+    // 3. Render the Initial Chart
+    renderCorrelationChart();
+}
+
+// --- INTERACTIVE DATA EXPLORATION CHART ---
+let correlationChart;
+
+function renderCorrelationChart() {
+    const ctx = document.getElementById('correlationChart');
+    if (!ctx) {
+        console.error("Canvas 'correlationChart' not found.");
+        return;
+    }
+
+    const xSelect = document.getElementById('xVariable');
+    const ySelect = document.getElementById('yVariable');
+    if (!xSelect || !ySelect) return;
+
+    const xMetric = xSelect.value;
+    const yMetric = ySelect.value;
+
+    // Check if data exists
+    if (typeof camdenNeighborhoods === 'undefined' || camdenNeighborhoods.length === 0) {
+        console.error("camdenNeighborhoods data is missing.");
+        return;
+    }
+
+    // Safely map data (handles both nested 'data' objects and flat objects)
+    const scatterData = camdenNeighborhoods.map(n => {
+        const dataObj = n.data ? n.data : n; 
+        return {
+            x: dataObj[xMetric] || 0,
+            y: dataObj[yMetric] || 0,
+            name: n.name
+        };
+    });
+
+    if (correlationChart) {
+        correlationChart.destroy();
+    }
+
+    // Draw the chart without the red trendline
+    correlationChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Neighborhoods',
+                data: scatterData,
+                backgroundColor: 'rgba(13, 110, 253, 0.6)',
+                borderColor: 'rgba(13, 110, 253, 1)',
+                borderWidth: 1,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: { top: 20, right: 30, bottom: 20, left: 10 }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const p = context.raw;
+                            // Uses getMetricLabel if it exists, otherwise falls back to the key name
+                            const xLabel = typeof getMetricLabel === 'function' ? getMetricLabel(xMetric) : xMetric;
+                            const yLabel = typeof getMetricLabel === 'function' ? getMetricLabel(yMetric) : yMetric;
+                            return `${p.name}: ${xLabel} ${p.x}, ${yLabel} ${p.y}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: { 
+                        display: true, 
+                        text: typeof getMetricLabel === 'function' ? getMetricLabel(xMetric) : xMetric 
+                    },
+                    grace: '5%'
+                },
+                y: {
+                    title: { 
+                        display: true, 
+                        text: typeof getMetricLabel === 'function' ? getMetricLabel(yMetric) : yMetric 
+                    },
+                    grace: '5%'
+                }
+            }
+        }
+    });
+}
+
+// --- INITIALIZE THE CHART & LISTEN FOR DROPDOWN CHANGES ---
+document.addEventListener('DOMContentLoaded', function() {
+    const xVar = document.getElementById('xVariable');
+    const yVar = document.getElementById('yVariable');
+    
+    if (xVar && yVar) {
+        // Redraw chart when the user changes a dropdown
+        xVar.addEventListener('change', renderCorrelationChart);
+        yVar.addEventListener('change', renderCorrelationChart);
+    }
+    
+    // Initial draw after a brief delay to ensure data is loaded
+    setTimeout(renderCorrelationChart, 500);
+});
+
+// --- HELPER: MATH & STATISTICS ---
+function calculateRegression(data) {
+    const n = data.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+    data.forEach(p => {
+        sumX += p.x; sumY += p.y;
+        sumXY += (p.x * p.y); sumX2 += (p.x * p.x); sumY2 += (p.y * p.y);
+    });
+    
+    const m = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    const b = (sumY - m * sumX) / n;
+    
+    const num = (n * sumXY) - (sumX * sumY);
+    const den = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+    const r = den === 0 ? 0 : num / den;
+
+    return { m, b, r };
+}
+
+function updateCorrelationBadge(r) {
+    const badge = document.getElementById('rValue');
+    if (!badge) return;
+    
+    const absR = Math.abs(r);
+    let text = "Weak Link";
+    let color = "text-muted";
+
+    if (absR > 0.7) { text = "Very Strong Link"; color = "text-success"; }
+    else if (absR > 0.5) { text = "Strong Link"; color = "text-primary"; }
+    else if (absR > 0.3) { text = "Moderate Link"; color = "text-info"; }
+
+    badge.className = `fw-bold ${color}`;
+    badge.innerHTML = `${text} (r=${r.toFixed(2)})`;
+}
+
+function updateInsightText(xName, yName, r) {
+    const box = document.getElementById('correlationInsight');
+    if (!box) return;
+    
+    let msg = "";
+    if (r < -0.5) msg = `<strong>Protective Factor:</strong> Higher levels of <em>${xName}</em> are strongly associated with lower <em>${yName}</em>.`;
+    else if (r > 0.5) msg = `<strong>Risk Factor:</strong> As <em>${xName}</em> increases, <em>${yName}</em> tends to rise sharply.`;
+    else msg = `<strong>Complex Relationship:</strong> There is no simple linear link between <em>${xName}</em> and <em>${yName}</em>. Use the map to explore specific neighborhoods.`;
+
+    box.innerHTML = `<h6 class="alert-heading fw-bold text-primary"><i class="fas fa-robot me-2"></i>Preliminary Analysis</h6><p class="mb-0 text-muted">${msg}</p>`;
+}
+
+window.startTour = function() { alert('Welcome to the Camden Health Dashboard!'); };
+window.exportData = function(format) { alert(`Data export (${format}) coming soon.`); };
+
+console.log('Dashboard script loaded with GLOBAL DEFAULTS');
