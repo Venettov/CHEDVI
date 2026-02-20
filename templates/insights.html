@@ -13,6 +13,30 @@
         color: black !important;
         border: none;
     }
+
+    /* Custom Tab Styling for CHEDVI */
+    #insightTabs .nav-link {
+        color: #adb5bd !important; /* Muted gray for inactive tabs */
+        transition: all 0.3s ease;
+        border-bottom: 3px solid transparent !important;
+    }
+
+    #insightTabs .nav-link:hover {
+        color: #fff !important;
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    /* Specific Active States with category colors */
+    #income-tab.active { color: #0d6efd !important; border-bottom-color: #0d6efd !important; background: white !important; }
+    #food-tab.active { color: #198754 !important; border-bottom-color: #198754 !important; background: white !important; }
+    #education-tab.active { color: #0dcaf0 !important; border-bottom-color: #0dcaf0 !important; background: white !important; }
+    #housing-tab.active { color: #ffc107 !important; border-bottom-color: #ffc107 !important; background: white !important; }
+    #healthcare-tab.active { color: #dc3545 !important; border-bottom-color: #dc3545 !important; background: white !important; }
+    #mental-tab.active { color: #6f42c1 !important; border-bottom-color: #6f42c1 !important; background: white !important; }
+
+    /* Keep icons colored even when inactive for better recognition */
+    #insightTabs .nav-link i { opacity: 0.7; }
+    #insightTabs .nav-link.active i { opacity: 1; }
 </style>
 
 <section class="py-4 bg-light">
@@ -106,34 +130,34 @@
             <div class="col-12">
                 <div class="card shadow-sm border-0">
                     <div class="card-header bg-dark p-0">
-                        <ul class="nav nav-tabs nav-justified card-header-tabs m-0" id="insightTabs" role="tablist">
+                        <ul class="nav nav-tabs nav-justified card-header-tabs m-0 border-0" id="insightTabs" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active py-3 text-white border-0" id="income-tab" data-bs-toggle="tab" data-bs-target="#income" type="button" role="tab">
+                                <button class="nav-link active py-3 fw-bold" id="income-tab" data-bs-toggle="tab" data-bs-target="#income" type="button" role="tab">
                                     <i class="fas fa-wallet me-2"></i>Income
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link py-3 text-white border-0" id="food-tab" data-bs-toggle="tab" data-bs-target="#food" type="button" role="tab">
+                                <button class="nav-link py-3 fw-bold" id="food-tab" data-bs-toggle="tab" data-bs-target="#food" type="button" role="tab">
                                     <i class="fas fa-apple-alt me-2"></i>Food Access
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link py-3 text-white border-0" id="education-tab" data-bs-toggle="tab" data-bs-target="#education" type="button" role="tab">
+                                <button class="nav-link py-3 fw-bold" id="education-tab" data-bs-toggle="tab" data-bs-target="#education" type="button" role="tab">
                                     <i class="fas fa-graduation-cap me-2"></i>Education
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link py-3 text-white border-0" id="housing-tab" data-bs-toggle="tab" data-bs-target="#housing" type="button" role="tab">
+                                <button class="nav-link py-3 fw-bold" id="housing-tab" data-bs-toggle="tab" data-bs-target="#housing" type="button" role="tab">
                                     <i class="fas fa-home me-2"></i>Housing
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link py-3 text-white border-0" id="healthcare-tab" data-bs-toggle="tab" data-bs-target="#healthcare" type="button" role="tab">
+                                <button class="nav-link py-3 fw-bold" id="healthcare-tab" data-bs-toggle="tab" data-bs-target="#healthcare" type="button" role="tab">
                                     <i class="fas fa-user-md me-2"></i>Access
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link py-3 text-white border-0" id="mental-tab" data-bs-toggle="tab" data-bs-target="#mental" type="button" role="tab">
+                                <button class="nav-link py-3 fw-bold" id="mental-tab" data-bs-toggle="tab" data-bs-target="#mental" type="button" role="tab">
                                     <i class="fas fa-brain me-2"></i>Stressors
                                 </button>
                             </li>
