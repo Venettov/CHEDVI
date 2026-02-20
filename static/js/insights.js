@@ -124,22 +124,39 @@ function createFoodObesityChart() {
     if (!ctx || !window.dbData || window.dbData.length === 0) return;
     if (foodObesityChart) foodObesityChart.destroy();
 
-    const selector = document.getElementById('foodOutcomeSelector');
-    const outcomeKey = selector ? selector.value : 'obesity';
+    const outcomeKey = document.getElementById('foodOutcomeSelector') ? document.getElementById('foodOutcomeSelector').value : 'obesity';
     
+    // --- 1. TEXT UPDATES (Restored logic for titles/explanations) ---
+    const explanations = {
+        'obesity': { title: 'Food Access & Obesity', main: '', detail: 'Enter explanation here.' },
+        'diabetes': { title: 'Food Access & Diabetes', main: '', detail: 'Enter explanation here.' },
+        'highBloodPressure': { title: 'Food Access & Hypertension', main: '', detail: 'Enter explanation here.' },
+        'mentalDistress': { title: 'Food Access & Mental Health', main: '', detail: 'Enter explanation here.' },
+        'asthma': { title: 'Food Access & Asthma', main: '', detail: 'Enter explanation here.' },
+        'poverty': { title: 'Food Access & Poverty', main: '', detail: 'Enter explanation here.' }
+    };
+    
+    const textData = explanations[outcomeKey];
+    if (textData) {
+        if (document.getElementById('food-text-title')) document.getElementById('food-text-title').textContent = textData.title;
+        if (document.getElementById('food-text-main')) document.getElementById('food-text-main').textContent = textData.main;
+        if (document.getElementById('food-text-detail')) document.getElementById('food-text-detail').textContent = textData.detail;
+    }
+
     const labels = {
         'obesity': 'Obesity Rate (%)', 'diabetes': 'Diabetes Rate (%)', 
         'highBloodPressure': 'High Blood Pressure (%)', 'mentalDistress': 'Mental Distress (%)', 
         'asthma': 'Asthma Rate (%)', 'poverty': 'Poverty Rate (%)'
     };
 
-    // MAP FROM DB - Ensure we handle 0 values gracefully
+    // --- 2. MAP FROM DB (Handles scores from 0.06 to 77.61+) ---
     const scatterData = window.dbData.map(d => ({
         x: d.foodAccess || 0, 
         y: d[outcomeKey] || 0, 
         name: d.name
     }));
 
+    // --- 3. DRAW CHART ---
     foodObesityChart = new Chart(ctx, {
         type: 'scatter',
         data: {
@@ -151,7 +168,7 @@ function createFoodObesityChart() {
                 borderWidth: 1, 
                 pointRadius: 6, 
                 pointHoverRadius: 8,
-                clip: false // Prevents dots from being cut off at the edge
+                clip: false // Prevents dots sitting on axes from being cut in half
             }]
         },
         options: {
@@ -159,32 +176,33 @@ function createFoodObesityChart() {
             maintainAspectRatio: false,
             layout: {
                 padding: {
-                    top: 10,
-                    right: 20,
-                    bottom: 10,
-                    left: 10
+                    top: 15,
+                    right: 25,
+                    bottom: 15,
+                    left: 15
                 }
             },
             plugins: {
                 tooltip: { 
                     callbacks: { 
-                        label: (c) => `${c.raw.name}: Score ${c.raw.x}, ${labels[outcomeKey]} ${c.raw.y}%` 
+                        label: function(context) {
+                            return `${context.raw.name}: Score ${context.raw.x}, ${labels[outcomeKey]} ${context.raw.y}%`;
+                        }
                     } 
                 },
                 legend: { position: 'bottom' }
             },
             scales: {
                 x: { 
-                    title: { display: true, text: 'Food Access Score (Higher is Better)' },
-                    // Added offset to prevent dots from sitting on the Y-axis line
-                    grace: '5%', 
-                    beginAtZero: true
+                    title: { display: true, text: 'Low Food Access Score (Calculated Metric)' },
+                    beginAtZero: true,
+                    // 'grace' adds extra space at ends so dots don't touch axis lines
+                    grace: '5%' 
                 },
                 y: { 
                     title: { display: true, text: labels[outcomeKey] },
-                    // Added grace to prevent dots from sitting on the X-axis line
-                    grace: '5%',
-                    beginAtZero: false 
+                    beginAtZero: false,
+                    grace: '5%'
                 }
             }
         }
