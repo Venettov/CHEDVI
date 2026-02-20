@@ -997,151 +997,67 @@ function populateDataExplorer() {
 let correlationChart = null;
 
 function renderCorrelationChart() {
-    const ctx = document.getElementById('interactiveCorrelationChart');
+    const ctx = document.getElementById('correlationChart');
     if (!ctx) return;
-
-    // Get current selections
-    const xVar = document.getElementById('xVariable').value;
-    const yVar = document.getElementById('yVariable').value;
-    const chartType = document.getElementById('chartTypeSelector').value;
-
-    // Configuration Map for Labels
-    const labelsMap = {
-        'income': { label: 'Median Income ($)', isCurrency: true },
-        'poverty': { label: 'Poverty Rate (%)', isCurrency: false },
-        'foodAccess': { label: 'Food Access Score', isCurrency: false },
-        'insurance': { label: 'Uninsured Rate (%)', isCurrency: false },
-        'education': { label: 'Education Rate (%)', isCurrency: false },
-        'diabetes': { label: 'Diabetes Rate (%)' },
-        'obesity': { label: 'Obesity Rate (%)' },
-        'asthma': { label: 'Asthma Rate (%)' },
-        'mentalDistress': { label: 'Mental Distress (%)' },
-        'highBloodPressure': { label: 'High Blood Pressure (%)' }
-    };
-
-    // 1. Prepare Data for Charting
-    let plotData = dashboardData.neighborhoods.map((name, i) => ({
-        name: name,
-        x: dashboardData[xVar] ? dashboardData[xVar][i] : 0,
-        y: dashboardData[yVar] ? dashboardData[yVar][i] : 0
-    }));
-
-    // 2. Run Statistical Analysis (Regression)
-    const stats = calculateRegression(plotData);
-    updateCorrelationBadge(stats.r);
-    updateInsightText(labelsMap[xVar].label, labelsMap[yVar].label, stats.r);
-
-    // 3. Build Chart Configuration
-    let chartConfig;
-
-    if (chartType === 'bar') {
-        // === MODE A: RANKED BAR CHART ===
-        plotData.sort((a, b) => a.x - b.x); // Sort Low to High
-
-        // Create a Gradient for the bars
-        const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(54, 162, 235, 0.9)');
-        gradient.addColorStop(1, 'rgba(54, 162, 235, 0.2)');
-
-        chartConfig = {
-            type: 'bar',
-            data: {
-                labels: plotData.map(d => d.name),
-                datasets: [{
-                    label: labelsMap[yVar].label,
-                    data: plotData.map(d => d.y),
-                    backgroundColor: gradient,
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                    borderRadius: 3
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            afterLabel: function(context) {
-                                const raw = plotData[context.dataIndex];
-                                let xVal = labelsMap[xVar].isCurrency ? '$' + raw.x.toLocaleString() : raw.x + '%';
-                                return `${labelsMap[xVar].label}: ${xVal}`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: { ticks: { display: false }, title: { display: true, text: `Ranked by ${labelsMap[xVar].label} (Low → High)` } },
-                    y: { beginAtZero: false, title: { display: true, text: labelsMap[yVar].label } }
-                }
-            }
-        };
-    } else {
-        // === MODE B: SCATTER PLOT + TREND LINE ===
-        
-        // Calculate Trend Line Points
-        const minX = Math.min(...plotData.map(d => d.x));
-        const maxX = Math.max(...plotData.map(d => d.x));
-        const trendLine = [
-            { x: minX, y: (stats.m * minX) + stats.b },
-            { x: maxX, y: (stats.m * maxX) + stats.b }
-        ];
-
-        chartConfig = {
-            type: 'scatter',
-            data: {
-                datasets: [
-                    {
-                        label: 'Neighborhoods',
-                        data: plotData,
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        pointRadius: 6,
-                        pointHoverRadius: 9
-                    },
-                    {
-                        label: 'Trend Line',
-                        data: trendLine,
-                        type: 'line',
-                        borderColor: '#dc3545',
-                        borderWidth: 2,
-                        borderDash: [5, 5],
-                        pointRadius: 0,
-                        tension: 0
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                if (context.dataset.type === 'line') return null;
-                                let p = context.raw;
-                                let xStr = labelsMap[xVar].isCurrency ? '$' + p.x.toLocaleString() : p.x;
-                                return `${p.name}: ${xStr} vs ${p.y}%`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: { 
-                        type: 'linear', position: 'bottom', 
-                        title: { display: true, text: labelsMap[xVar].label },
-                        ticks: { callback: val => labelsMap[xVar].isCurrency ? '$' + val.toLocaleString() : val }
-                    },
-                    y: { title: { display: true, text: labelsMap[yVar].label } }
-                }
-            }
-        };
+    
+    if (correlationChart) {
+        correlationChart.destroy();
     }
 
-    if (correlationChart) correlationChart.destroy();
-    correlationChart = new Chart(ctx, chartConfig);
+    const xMetric = document.getElementById('xVariable').value;
+    const yMetric = document.getElementById('yVariable').value;
+
+    const scatterData = camdenNeighborhoods.map(n => ({
+        x: n.data[xMetric],
+        y: n.data[yMetric],
+        name: n.name
+    }));
+
+    correlationChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Neighborhoods',
+                data: scatterData,
+                backgroundColor: 'rgba(13, 110, 253, 0.6)',
+                borderColor: 'rgba(13, 110, 253, 1)',
+                borderWidth: 1,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+            // Trendline dataset (type: 'line') has been removed
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            layout: {
+                padding: { top: 20, right: 20, bottom: 10, left: 10 }
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const p = context.raw;
+                            return `${p.name}: ${getMetricLabel(xMetric)} ${formatMetricValue(xMetric, p.x)}, ${getMetricLabel(yMetric)} ${formatMetricValue(yMetric, p.y)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: { display: true, text: getMetricLabel(xMetric) },
+                    grace: '5%' // Prevents dots from touching the Y-axis
+                },
+                y: {
+                    title: { display: true, text: getMetricLabel(yMetric) },
+                    grace: '5%' // Prevents dots from touching the X-axis
+                }
+            }
+        }
+    });
+
+    // Removed the calculateCorrelation and analysis update logic
 }
 
 // --- HELPER: MATH & STATISTICS ---
