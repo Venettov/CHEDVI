@@ -913,34 +913,37 @@ window.highlightNeighborhood = function(query) {
 function populateDataExplorer() {
     console.log("Initializing Revolutionary Data Explorer...");
     
-    // 1. Populate the Data Table
+    // 1. Populate the Data Table SAFELY using the camdenNeighborhoods array directly
     const tableBody = document.getElementById('tableBody');
     if (tableBody) {
         tableBody.innerHTML = '';
-        dashboardData.neighborhoods.forEach((name, i) => {
+        camdenNeighborhoods.forEach((n) => {
+            const d = n.data || {};
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td class="ps-3 fw-bold">${name}</td>
-                <td>$${dashboardData.income[i].toLocaleString()}</td>
-                <td>${dashboardData.poverty[i]}%</td>
-                <td>${dashboardData.diabetes[i]}%</td>
-                <td>${dashboardData.obesity[i]}%</td>
-                <td>${dashboardData.asthma[i]}%</td>
+                <td class="ps-3 fw-bold">${n.name}</td>
+                <td>$${(d.income || 0).toLocaleString()}</td>
+                <td>${d.poverty_rate || 0}%</td>
+                <td>${d.diabetes || 0}%</td>
+                <td>${d.obesity || 0}%</td>
+                <td>${d.asthma || 0}%</td>
             `;
             tableBody.appendChild(row);
         });
     }
 
-    // 2. Setup Event Listeners for the Chart Selectors
-    const ids = ['xVariable', 'yVariable'];
-    ids.forEach(id => {
-        const el = document.getElementById(id);
-        if(el) {
-            // Remove old listeners to be safe, then add new one
-            el.replaceWith(el.cloneNode(true)); 
-            document.getElementById(id).addEventListener('change', renderCorrelationChart);
-        }
-    });
+    // 2. Setup Event Listeners for the Chart Selectors safely
+    const xVar = document.getElementById('xVariable');
+    const yVar = document.getElementById('yVariable');
+    
+    if (xVar) {
+        xVar.removeEventListener('change', renderCorrelationChart);
+        xVar.addEventListener('change', renderCorrelationChart);
+    }
+    if (yVar) {
+        yVar.removeEventListener('change', renderCorrelationChart);
+        yVar.addEventListener('change', renderCorrelationChart);
+    }
 
     // 3. Render the Initial Chart
     setTimeout(renderCorrelationChart, 500);
@@ -960,19 +963,33 @@ function renderCorrelationChart() {
     const ySelect = document.getElementById('yVariable');
     if (!xSelect || !ySelect) return;
 
-    const xMetric = xSelect.value;
-    const yMetric = ySelect.value;
+    let xMetric = xSelect.value;
+    let yMetric = ySelect.value;
 
-    if (typeof camdenNeighborhoods === 'undefined' || camdenNeighborhoods.length === 0) {
-        console.error("camdenNeighborhoods data is missing.");
-        return;
-    }
+    // FAILSAFE: Map HTML dropdown values to the actual keys in your data object
+    const getMappedKey = (key) => {
+        const keyMap = {
+            'poverty': 'poverty_rate',
+            'insurance': 'lack_health_insurance',
+            'uninsured': 'lack_health_insurance',
+            'foodAccess': 'food_access',
+            'mentalDistress': 'mental_distress',
+            'highBloodPressure': 'high_blood_pressure'
+        };
+        return keyMap[key] || key;
+    };
 
+    const actualX = getMappedKey(xMetric);
+    const actualY = getMappedKey(yMetric);
+
+    if (typeof camdenNeighborhoods === 'undefined' || camdenNeighborhoods.length === 0) return;
+
+    // Extract the exact data points for X and Y
     const scatterData = camdenNeighborhoods.map(n => {
-        const dataObj = n.data ? n.data : n; 
+        const dataObj = n.data || {}; 
         return {
-            x: dataObj[xMetric] || 0,
-            y: dataObj[yMetric] || 0,
+            x: dataObj[actualX] || 0,
+            y: dataObj[actualY] || 0,
             name: n.name
         };
     });
@@ -1006,8 +1023,8 @@ function renderCorrelationChart() {
                     callbacks: {
                         label: function(context) {
                             const p = context.raw;
-                            const xLabel = typeof getMetricLabel === 'function' ? getMetricLabel(xMetric) : xMetric;
-                            const yLabel = typeof getMetricLabel === 'function' ? getMetricLabel(yMetric) : yMetric;
+                            const xLabel = typeof getMetricLabel === 'function' ? getMetricLabel(actualX) : actualX;
+                            const yLabel = typeof getMetricLabel === 'function' ? getMetricLabel(actualY) : actualY;
                             return `${p.name}: ${xLabel} ${p.x}, ${yLabel} ${p.y}`;
                         }
                     }
@@ -1017,14 +1034,14 @@ function renderCorrelationChart() {
                 x: {
                     title: { 
                         display: true, 
-                        text: typeof getMetricLabel === 'function' ? getMetricLabel(xMetric) : xMetric 
+                        text: typeof getMetricLabel === 'function' ? getMetricLabel(actualX) : actualX 
                     },
                     grace: '5%'
                 },
                 y: {
                     title: { 
                         display: true, 
-                        text: typeof getMetricLabel === 'function' ? getMetricLabel(yMetric) : yMetric 
+                        text: typeof getMetricLabel === 'function' ? getMetricLabel(actualY) : actualY 
                     },
                     grace: '5%'
                 }
@@ -1036,4 +1053,4 @@ function renderCorrelationChart() {
 window.startTour = function() { alert('Welcome to the Camden Health Dashboard!'); };
 window.exportData = function(format) { alert(`Data export (${format}) coming soon.`); };
 
-console.log('Dashboard script loaded with GLOBAL DEFAULTS');
+console.log('Dashboard script loaded successfully.');
