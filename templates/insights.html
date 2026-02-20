@@ -104,37 +104,37 @@
         
         <div class="row">
             <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-secondary p-0">
+                <div class="card shadow-sm border-0">
+                    <div class="card-header bg-dark p-0">
                         <ul class="nav nav-tabs nav-justified card-header-tabs m-0" id="insightTabs" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active py-3" id="income-tab" data-bs-toggle="tab" data-bs-target="#income" type="button" role="tab">
-                                    <i class="fas fa-wallet text-primary me-2"></i>Income
+                                <button class="nav-link active py-3 text-white border-0" id="income-tab" data-bs-toggle="tab" data-bs-target="#income" type="button" role="tab">
+                                    <i class="fas fa-wallet me-2"></i>Income
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link py-3" id="food-tab" data-bs-toggle="tab" data-bs-target="#food" type="button" role="tab">
-                                    <i class="fas fa-apple-alt text-success me-2"></i>Food Access
+                                <button class="nav-link py-3 text-white border-0" id="food-tab" data-bs-toggle="tab" data-bs-target="#food" type="button" role="tab">
+                                    <i class="fas fa-apple-alt me-2"></i>Food Access
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link py-3" id="education-tab" data-bs-toggle="tab" data-bs-target="#education" type="button" role="tab">
-                                    <i class="fas fa-graduation-cap text-info me-2"></i>Education
+                                <button class="nav-link py-3 text-white border-0" id="education-tab" data-bs-toggle="tab" data-bs-target="#education" type="button" role="tab">
+                                    <i class="fas fa-graduation-cap me-2"></i>Education
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link py-3" id="housing-tab" data-bs-toggle="tab" data-bs-target="#housing" type="button" role="tab">
-                                    <i class="fas fa-home text-warning me-2"></i>Housing
+                                <button class="nav-link py-3 text-white border-0" id="housing-tab" data-bs-toggle="tab" data-bs-target="#housing" type="button" role="tab">
+                                    <i class="fas fa-home me-2"></i>Housing
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link py-3" id="healthcare-tab" data-bs-toggle="tab" data-bs-target="#healthcare" type="button" role="tab">
-                                    <i class="fas fa-user-md text-danger me-2"></i>Access
+                                <button class="nav-link py-3 text-white border-0" id="healthcare-tab" data-bs-toggle="tab" data-bs-target="#healthcare" type="button" role="tab">
+                                    <i class="fas fa-user-md me-2"></i>Access
                                 </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link py-3" id="mental-tab" data-bs-toggle="tab" data-bs-target="#mental" type="button" role="tab">
-                                    <i class="fas fa-brain text-purple me-2" style="color: #6f42c1;"></i>Social Stressors
+                                <button class="nav-link py-3 text-white border-0" id="mental-tab" data-bs-toggle="tab" data-bs-target="#mental" type="button" role="tab">
+                                    <i class="fas fa-brain me-2"></i>Stressors
                                 </button>
                             </li>
                         </ul>
@@ -142,326 +142,169 @@
                     
                     <div class="card-body p-4">
                         <div class="tab-content" id="insightTabsContent">
+                            
                             <div class="tab-pane fade show active" id="income" role="tabpanel">
-                                <div class="row align-items-center">
-                                    <div class="col-lg-8">
-                                        <div class="card shadow-sm border-0 h-100">
-                                            <div class="card-body p-4">
-                                                
-                                                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-                                                    <h5 class="card-title fw-bold text-primary mb-0">
-                                                        <i class="fas fa-wallet me-2"></i>Income Correlations
-                                                    </h5>
-                                                    <select class="form-select form-select-sm w-auto shadow-sm border-primary bg-light" id="incomeOutcomeSelector" style="min-width: 200px;">
-                                                        <option value="diabetes" selected>vs. Diabetes Rate</option>
-                                                        <option value="obesity">vs. Obesity Rate</option>
-                                                        <option value="highBloodPressure">vs. High Blood Pressure</option>
-                                                        <option value="mentalDistress">vs. Mental Distress</option>
-                                                        <option value="asthma">vs. Asthma Rate</option>
-                                                        <option value="poverty">vs. Poverty Rate</option>
-                                                    </select>       
-                                                </div>
-
-                                                <div class="chart-container" style="position: relative; height: 350px;">
-                                                    <canvas id="incomeHealthChart"></canvas>
-                                                </div>
-                                                
-                                                <div class="mt-3 text-center">
-                                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary px-3 py-2 rounded-pill">
-                                                        <i class="fas fa-dollar-sign me-1"></i>
-                                                        Median Household Income
-                                                    </span>
-                                                </div>
-                                                <p class="card-text text-muted small mt-3 text-center">
-                                                    Comparing neighborhood income levels against health outcomes.<br>
-                                                    <em>Enter explanation here.</em>
-                                                </p>
-                                            </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <h5 class="fw-bold text-primary mb-0" id="income-text-title">Income & Health Correlations</h5>
+                                            <select class="form-select form-select-sm w-auto shadow-sm" id="incomeOutcomeSelector">
+                                                <option value="diabetes" selected>vs. Diabetes Rate</option>
+                                                <option value="obesity">vs. Obesity Rate</option>
+                                                <option value="highBloodPressure">vs. High Blood Pressure</option>
+                                                <option value="mentalDistress">vs. Mental Distress</option>
+                                                <option value="asthma">vs. Asthma Rate</option>
+                                                <option value="poverty">vs. Poverty Rate</option>
+                                            </select>
+                                        </div>
+                                        <div class="chart-container mb-4" style="height: 450px; width: 100%;">
+                                            <canvas id="incomeHealthChart"></canvas>
                                         </div>
                                     </div>
-                                    <div class="col-lg-4">
-                                        <div class="alert alert-primary bg-light border-0 h-100">
-                                            <h4 class="alert-heading text-primary mb-3" id="income-text-title">
-                                                Income & Diabetes
-                                            </h4>
-                                            
-                                            <p class="lead" id="income-text-main">
-                                                Enter explanation here.
-                                            </p>
-                                            
+                                    <div class="col-12">
+                                        <div class="alert alert-primary bg-light border-start border-primary border-4 shadow-sm">
+                                            <h6 class="fw-bold text-primary"><i class="fas fa-info-circle me-2"></i>Why This Matters:</h6>
+                                            <p class="lead fs-6 mb-2" id="income-text-main">Analyzing the link between household resources and chronic disease management.</p>
                                             <hr>
-                                            
-                                            <h6 class="fw-bold">Why This Matters:</h6>
-                                            <p class="mb-0 small" id="income-text-detail">
-                                                Enter explanation here.
-                                            </p>
+                                            <p class="mb-0 small text-muted" id="income-text-detail">Data represents the correlation between median annual income and the selected health outcome across 19 Camden neighborhoods.</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="tab-pane fade" id="food" role="tabpanel">
-                                <div class="row align-items-center">
-                                    <div class="col-lg-8">
-                                        <div class="card shadow-sm border-0 h-100">
-                                            <div class="card-body p-4">
-                                                
-                                                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-                                                    <h5 class="card-title fw-bold text-success mb-0">
-                                                        <i class="fas fa-apple-alt me-2"></i>Food Access Correlations
-                                                    </h5>
-                                                    
-                                                    <select class="form-select form-select-sm w-auto shadow-sm border-success bg-light" id="foodOutcomeSelector" style="min-width: 200px;">
-                                                        <option value="obesity" selected>vs. Obesity Rate</option>
-                                                        <option value="diabetes">vs. Diabetes Rate</option>
-                                                        <option value="highBloodPressure">vs. High Blood Pressure</option>
-                                                        <option value="mentalDistress">vs. Mental Distress</option>
-                                                        <option value="asthma">vs. Asthma Rate</option>
-                                                        <option value="poverty">vs. Poverty Rate</option>
-                                                    </select>
-                                                </div>
-
-                                                <div class="chart-container" style="position: relative; height: 350px;">
-                                                    <canvas id="foodObesityChart"></canvas>
-                                                </div>
-                                                
-                                                <div class="mt-3 text-center">
-                                                    <span class="badge bg-success bg-opacity-10 text-success border border-success px-3 py-2 rounded-pill">
-                                                        <i class="fas fa-info-circle me-1"></i>
-                                                        Food Access Score (0-10)
-                                                    </span>
-                                                </div>
-                                                <p class="card-text text-muted small mt-3 text-center">
-                                                    Comparing neighborhood food access scores against selected health outcomes.<br>
-                                                    <em>Enter explanation here.</em>
-                                                </p>
-                                            </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <h5 class="fw-bold text-success mb-0" id="food-text-title">Food Access Correlation</h5>
+                                            <select class="form-select form-select-sm w-auto shadow-sm" id="foodOutcomeSelector">
+                                                <option value="obesity" selected>vs. Obesity Rate</option>
+                                                <option value="diabetes">vs. Diabetes Rate</option>
+                                                <option value="highBloodPressure">vs. High Blood Pressure</option>
+                                                <option value="mentalDistress">vs. Mental Distress</option>
+                                                <option value="asthma">vs. Asthma Rate</option>
+                                                <option value="poverty">vs. Poverty Rate</option>
+                                            </select>
+                                        </div>
+                                        <div class="chart-container mb-4" style="height: 450px; width: 100%;">
+                                            <canvas id="foodObesityChart"></canvas>
                                         </div>
                                     </div>
-                                    <div class="col-lg-4">
-                                        <div class="alert alert-success bg-light border-0 h-100">
-                                            <h4 class="alert-heading text-success mb-3" id="food-text-title">
-                                                Food Access & Obesity
-                                            </h4>
-                                            
-                                            <p class="lead" id="food-text-main">
-                                                Enter explanation here.
-                                            </p>
-                                            
+                                    <div class="col-12">
+                                        <div class="alert alert-success bg-light border-start border-success border-4 shadow-sm">
+                                            <h6 class="fw-bold text-success"><i class="fas fa-apple-alt me-2"></i>Why This Matters:</h6>
+                                            <p class="lead fs-6 mb-2" id="food-text-main">Limited access to fresh produce is a primary social determinant of metabolic health.</p>
                                             <hr>
-                                            
-                                            <h6 class="fw-bold">Why This Matters:</h6>
-                                            <p class="mb-0 small" id="food-text-detail">
-                                                Enter explanation here.
-                                            </p>
+                                            <p class="mb-0 small text-muted" id="food-text-detail">The score (0-10) calculates neighborhood proximity to healthy food sources vs. convenience retailers.</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            
-                            <div class="tab-pane fade" id="education" role="tabpanel">
-                                <div class="row align-items-center">
-                                    <div class="col-lg-8">
-                                        <div class="card shadow-sm border-0 h-100">
-                                            <div class="card-body p-4">
-                                                
-                                                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-                                                    <h5 class="card-title fw-bold text-info mb-0">
-                                                        <i class="fas fa-graduation-cap me-2"></i>Education Correlations
-                                                    </h5>
-                                                    
-                                                    <select class="form-select form-select-sm w-auto shadow-sm border-info bg-light" id="educationOutcomeSelector" style="min-width: 200px;">
-                                                        <option value="diabetes" selected>vs. Diabetes Rate</option>
-                                                        <option value="obesity">vs. Obesity Rate</option>
-                                                        <option value="poverty">vs. Poverty Rate</option>
-                                                        <option value="mentalDistress">vs. Mental Distress</option>
-                                                        <option value="income">vs. Median Income</option>
-                                                    </select>
-                                                </div>
 
-                                                <div class="chart-container" style="position: relative; height: 350px;">
-                                                    <canvas id="educationHealthChart"></canvas>
-                                                </div>
-                                                
-                                                <div class="mt-3 text-center">
-                                                    <span class="badge bg-info bg-opacity-10 text-info border border-info px-3 py-2 rounded-pill">
-                                                        <i class="fas fa-user-graduate me-1"></i>
-                                                        High School Graduation Rate (%)
-                                                    </span>
-                                                </div>
-                                                <p class="card-text text-muted small mt-3 text-center">
-                                                    Comparing neighborhood education levels against health and economic outcomes.<br>
-                                                    <em>Enter explanation here.</em>
-                                                </p>
-                                            </div>
+                            <div class="tab-pane fade" id="education" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <h5 class="fw-bold text-info mb-0" id="edu-text-title">Education & Equity</h5>
+                                            <select class="form-select form-select-sm w-auto shadow-sm" id="educationOutcomeSelector">
+                                                <option value="diabetes" selected>vs. Diabetes Rate</option>
+                                                <option value="obesity">vs. Obesity Rate</option>
+                                                <option value="poverty">vs. Poverty Rate</option>
+                                                <option value="mentalDistress">vs. Mental Distress</option>
+                                                <option value="income">vs. Median Income</option>
+                                            </select>
+                                        </div>
+                                        <div class="chart-container mb-4" style="height: 450px; width: 100%;">
+                                            <canvas id="educationHealthChart"></canvas>
                                         </div>
                                     </div>
-                                    <div class="col-lg-4">
-                                        <div class="alert alert-info bg-light border-0 h-100">
-                                            <h4 class="alert-heading text-info mb-3" id="edu-text-title">
-                                                Education as a Health Shield
-                                            </h4>
-                                            
-                                            <p class="lead" id="edu-text-main">
-                                                Enter explanation here.
-                                            </p>
-                                            
+                                    <div class="col-12">
+                                        <div class="alert alert-info bg-light border-start border-info border-4 shadow-sm">
+                                            <h6 class="fw-bold text-info"><i class="fas fa-graduation-cap me-2"></i>Why This Matters:</h6>
+                                            <p class="lead fs-6 mb-2" id="edu-text-main">Education acts as a health shield, providing better access to information and higher-income employment.</p>
                                             <hr>
-                                            
-                                            <h6 class="fw-bold">Why This Matters:</h6>
-                                            <p class="mb-0 small" id="edu-text-detail">
-                                                Enter explanation here.
-                                            </p>
+                                            <p class="mb-0 small text-muted" id="edu-text-detail">This chart plots High School Graduation rates against long-term community health indicators.</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="tab-pane fade" id="housing" role="tabpanel">
-                                <div class="row align-items-center">
-                                    <div class="col-lg-8">
-                                        <div class="card shadow-sm border-0 h-100">
-                                            <div class="card-body p-4">
-                                                
-                                                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-                                                    <h5 class="card-title fw-bold text-warning mb-0">
-                                                        <i class="fas fa-home me-2"></i>Housing Correlations
-                                                    </h5>
-                                                    
-                                                    <select class="form-select form-select-sm w-auto shadow-sm border-warning bg-light" id="housingOutcomeSelector" style="min-width: 200px;">
-                                                        <option value="asthma" selected>vs. Asthma Rate</option>
-                                                        <option value="leadRisk">vs. Lead Exposure Risk</option>
-                                                        <option value="mentalDistress">vs. Mental Distress</option>
-                                                        <option value="diabetes">vs. Diabetes Rate</option>
-                                                        <option value="obesity">vs. Obesity Rate</option>
-                                                        <option value="highBloodPressure">vs. High Blood Pressure</option>
-                                                    </select>
-                                                </div>
-
-                                                <div class="chart-container" style="position: relative; height: 350px;">
-                                                    <canvas id="housingHealthChart"></canvas>
-                                                </div>
-                                                
-                                                <div class="mt-3 text-center d-flex justify-content-center align-items-center gap-3">
-                                                    <span class="badge bg-warning bg-opacity-10 text-dark border border-warning px-3 py-2 rounded-pill">
-                                                        <i class="fas fa-exclamation-triangle me-1"></i>
-                                                        Housing Problems %
-                                                    </span>
-                                                    <span class="small text-muted">
-                                                        <i class="fas fa-circle text-warning opacity-50" style="font-size: 0.8em;"></i> Bubble Size = Poverty Rate
-                                                    </span>
-                                                </div>
-                                                <p class="card-text text-muted small mt-3 text-center">
-                                                    Comparing housing quality against health outcomes.<br>
-                                                    <em>Enter explanation here.</em>
-                                                </p>
-                                            </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <h5 class="fw-bold text-warning mb-0" id="housing-text-title">Housing Quality Correlations</h5>
+                                            <select class="form-select form-select-sm w-auto shadow-sm" id="housingOutcomeSelector">
+                                                <option value="asthma" selected>vs. Asthma Rate</option>
+                                                <option value="leadRisk">vs. Lead Exposure Risk</option>
+                                                <option value="mentalDistress">vs. Mental Distress</option>
+                                                <option value="diabetes">vs. Diabetes Rate</option>
+                                                <option value="obesity">vs. Obesity Rate</option>
+                                                <option value="highBloodPressure">vs. High Blood Pressure</option>
+                                            </select>
+                                        </div>
+                                        <div class="chart-container mb-4" style="height: 450px; width: 100%;">
+                                            <canvas id="housingHealthChart"></canvas>
                                         </div>
                                     </div>
-                                    <div class="col-lg-4">
-                                        <div class="alert alert-warning bg-light border-0 h-100">
-                                            <h4 class="alert-heading text-warning mb-3" id="housing-text-title">
-                                                Housing & Asthma
-                                            </h4>
-                                            
-                                            <p class="lead" id="housing-text-main">
-                                                Enter explanation here
-                                            </p>
-                                            
+                                    <div class="col-12">
+                                        <div class="alert alert-warning bg-light border-start border-warning border-4 shadow-sm">
+                                            <h6 class="fw-bold text-warning"><i class="fas fa-home me-2"></i>Why This Matters:</h6>
+                                            <p class="lead fs-6 mb-2" id="housing-text-main">Poor housing conditions are direct triggers for respiratory issues and environmental stress.</p>
                                             <hr>
-                                            
-                                            <h6 class="fw-bold">Why This Matters:</h6>
-                                            <p class="mb-0 small" id="housing-text-detail">
-                                                Enter explanation here.
-                                            </p>
+                                            <p class="mb-0 small text-muted" id="housing-text-detail">Bubble size represents neighborhood poverty rate, highlighting how housing stress compounds with economic strain.</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="tab-pane fade" id="healthcare" role="tabpanel">
-                                <div class="row align-items-center">
-                                    <div class="col-lg-8">
-                                        <div class="chart-container" style="height: 400px;">
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h5 class="fw-bold text-danger mb-4">Insurance Coverage Gaps</h5>
+                                        <div class="chart-container mb-4" style="height: 450px; width: 100%;">
                                             <canvas id="healthcareAccessChart"></canvas>
                                         </div>
                                     </div>
-                                    <div class="col-lg-4">
-                                        <div class="alert alert-danger bg-light border-0">
-                                            <h4 class="alert-heading text-danger mb-3">Critical Coverage Gaps</h4>
-                                            <p class="lead">
-                                                <strong>Enter explanation here:</strong> "Explanation"
-                                            </p>
+                                    <div class="col-12">
+                                        <div class="alert alert-danger bg-light border-start border-danger border-4 shadow-sm">
+                                            <h6 class="fw-bold text-danger"><i class="fas fa-user-md me-2"></i>Why This Matters:</h6>
+                                            <p class="lead fs-6 mb-2">Uninsured rates dictate a neighborhood's ability to access preventative screenings and early intervention.</p>
                                             <hr>
-                                            <h6 class="fw-bold">Why This Matters:</h6>
-                                            <p class="mb-0 small">
-                                                Enter explanation here.
-                                            </p>
+                                            <p class="mb-0 small text-muted">A higher percentage of uninsured residents often correlates with higher emergency room dependency for basic care.</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="tab-pane fade" id="mental" role="tabpanel">
-                                <div class="row align-items-center">
-                                    <div class="col-lg-8">
-                                        <div class="card shadow-sm border-0 h-100">
-                                            <div class="card-body p-4">
-                                                
-                                                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
-                                                    <h5 class="card-title fw-bold mb-0" style="color: #6f42c1;">
-                                                        <i class="fas fa-brain me-2"></i>Stress Correlations
-                                                    </h5>
-                                                    
-                                                    <select class="form-select form-select-sm w-auto shadow-sm border-0 bg-light" id="socialOutcomeSelector" style="min-width: 200px; color: #6f42c1; font-weight: bold;">
-                                                        <option value="mentalDistress" selected>vs. Mental Distress</option>
-                                                        <option value="highBloodPressure">vs. High Blood Pressure</option>
-                                                        <option value="obesity">vs. Obesity Rate</option>
-                                                        <option value="diabetes">vs. Diabetes Rate</option>
-                                                        <option value="asthma">vs. Asthma Rate</option>
-                                                    </select>
-                                                </div>
-
-                                                <div class="chart-container" style="position: relative; height: 350px;">
-                                                    <canvas id="mentalHealthChart"></canvas>
-                                                </div>
-                                                
-                                                <div class="mt-3 text-center d-flex justify-content-center align-items-center gap-3">
-                                                    <span class="badge bg-opacity-10 text-dark px-3 py-2 rounded-pill" style="background-color: rgba(111, 66, 193, 0.1); border: 1px solid #6f42c1;">
-                                                        <i class="fas fa-percentage me-1"></i>
-                                                        Poverty Rate
-                                                    </span>
-                                                    <span class="small text-muted">
-                                                        <i class="fas fa-circle opacity-50" style="font-size: 0.8em; color: #6f42c1;"></i> Bubble Size = Unemployment Rate
-                                                    </span>
-                                                </div>
-                                                <p class="card-text text-muted small mt-3 text-center">
-                                                    Comparing poverty levels against stress-related health outcomes.<br>
-                                                    <em>Larger bubbles represent higher unemployment, showing total economic stress.</em>
-                                                </p>
-                                            </div>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <h5 class="fw-bold mb-0" style="color: #6f42c1;" id="social-text-title">Socioeconomic Stress Patterns</h5>
+                                            <select class="form-select form-select-sm w-auto shadow-sm" id="socialOutcomeSelector">
+                                                <option value="mentalDistress" selected>vs. Mental Distress</option>
+                                                <option value="highBloodPressure">vs. High Blood Pressure</option>
+                                                <option value="obesity">vs. Obesity Rate</option>
+                                                <option value="diabetes">vs. Diabetes Rate</option>
+                                                <option value="asthma">vs. Asthma Rate</option>
+                                            </select>
+                                        </div>
+                                        <div class="chart-container mb-4" style="height: 450px; width: 100%;">
+                                            <canvas id="mentalHealthChart"></canvas>
                                         </div>
                                     </div>
-                                    <div class="col-lg-4">
-                                        <div class="alert bg-light border-0 h-100" style="background-color: #f3f0fa !important;">
-                                            <h4 class="alert-heading mb-3" id="social-text-title" style="color: #6f42c1;">
-                                                Poverty & Mental Health
-                                            </h4>
-                                            
-                                            <p class="lead" id="social-text-main">
-                                                An initial explanation here:
-                                            </p>
-                                            
+                                    <div class="col-12">
+                                        <div class="alert bg-light border-start border-4 shadow-sm" style="border-color: #6f42c1 !important;">
+                                            <h6 class="fw-bold" style="color: #6f42c1;"><i class="fas fa-brain me-2"></i>Why This Matters:</h6>
+                                            <p class="lead fs-6 mb-2" id="social-text-main">Persistent economic insecurity leads to "Toxic Stress," impacting both mental health and cardiovascular systems.</p>
                                             <hr>
-                                            
-                                            <h6 class="fw-bold">Why This Matters:</h6>
-                                            <p class="mb-0 small" id="social-text-detail">
-                                                Insert explanation here. 
-                                            </p>
+                                            <p class="mb-0 small text-muted" id="social-text-detail">Bubble size indicates Unemployment Rate, showing the cumulative effect of multi-dimensional poverty.</p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -470,26 +313,26 @@
         
         <div class="row mt-5">
             <div class="col-12">
-                <div class="card border-primary">
-                    <div class="card-header bg-primary text-white">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white py-3">
                         <h5 class="card-title mb-0">
-                            <i class="fas fa-lightbulb me-2"></i>Key Takeaways for Camden
+                            <i class="fas fa-lightbulb me-2"></i>Strategic Insights for Camden
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-4">
                         <div class="row g-4">
-                            <div class="col-md-6">
-                                <h6 class="text-primary">What the Data Tells Us:</h6>
+                            <div class="col-md-6 border-end">
+                                <h6 class="text-primary fw-bold mb-3">Data Evidence:</h6>
                                 <ul class="list-unstyled">
-                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Health outcomes vary significantly across Camden's 19 neighborhoods</li>
-                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Access to resources (food, healthcare, education) makes a measurable difference</li>
+                                    <li class="mb-3"><i class="fas fa-check-circle text-success me-2"></i><strong>Variable Outcomes:</strong> Significant health gaps exist across Camden's 19 neighborhoods, suggesting localized rather than city-wide interventions are needed.</li>
+                                    <li><i class="fas fa-check-circle text-success me-2"></i><strong>Resource Impact:</strong> Proximity to food and healthcare access shows a direct mathematical correlation with chronic disease prevalence.</li>
                                 </ul>
                             </div>
                             <div class="col-md-6">
-                                <h6 class="text-primary">Opportunities for Action:</h6>
+                                <h6 class="text-primary fw-bold mb-3">Priority Actions:</h6>
                                 <ul class="list-unstyled">
-                                    <li class="mb-2"><i class="fas fa-arrow-right text-info me-2"></i>Target resources to neighborhoods with greatest need</li>
-                                    <li class="mb-2"><i class="fas fa-arrow-right text-info me-2"></i>Build community partnerships to strengthen social support networks</li>
+                                    <li class="mb-3"><i class="fas fa-arrow-right text-info me-2"></i><strong>Precision Allocation:</strong> Direct public health funding to the specific tracts identified in the "Housing" and "Stress" charts.</li>
+                                    <li><i class="fas fa-arrow-right text-info me-2"></i><strong>Coalition Building:</strong> Engage neighborhood leaders in Beideman and Liberty Park to model peer-to-peer health support networks.</li>
                                 </ul>
                             </div>
                         </div>

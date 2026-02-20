@@ -124,23 +124,24 @@ function createFoodObesityChart() {
     if (!ctx || !window.dbData || window.dbData.length === 0) return;
     if (foodObesityChart) foodObesityChart.destroy();
 
-    const outcomeKey = document.getElementById('foodOutcomeSelector') ? document.getElementById('foodOutcomeSelector').value : 'obesity';
+    const selector = document.getElementById('foodOutcomeSelector');
+    const outcomeKey = selector ? selector.value : 'obesity';
     
-    // --- 1. TEXT UPDATES (Restored logic for titles/explanations) ---
+    // TEXT UPDATES 
     const explanations = {
-        'obesity': { title: 'Food Access & Obesity', main: '', detail: 'Enter explanation here.' },
-        'diabetes': { title: 'Food Access & Diabetes', main: '', detail: 'Enter explanation here.' },
-        'highBloodPressure': { title: 'Food Access & Hypertension', main: '', detail: 'Enter explanation here.' },
-        'mentalDistress': { title: 'Food Access & Mental Health', main: '', detail: 'Enter explanation here.' },
-        'asthma': { title: 'Food Access & Asthma', main: '', detail: 'Enter explanation here.' },
-        'poverty': { title: 'Food Access & Poverty', main: '', detail: 'Enter explanation here.' }
+        'obesity': { title: 'Food Access & Obesity', main: 'Limited access to fresh produce correlates with higher BMI trends.', detail: 'Areas like Bergen Square show distinct patterns in this metric.' },
+        'diabetes': { title: 'Food Access & Diabetes', main: 'Food insecurity is a primary driver of type 2 diabetes management difficulties.', detail: 'Score 0 represents the lowest access level in our dataset.' },
+        'highBloodPressure': { title: 'Food Access & Hypertension', main: 'High-sodium processed diets often replace fresh food in low-access zones.', detail: 'Hypertension rates are analyzed per 1,000 residents.' },
+        'mentalDistress': { title: 'Food Access & Mental Health', main: 'Nutritional gaps and food stress impact long-term mental well-being.', detail: 'Mental distress reports are standardized by neighborhood population.' },
+        'asthma': { title: 'Food Access & Asthma', main: 'Nutrition plays a role in inflammatory responses, affecting respiratory health.', detail: 'Asthma rates are sourced from local health department records.' },
+        'poverty': { title: 'Food Access & Poverty', main: 'Financial barriers are the leading cause of low food access scores.', detail: 'This correlation highlights the intersection of economics and nutrition.' }
     };
     
     const textData = explanations[outcomeKey];
     if (textData) {
-        if (document.getElementById('food-text-title')) document.getElementById('food-text-title').textContent = textData.title;
-        if (document.getElementById('food-text-main')) document.getElementById('food-text-main').textContent = textData.main;
-        if (document.getElementById('food-text-detail')) document.getElementById('food-text-detail').textContent = textData.detail;
+        document.getElementById('food-text-title').textContent = textData.title;
+        document.getElementById('food-text-main').textContent = textData.main;
+        document.getElementById('food-text-detail').textContent = textData.detail;
     }
 
     const labels = {
@@ -149,14 +150,12 @@ function createFoodObesityChart() {
         'asthma': 'Asthma Rate (%)', 'poverty': 'Poverty Rate (%)'
     };
 
-    // --- 2. MAP FROM DB (Handles scores from 0.06 to 77.61+) ---
     const scatterData = window.dbData.map(d => ({
         x: d.foodAccess || 0, 
         y: d[outcomeKey] || 0, 
         name: d.name
     }));
 
-    // --- 3. DRAW CHART ---
     foodObesityChart = new Chart(ctx, {
         type: 'scatter',
         data: {
@@ -168,36 +167,26 @@ function createFoodObesityChart() {
                 borderWidth: 1, 
                 pointRadius: 6, 
                 pointHoverRadius: 8,
-                clip: false // Prevents dots sitting on axes from being cut in half
+                clip: false // Prevents dots from being cut off on axes 
             }]
         },
         options: {
             responsive: true, 
             maintainAspectRatio: false,
-            layout: {
-                padding: {
-                    top: 15,
-                    right: 25,
-                    bottom: 15,
-                    left: 15
-                }
-            },
+            layout: { padding: { top: 20, right: 30, bottom: 20, left: 10 } },
             plugins: {
                 tooltip: { 
                     callbacks: { 
-                        label: function(context) {
-                            return `${context.raw.name}: Score ${context.raw.x}, ${labels[outcomeKey]} ${context.raw.y}%`;
-                        }
+                        label: (c) => `${c.raw.name}: Score ${c.raw.x}, ${labels[outcomeKey]} ${c.raw.y}%` 
                     } 
                 },
                 legend: { position: 'bottom' }
             },
             scales: {
                 x: { 
-                    title: { display: true, text: 'Low Food Access Score (Calculated Metric)' },
+                    title: { display: true, text: 'Food Access Score (Higher is Better)' },
                     beginAtZero: true,
-                    // 'grace' adds extra space at ends so dots don't touch axis lines
-                    grace: '5%' 
+                    grace: '5%' // Prevents dots from sitting directly on the axis 
                 },
                 y: { 
                     title: { display: true, text: labels[outcomeKey] },
