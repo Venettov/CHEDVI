@@ -42,33 +42,33 @@ function createIncomeHealthChart() {
     const explanations = {
         'diabetes': { 
             title: 'Income & Diabetes', 
-            main: 'Neighborhoods with median incomes under $30,000 see diabetes rates as high as 22%, nearly double the rate of wealthier tracts.', 
-            detail: 'Data confirms a strong inverse correlation: as household income rises, the ability to manage chronic glycemic levels improves significantly due to better medication access and nutritional stability.' 
+            main: 'Higher-income tracts like Waterfront South ($54k) show significantly more stability in diabetes rates compared to those under $20k.', 
+            detail: 'The data reveals that as median income crosses the $50,000 threshold, the prevalence of type 2 diabetes drops by nearly 30%, likely due to increased healthcare access and more consistent nutritional options.' 
         },
         'obesity': { 
             title: 'Income & Obesity', 
-            main: 'Obesity prevalence peaks at 47.6% in Bergen Square, Camden’s lowest-income neighborhood.', 
-            detail: 'The economic burden of healthy eating is clear; calorie-dense, shelf-stable foods are often the only affordable option for families living below the $15,000 income threshold.' 
+            main: 'While obesity is high across the city, the "Income Shield" is visible in Waterfront South.', 
+            detail: 'Despite being an industrial-adjacent area, Waterfront South’s higher median income provides a buffer, with obesity rates lower than the 47% seen in Bergen Square, Camden’s lowest-income tract.' 
         },
         'highBloodPressure': { 
             title: 'Income & Hypertension', 
-            main: 'Hypertension affects nearly 1 in 2 adults in Camden’s most economically stressed tracts.', 
-            detail: 'The physiological toll of financial instability—often called "Toxic Stress"—directly contributes to sustained high blood pressure, particularly in areas like Liberty Park and Cramer Hill.' 
+            main: 'Income stability in tracts like Waterfront South correlates with lower hypertension reports.', 
+            detail: 'Financial security reduces the "Toxic Stress" that drives chronic high blood pressure. Residents in the $50k+ income bracket show better cardiovascular health indicators than those in the city\'s high-poverty quadrants.' 
         },
         'mentalDistress': { 
             title: 'Income & Mental Health', 
-            main: 'Reports of frequent mental distress are 25% more common in the city’s lowest-earning quadrants.', 
-            detail: 'Financial scarcity is a primary driver of psychological strain. The data reflects the compounding stress of housing insecurity and utility costs on community well-being.' 
+            main: 'Economic security in areas like Waterfront South acts as a stabilizer for community mental health.', 
+            detail: 'The lower reports of frequent mental distress in higher-income neighborhoods underscore the link between financial stability and psychological well-being.' 
         },
         'asthma': { 
-            title: 'Income & Asthma', 
-            main: 'Asthma rates are localized in lower-income areas near industrial zones and older housing stock.', 
-            detail: 'Income acts as a proxy for environmental quality. Residents in lower-income tracts like Waterfront South face higher exposure to triggers like mold and industrial pollutants.' 
+            title: 'Income & Environmental Impact', 
+            main: 'Interestingly, Waterfront South has a higher asthma rate despite its higher income.', 
+            detail: 'This is a key data insight: income doesn\'t always protect against geography. Because Waterfront South is located near industrial zones, residents still face respiratory risks (10.4% asthma) that even a $54k median income cannot fully mitigate.' 
         },
         'poverty': { 
-            title: 'The Income-Poverty Cycle', 
-            main: 'Camden exhibits a sharp poverty cliff where slight drops in median income lead to massive spikes in poverty rates.', 
-            detail: 'This visualization highlights the "Poverty Trap," where neighborhoods lack the economic base to fund local health-improving services, creating a self-perpetuating cycle of health inequity.' 
+            title: 'The Wealth-Poverty Gap', 
+            main: 'Waterfront South stands as an example of economic resilience within Camden.', 
+            detail: 'While many Camden neighborhoods are trapped in a low-income/high-poverty cycle, Waterfront South demonstrates that higher median incomes are essential for breaking that pattern and improving overall health equity.' 
         }
     };
 
@@ -153,12 +153,36 @@ function createFoodObesityChart() {
     
     // TEXT UPDATES 
     const explanations = {
-        'obesity': { title: 'Food Access & Obesity', main: 'Limited access to fresh produce correlates with higher BMI trends.', detail: 'Areas like Bergen Square show distinct patterns in this metric.' },
-        'diabetes': { title: 'Food Access & Diabetes', main: 'Food insecurity is a primary driver of type 2 diabetes management difficulties.', detail: 'Score 0 represents the lowest access level in our dataset.' },
-        'highBloodPressure': { title: 'Food Access & Hypertension', main: 'High-sodium processed diets often replace fresh food in low-access zones.', detail: 'Hypertension rates are analyzed per 1,000 residents.' },
-        'mentalDistress': { title: 'Food Access & Mental Health', main: 'Nutritional gaps and food stress impact long-term mental well-being.', detail: 'Mental distress reports are standardized by neighborhood population.' },
-        'asthma': { title: 'Food Access & Asthma', main: 'Nutrition plays a role in inflammatory responses, affecting respiratory health.', detail: 'Asthma rates are sourced from local health department records.' },
-        'poverty': { title: 'Food Access & Poverty', main: 'Financial barriers are the leading cause of low food access scores.', detail: 'This correlation highlights the intersection of economics and nutrition.' }
+        'obesity': { 
+            title: 'Food Access & Obesity', 
+            main: 'Neighborhoods with Food Access Scores under 10 see obesity rates consistently exceeding 44%.', 
+            detail: 'In areas like Pyne Point (Score 0.3), the lack of full-service grocery stores creates a "Food Swamp" where calorie-dense, low-nutrient foods are the most accessible options, driving community-wide BMI increases.' 
+        },
+        'diabetes': { 
+            title: 'Food Access & Diabetes', 
+            main: 'Low food access correlates with a 21.5% diabetes prevalence in Whitman Park.', 
+            detail: 'Managing blood sugar requires consistent access to fresh produce and lean proteins. When a neighborhood score is near zero, residents face a "geographic tax" on health, as the nearest healthy food source requires significant travel time.' 
+        },
+        'highBloodPressure': { 
+            title: 'Food Access & Hypertension', 
+            main: 'High-sodium, processed diets are often the default in Camden’s low-access zones.', 
+            detail: 'The correlation suggests that limited access to heart-healthy produce leads to a higher reliance on shelf-stable processed goods, which are primary dietary contributors to Camden’s hypertension crisis.' 
+        },
+        'mentalDistress': { 
+            title: 'Food Access & Mental Health', 
+            main: 'Food insecurity acts as a persistent psychological stressor on Camden families.', 
+            detail: 'The uncertainty of "food deserts" compounds the mental health burden. Areas with low access scores show higher reports of frequent mental distress, reflecting the intersection of nutritional gaps and economic anxiety.' 
+        },
+        'asthma': { 
+            title: 'Nutrition & Respiratory Resilience', 
+            main: 'Nutritional gaps can exacerbate the body’s inflammatory response to asthma triggers.', 
+            detail: 'While asthma is primarily driven by housing and air quality, a diet low in anti-inflammatory antioxidants (found in fresh produce) reduces the biological resilience of residents living in high-risk environmental zones.' 
+        },
+        'poverty': { 
+            title: 'The Nutrition-Poverty Intersection', 
+            main: 'In Camden, low food access and high poverty are nearly synonymous.', 
+            detail: 'This visualization maps the "Double Burden": families with the least financial capital also face the highest geographic barriers to the food required to maintain health, cementing the cycle of inequity.' 
+        }
     };
     
     const textData = explanations[outcomeKey];
