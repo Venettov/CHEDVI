@@ -442,19 +442,23 @@ let dashboardData;
 
 if (typeof dbPayload !== 'undefined' && dbPayload !== null) {
     console.log("✅ Using Live Database Data");
+    
+    // INTELLIGENT MERGE:
+    // This takes the fallback data and OVERWRITES it with database values.
+    // Crucially, since 'education' is missing in your DB, it keeps the fallback 'education' values!
     dashboardData = { ...fallbackData, ...dbPayload };
+    
 } else {
     console.warn("⚠️ Database unavailable. Using Fallback Data.");
     dashboardData = fallbackData;
 }
 
 // --- GLOBAL STATE ---
+// Set your desired defaults here. These will apply immediately on load.
 let currentLeftMetric = 'diabetes';  
 let currentRightMetric = 'income';
 
-// ==========================================
-// SINGLE MASTER INITIALIZATION BLOCK
-// ==========================================
+// Initialize when page loads
 document.addEventListener('DOMContentLoaded', function() {
     console.log('Initializing Camden Health Dashboard...');
     
@@ -463,36 +467,21 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    // 1. Sync Map Dropdowns with Global State
+    // Set dropdowns to match our JS defaults (sync UI with Logic)
     const leftSel = document.getElementById('leftMapSelector');
     const rightSel = document.getElementById('rightMapSelector');
     if(leftSel) leftSel.value = currentLeftMetric;
     if(rightSel) rightSel.value = currentRightMetric;
 
-    // 2. Initialize Core Components
     initializeMaps();
     setupEventListeners();
     loadInitialData();
     initializeAllCharts();
     
-    // 3. Initialize Data Explorer Table & Connect Chart Listeners
     if (typeof populateDataExplorer === 'function') {
         populateDataExplorer(); 
     }
-
-    // 4. Handle Global Search Parameters (from URL)
-    const urlParams = new URLSearchParams(window.location.search);
-    const searchParam = urlParams.get('search');
-    if (searchParam) {
-        setTimeout(() => {
-            if(window.highlightNeighborhood) window.highlightNeighborhood(searchParam);
-            const searchBox = document.getElementById('globalSearchInput');
-            if(searchBox) searchBox.value = searchParam;
-        }, 1000);
-    }
 });
-// ==========================================
-
 
 // --- STYLING ---
 const STYLE_BLUE = {
@@ -508,12 +497,15 @@ const STYLE_HIGHLIGHT = {
 // 3. INITIALIZE MAPS
 function initializeMaps() {
     try {
+        // Left Map
         leftMap = L.map('leftMap', { zoomControl: true, scrollWheelZoom: false }).setView([39.9259, -75.1196], 11.5);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(leftMap);
 
+        // Right Map
         rightMap = L.map('rightMap', { zoomControl: true, scrollWheelZoom: false }).setView([39.9259, -75.1196], 11.5);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(rightMap);
 
+        // Render Initial Polygons using the Global Defaults
         renderMapPolygons(leftMap, leftPolygons, 'left', currentLeftMetric);
         renderMapPolygons(rightMap, rightPolygons, 'right', currentRightMetric);
 
@@ -522,25 +514,32 @@ function initializeMaps() {
     } catch (error) { console.error('Error initializing maps:', error); }
 }
 
-// 4. CORE RENDER FUNCTION
+// 4. CORE RENDER FUNCTION (UPDATED WITH COLOR SCALES & LEGEND)
 function renderMapPolygons(mapInstance, polygonArray, mapSide, metric) {
+    // 1. Clear existing layers
     polygonArray.forEach(p => mapInstance.removeLayer(p));
     polygonArray.length = 0; 
 
+    // 2. Clear existing legend if it exists
     if (mapInstance.legendControl) {
         mapInstance.removeControl(mapInstance.legendControl);
     }
 
+    // 3. Calculate Min/Max for this metric across ALL neighborhoods
+    // We filter out undefined values to prevent errors
     const values = camdenNeighborhoods.map(n => n.data[metric]).filter(v => v !== undefined);
     const min = Math.min(...values);
     const max = Math.max(...values);
     
+    // 4. Determine Color Scheme (Green for good, Red for bad)
     const scheme = POSITIVE_METRICS.includes(metric) ? COLORS_GREEN : COLORS_BLUE;
 
+    // 5. Add new polygons with Dynamic Colors
     camdenNeighborhoods.forEach(n => {
         const val = n.data[metric];
         const dynamicColor = getColor(val, min, max, scheme);
         
+        // Create a style object that overrides the default blue
         const polyStyle = {
             color: "#2c3e50", 
             weight: 2, 
@@ -550,16 +549,21 @@ function renderMapPolygons(mapInstance, polygonArray, mapSide, metric) {
         };
 
         const popupContent = createPopupContent(n, metric);
+        
         const poly = L.polygon(n.bounds, polyStyle).addTo(mapInstance);
         poly.bindPopup(popupContent);
         
+        // Metadata for interactions
         poly.neighborhoodName = n.name;
-        poly.defaultStyle = polyStyle; 
+        poly.defaultStyle = polyStyle; // Save this color so hover effects reset correctly
         
+        // Click Event
         poly.on('click', (e) => handlePolygonClick(e, mapSide));
+        
         polygonArray.push(poly);
     });
 
+    // 6. Add the Legend Control
     addLegend(mapInstance, min, max, scheme, metric);
 }
 
@@ -569,12 +573,14 @@ function addLegend(mapInstance, min, max, scheme, metric) {
     legend.onAdd = function (map) {
         const div = L.DomUtil.create('div', 'info legend');
         
+        // Format numbers (Currency vs Percent)
         const format = (num) => {
             if (metric === 'income') return '$' + (num/1000).toFixed(0) + 'k';
             if (['food_access'].includes(metric)) return num.toFixed(1);
             return num.toFixed(0) + '%';
         };
 
+        // CSS for the Legend Box
         div.style.backgroundColor = 'white';
         div.style.padding = '10px';
         div.style.borderRadius = '5px';
@@ -584,6 +590,8 @@ function addLegend(mapInstance, min, max, scheme, metric) {
 
         div.innerHTML += `<strong>${getMetricLabel(metric)}</strong><br>`;
 
+        // Loop through our color intervals
+        // We divide the range into 5 steps matching our 5 colors
         const step = (max - min) / scheme.length;
         
         for (let i = 0; i < scheme.length; i++) {
@@ -599,13 +607,14 @@ function addLegend(mapInstance, min, max, scheme, metric) {
     };
 
     legend.addTo(mapInstance);
-    mapInstance.legendControl = legend; 
+    mapInstance.legendControl = legend; // Store reference to remove it later
 }
 
 // 5. CREATE POPUP CONTENT
 function createPopupContent(n, metric) {
     let statsHtml = '';
 
+    // If we have a valid metric, show ONLY that metric
     if (metric && metric !== "" && n.data[metric] !== undefined) {
         const label = getMetricLabel(metric);
         let value = n.data[metric];
@@ -618,6 +627,7 @@ function createPopupContent(n, metric) {
                         <strong>${label}:</strong> ${value}
                      </div>`;
     } else {
+        // Fallback: This should rarely be seen if defaults are set correctly
         statsHtml = `<div style="color:#666; font-style:italic;">Select a metric...</div>`;
     }
 
@@ -639,7 +649,7 @@ function setupEventListeners() {
 
     if (leftSelector) {
         leftSelector.addEventListener('change', function() {
-            currentLeftMetric = this.value; 
+            currentLeftMetric = this.value; // Update global state
             renderMapPolygons(leftMap, leftPolygons, 'left', currentLeftMetric);
             updateMetrics();
         });
@@ -647,12 +657,13 @@ function setupEventListeners() {
 
     if (rightSelector) {
         rightSelector.addEventListener('change', function() {
-            currentRightMetric = this.value; 
+            currentRightMetric = this.value; // Update global state
             renderMapPolygons(rightMap, rightPolygons, 'right', currentRightMetric);
             updateMetrics();
         });
     }
 
+    // Sync Logic
     let isSyncing = false;
     if (overlayToggle) {
         overlayToggle.addEventListener('change', function() {
@@ -679,11 +690,15 @@ function setupEventListeners() {
 function handlePolygonClick(e, sourceMap) {
     const targetName = e.target.neighborhoodName;
 
+    // --- ADD THIS LINE TO LINK TO DATABASE ---
     window.currentSelection = targetName; 
+    // -----------------------------------------
 
+    // Reset styles
     leftPolygons.forEach(p => p.setStyle(p.defaultStyle));
     rightPolygons.forEach(p => p.setStyle(p.defaultStyle));
 
+    // Highlight targets
     const leftTarget = leftPolygons.find(p => p.neighborhoodName === targetName);
     const rightTarget = rightPolygons.find(p => p.neighborhoodName === targetName);
 
@@ -716,6 +731,7 @@ function getMetricLabel(metric) {
 }
 
 function updateMetrics() {
+    // Use the GLOBAL variables instead of reading DOM to be safe
     const leftValues = camdenNeighborhoods.map(n => n.data[currentLeftMetric]).filter(v => v !== undefined);
     const rightValues = camdenNeighborhoods.map(n => n.data[currentRightMetric]).filter(v => v !== undefined);
     
@@ -755,6 +771,7 @@ function initializeAllCharts() {
     // 1. Neighborhood Chart (Bar: Top 10 Diabetes)
     const neighborhoodCanvas = document.getElementById('neighborhoodChart');
     if (neighborhoodCanvas) {
+        // Destroy existing chart if it exists to prevent overlap
         if (Chart.getChart(neighborhoodCanvas)) Chart.getChart(neighborhoodCanvas).destroy();
         
         const ctx = neighborhoodCanvas.getContext('2d');
@@ -888,19 +905,28 @@ function initializeAllCharts() {
 }
 
 // --- SEARCH FUNCTIONALITY BRIDGE ---
+
+// 1. Define the function that main.js is trying to call
 window.highlightNeighborhood = function(query) {
     if (!query) return;
     
+    // Normalize text (lowercase, trim)
     const searchTerm = query.toLowerCase().trim();
+    
+    // Find the neighborhood
     const target = camdenNeighborhoods.find(n => n.name.toLowerCase() === searchTerm);
     
     if (target) {
         console.log("Search found:", target.name);
         
+        // Find the polygon on the map
         const poly = leftPolygons.find(p => p.neighborhoodName === target.name);
         
         if (poly) {
+            // Trigger the click logic (turns it Green & Updates Stats)
             poly.fire('click'); 
+            
+            // Zoom to it
             leftMap.fitBounds(poly.getBounds());
             rightMap.fitBounds(poly.getBounds());
         }
@@ -909,148 +935,263 @@ window.highlightNeighborhood = function(query) {
     }
 };
 
-// --- REVOLUTIONARY DATA EXPLORER (Table + Chart + Analytics) ---
+// 2. Check URL for search params (Handle redirect from other pages)
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    
+    if (searchParam) {
+        // Wait 1 second for maps to initialize, then search
+        setTimeout(() => {
+            window.highlightNeighborhood(searchParam);
+            
+            // Fill the search box so user sees what they searched
+            const searchBox = document.getElementById('globalSearchInput');
+            if(searchBox) searchBox.value = searchParam;
+            
+        }, 1000);
+    }
+});
+
+
+// --- 4. REVOLUTIONARY DATA EXPLORER (Table + Chart + Analytics) ---
+
+// Redefine the existing function so it triggers everything automatically
 function populateDataExplorer() {
     console.log("Initializing Revolutionary Data Explorer...");
     
-    // 1. Populate the Data Table SAFELY using the camdenNeighborhoods array directly
+    // 1. Populate the Data Table
     const tableBody = document.getElementById('tableBody');
     if (tableBody) {
         tableBody.innerHTML = '';
-        camdenNeighborhoods.forEach((n) => {
-            const d = n.data || {};
+        dashboardData.neighborhoods.forEach((name, i) => {
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td class="ps-3 fw-bold">${n.name}</td>
-                <td>$${(d.income || 0).toLocaleString()}</td>
-                <td>${d.poverty_rate || 0}%</td>
-                <td>${d.diabetes || 0}%</td>
-                <td>${d.obesity || 0}%</td>
-                <td>${d.asthma || 0}%</td>
+                <td class="ps-3 fw-bold">${name}</td>
+                <td>$${dashboardData.income[i].toLocaleString()}</td>
+                <td>${dashboardData.poverty[i]}%</td>
+                <td>${dashboardData.diabetes[i]}%</td>
+                <td>${dashboardData.obesity[i]}%</td>
+                <td>${dashboardData.asthma[i]}%</td>
             `;
             tableBody.appendChild(row);
         });
     }
 
-    // 2. Setup Event Listeners for the Chart Selectors safely
-    const xVar = document.getElementById('xVariable');
-    const yVar = document.getElementById('yVariable');
-    
-    if (xVar) {
-        xVar.removeEventListener('change', renderCorrelationChart);
-        xVar.addEventListener('change', renderCorrelationChart);
-    }
-    if (yVar) {
-        yVar.removeEventListener('change', renderCorrelationChart);
-        yVar.addEventListener('change', renderCorrelationChart);
-    }
-
-    // 3. Render the Initial Chart
-    setTimeout(renderCorrelationChart, 500);
-}
-
-// --- INTERACTIVE DATA EXPLORATION CHART ---
-let correlationChart;
-
-function renderCorrelationChart() {
-    const ctx = document.getElementById('correlationChart');
-    if (!ctx) {
-        console.error("Canvas 'correlationChart' not found.");
-        return;
-    }
-
-    const xSelect = document.getElementById('xVariable');
-    const ySelect = document.getElementById('yVariable');
-    if (!xSelect || !ySelect) return;
-
-    let xMetric = xSelect.value;
-    let yMetric = ySelect.value;
-
-    // FAILSAFE: Map HTML dropdown values to the actual keys in your data object
-    const getMappedKey = (key) => {
-        const keyMap = {
-            'poverty': 'poverty_rate',
-            'insurance': 'lack_health_insurance',
-            'uninsured': 'lack_health_insurance',
-            'foodAccess': 'food_access',
-            'mentalDistress': 'mental_distress',
-            'highBloodPressure': 'high_blood_pressure'
-        };
-        return keyMap[key] || key;
-    };
-
-    const actualX = getMappedKey(xMetric);
-    const actualY = getMappedKey(yMetric);
-
-    if (typeof camdenNeighborhoods === 'undefined' || camdenNeighborhoods.length === 0) return;
-
-    // Extract the exact data points for X and Y
-    const scatterData = camdenNeighborhoods.map(n => {
-        const dataObj = n.data || {}; 
-        return {
-            x: dataObj[actualX] || 0,
-            y: dataObj[actualY] || 0,
-            name: n.name
-        };
-    });
-
-    if (correlationChart) {
-        correlationChart.destroy();
-    }
-
-    correlationChart = new Chart(ctx, {
-        type: 'scatter',
-        data: {
-            datasets: [{
-                label: 'Neighborhoods',
-                data: scatterData,
-                backgroundColor: 'rgba(13, 110, 253, 0.6)',
-                borderColor: 'rgba(13, 110, 253, 1)',
-                borderWidth: 1,
-                pointRadius: 6,
-                pointHoverRadius: 8
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            layout: {
-                padding: { top: 20, right: 30, bottom: 20, left: 10 }
-            },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const p = context.raw;
-                            const xLabel = typeof getMetricLabel === 'function' ? getMetricLabel(actualX) : actualX;
-                            const yLabel = typeof getMetricLabel === 'function' ? getMetricLabel(actualY) : actualY;
-                            return `${p.name}: ${xLabel} ${p.x}, ${yLabel} ${p.y}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    title: { 
-                        display: true, 
-                        text: typeof getMetricLabel === 'function' ? getMetricLabel(actualX) : actualX 
-                    },
-                    grace: '5%'
-                },
-                y: {
-                    title: { 
-                        display: true, 
-                        text: typeof getMetricLabel === 'function' ? getMetricLabel(actualY) : actualY 
-                    },
-                    grace: '5%'
-                }
-            }
+    // 2. Setup Event Listeners for the Command Center
+    const ids = ['xVariable', 'yVariable', 'chartTypeSelector'];
+    ids.forEach(id => {
+        const el = document.getElementById(id);
+        if(el) {
+            // Remove old listeners to be safe, then add new one
+            el.replaceWith(el.cloneNode(true)); 
+            document.getElementById(id).addEventListener('change', renderCorrelationChart);
         }
     });
+
+    // 3. Render the Initial Chart
+    renderCorrelationChart();
+}
+
+// --- MAIN CHART RENDERING LOGIC ---
+let correlationChart = null;
+
+function renderCorrelationChart() {
+    const ctx = document.getElementById('interactiveCorrelationChart');
+    if (!ctx) return;
+
+    // Get current selections
+    const xVar = document.getElementById('xVariable').value;
+    const yVar = document.getElementById('yVariable').value;
+    const chartType = document.getElementById('chartTypeSelector').value;
+
+    // Configuration Map for Labels
+    const labelsMap = {
+        'income': { label: 'Median Income ($)', isCurrency: true },
+        'poverty': { label: 'Poverty Rate (%)', isCurrency: false },
+        'foodAccess': { label: 'Food Access Score', isCurrency: false },
+        'insurance': { label: 'Uninsured Rate (%)', isCurrency: false },
+        'education': { label: 'Education Rate (%)', isCurrency: false },
+        'diabetes': { label: 'Diabetes Rate (%)' },
+        'obesity': { label: 'Obesity Rate (%)' },
+        'asthma': { label: 'Asthma Rate (%)' },
+        'mentalDistress': { label: 'Mental Distress (%)' },
+        'highBloodPressure': { label: 'High Blood Pressure (%)' }
+    };
+
+    // 1. Prepare Data for Charting
+    let plotData = dashboardData.neighborhoods.map((name, i) => ({
+        name: name,
+        x: dashboardData[xVar] ? dashboardData[xVar][i] : 0,
+        y: dashboardData[yVar] ? dashboardData[yVar][i] : 0
+    }));
+
+    // 2. Run Statistical Analysis (Regression)
+    const stats = calculateRegression(plotData);
+    updateCorrelationBadge(stats.r);
+    updateInsightText(labelsMap[xVar].label, labelsMap[yVar].label, stats.r);
+
+    // 3. Build Chart Configuration
+    let chartConfig;
+
+    if (chartType === 'bar') {
+        // === MODE A: RANKED BAR CHART ===
+        plotData.sort((a, b) => a.x - b.x); // Sort Low to High
+
+        // Create a Gradient for the bars
+        const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(54, 162, 235, 0.9)');
+        gradient.addColorStop(1, 'rgba(54, 162, 235, 0.2)');
+
+        chartConfig = {
+            type: 'bar',
+            data: {
+                labels: plotData.map(d => d.name),
+                datasets: [{
+                    label: labelsMap[yVar].label,
+                    data: plotData.map(d => d.y),
+                    backgroundColor: gradient,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    borderRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: function(context) {
+                                const raw = plotData[context.dataIndex];
+                                let xVal = labelsMap[xVar].isCurrency ? '$' + raw.x.toLocaleString() : raw.x + '%';
+                                return `${labelsMap[xVar].label}: ${xVal}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { ticks: { display: false }, title: { display: true, text: `Ranked by ${labelsMap[xVar].label} (Low → High)` } },
+                    y: { beginAtZero: false, title: { display: true, text: labelsMap[yVar].label } }
+                }
+            }
+        };
+    } else {
+        // === MODE B: SCATTER PLOT + TREND LINE ===
+        
+        // Calculate Trend Line Points
+        const minX = Math.min(...plotData.map(d => d.x));
+        const maxX = Math.max(...plotData.map(d => d.x));
+        const trendLine = [
+            { x: minX, y: (stats.m * minX) + stats.b },
+            { x: maxX, y: (stats.m * maxX) + stats.b }
+        ];
+
+        chartConfig = {
+            type: 'scatter',
+            data: {
+                datasets: [
+                    {
+                        label: 'Neighborhoods',
+                        data: plotData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        pointRadius: 6,
+                        pointHoverRadius: 9
+                    },
+                    {
+                        label: 'Trend Line',
+                        data: trendLine,
+                        type: 'line',
+                        borderColor: '#dc3545',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        tension: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if (context.dataset.type === 'line') return null;
+                                let p = context.raw;
+                                let xStr = labelsMap[xVar].isCurrency ? '$' + p.x.toLocaleString() : p.x;
+                                return `${p.name}: ${xStr} vs ${p.y}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { 
+                        type: 'linear', position: 'bottom', 
+                        title: { display: true, text: labelsMap[xVar].label },
+                        ticks: { callback: val => labelsMap[xVar].isCurrency ? '$' + val.toLocaleString() : val }
+                    },
+                    y: { title: { display: true, text: labelsMap[yVar].label } }
+                }
+            }
+        };
+    }
+
+    if (correlationChart) correlationChart.destroy();
+    correlationChart = new Chart(ctx, chartConfig);
+}
+
+// --- HELPER: MATH & STATISTICS ---
+function calculateRegression(data) {
+    const n = data.length;
+    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+    data.forEach(p => {
+        sumX += p.x; sumY += p.y;
+        sumXY += (p.x * p.y); sumX2 += (p.x * p.x); sumY2 += (p.y * p.y);
+    });
+    
+    const m = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+    const b = (sumY - m * sumX) / n;
+    
+    const num = (n * sumXY) - (sumX * sumY);
+    const den = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+    const r = den === 0 ? 0 : num / den;
+
+    return { m, b, r };
+}
+
+function updateCorrelationBadge(r) {
+    const badge = document.getElementById('rValue');
+    if (!badge) return;
+    
+    const absR = Math.abs(r);
+    let text = "Weak Link";
+    let color = "text-muted";
+
+    if (absR > 0.7) { text = "Very Strong Link"; color = "text-success"; }
+    else if (absR > 0.5) { text = "Strong Link"; color = "text-primary"; }
+    else if (absR > 0.3) { text = "Moderate Link"; color = "text-info"; }
+
+    badge.className = `fw-bold ${color}`;
+    badge.innerHTML = `${text} (r=${r.toFixed(2)})`;
+}
+
+function updateInsightText(xName, yName, r) {
+    const box = document.getElementById('correlationInsight');
+    if (!box) return;
+    
+    let msg = "";
+    if (r < -0.5) msg = `<strong>Protective Factor:</strong> Higher levels of <em>${xName}</em> are strongly associated with lower <em>${yName}</em>.`;
+    else if (r > 0.5) msg = `<strong>Risk Factor:</strong> As <em>${xName}</em> increases, <em>${yName}</em> tends to rise sharply.`;
+    else msg = `<strong>Complex Relationship:</strong> There is no simple linear link between <em>${xName}</em> and <em>${yName}</em>. Use the map to explore specific neighborhoods.`;
+
+    box.innerHTML = `<h6 class="alert-heading fw-bold text-primary"><i class="fas fa-robot me-2"></i>Preliminary Analysis</h6><p class="mb-0 text-muted">${msg}</p>`;
 }
 
 window.startTour = function() { alert('Welcome to the Camden Health Dashboard!'); };
 window.exportData = function(format) { alert(`Data export (${format}) coming soon.`); };
 
-console.log('Dashboard script loaded successfully.');
+console.log('Dashboard script loaded with GLOBAL DEFAULTS');
