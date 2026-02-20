@@ -154,19 +154,19 @@ function createFoodObesityChart() {
     // TEXT UPDATES 
     const explanations = {
         'obesity': { 
-            title: 'Food Access & Obesity', 
-            main: 'Neighborhoods with Food Access Scores under 10 see obesity rates consistently exceeding 44%.', 
-            detail: 'In areas like Pyne Point (Score 0.3), the lack of full-service grocery stores creates a "Food Swamp" where calorie-dense, low-nutrient foods are the most accessible options, driving community-wide BMI increases.' 
+            title: 'The 44% Obesity Cluster', 
+            main: 'Obesity rates exceed 44% in over half of Camden neighborhoods, peaking at 51.4% in Centerville.', 
+            detail: 'The data shows a "High-Risk Cluster" (Liberty Park, Bergen Square, Centerville) where obesity remains high regardless of the food access score, indicating that calorie-dense processed foods are likely the dominant dietary source city-wide.' 
         },
         'diabetes': { 
             title: 'Food Access & Diabetes', 
             main: 'Low food access correlates with a 21.5% diabetes prevalence in Whitman Park.', 
-            detail: 'Managing blood sugar requires consistent access to fresh produce and lean proteins. When a neighborhood score is near zero, residents face a "geographic tax" on health, as the nearest healthy food source requires significant travel time.' 
+            detail: 'Managing blood sugar requires consistent access to fresh produce. When a neighborhood score is near zero (like Pyne Point at 0.31), residents face a "Geographic Tax" on health due to the travel required to find healthy food.' 
         },
         'highBloodPressure': { 
             title: 'Food Access & Hypertension', 
-            main: 'High-sodium, processed diets are often the default in Camden’s low-access zones.', 
-            detail: 'The correlation suggests that limited access to heart-healthy produce leads to a higher reliance on shelf-stable processed goods, which are primary dietary contributors to Camden’s hypertension crisis.' 
+            main: 'High-sodium diets replace fresh options in low-access zones.', 
+            detail: 'The correlation suggests that a lack of heart-healthy produce leads to a higher reliance on shelf-stable processed goods, contributing to Camden’s hypertension crisis.' 
         },
         'mentalDistress': { 
             title: 'Food Access & Mental Health', 
@@ -176,12 +176,12 @@ function createFoodObesityChart() {
         'asthma': { 
             title: 'Nutrition & Respiratory Resilience', 
             main: 'Nutritional gaps can exacerbate the body’s inflammatory response to asthma triggers.', 
-            detail: 'While asthma is primarily driven by housing and air quality, a diet low in anti-inflammatory antioxidants (found in fresh produce) reduces the biological resilience of residents living in high-risk environmental zones.' 
+            detail: 'While asthma is environmental, a diet low in anti-inflammatory antioxidants (found in fresh produce) reduces the biological resilience of residents living in high-risk zones.' 
         },
         'poverty': { 
             title: 'The Nutrition-Poverty Intersection', 
             main: 'In Camden, low food access and high poverty are nearly synonymous.', 
-            detail: 'This visualization maps the "Double Burden": families with the least financial capital also face the highest geographic barriers to the food required to maintain health, cementing the cycle of inequity.' 
+            detail: 'This visualization maps the "Double Burden": families with the least financial capital also face the highest geographic barriers to the food required to maintain health.' 
         }
     };
     
@@ -260,11 +260,31 @@ function createEducationHealthChart() {
 
     // --- TEXT UPDATES ---
     const explanations = {
-        'diabetes': { title: 'Education & Diabetes', main: '', detail: 'Enter explanation here.' },
-        'obesity': { title: 'Education & Obesity', main: '', detail: 'Enter explanation here.' },
-        'poverty': { title: 'The Education-Poverty Cycle', main: '', detail: 'Enter explanation here.' },
-        'mentalDistress': { title: 'Education & Mental Health', main: '', detail: 'Enter explanation here.' },
-        'income': { title: 'Education & Income', main: '', detail: 'Enter explanation here.' }
+        'diabetes': { 
+            title: 'Education & Diabetes Resilience', 
+            main: 'Higher graduation rates do not always guarantee lower diabetes rates in Camden.', 
+            detail: 'While Cramer Hill has the lowest HS grad rate (25.4%), neighborhoods with higher education like Dudley (37.8%) and Liberty Park (55.4%) actually report higher diabetes prevalence (22-23%), suggesting environmental factors often override education.' 
+        },
+        'obesity': { 
+            title: 'Education & Obesity', 
+            main: 'Educational attainment acts as a proxy for "Health Literacy" in our neighborhood data.', 
+            detail: 'In neighborhoods where graduation rates are lower, there is often a higher prevalence of metabolic disease due to systemic barriers to health information and preventative resources.' 
+        },
+        'poverty': { 
+            title: 'The Education-Poverty Cycle', 
+            main: 'Graduation rates are the strongest predictor of neighborhood poverty levels.', 
+            detail: 'The data shows a clear inverse relationship: as graduation rates climb toward 60% in areas like Fairview, poverty rates drop significantly, proving education is a key tool for economic mobility.' 
+        },
+        'mentalDistress': { 
+            title: 'Education & Mental Well-being', 
+            main: 'Higher educational attainment provides better coping mechanisms for social stress.', 
+            detail: 'The data reflects that neighborhoods with higher graduation rates generally report lower instances of frequent mental distress, likely due to better job security and reduced financial anxiety.' 
+        },
+        'income': { 
+            title: 'Education & Income', 
+            main: 'High school graduation is the primary gatekeeper for income levels in Camden.', 
+            detail: 'This chart shows a near-perfect correlation: every 10% increase in the graduation rate corresponds to a measurable spike in median household income, as seen in the contrast between Cramer Hill and Fairview.' 
+        }
     };
 
     const textData = explanations[outcomeKey];
@@ -372,16 +392,58 @@ function createHousingHealthChart() {
 
     const selector = document.getElementById('housingOutcomeSelector');
     let outcomeKey = selector ? selector.value : 'asthma';
+    
+    // --- 1. DATA-DRIVEN TEXT UPDATES ---
+    const explanations = {
+        'asthma': { 
+            title: 'Housing Stability & Asthma', 
+            main: 'Neighborhoods with high vacancy, like Gateway (29%), see different respiratory trends than stable ones like Stockton (2.9%).', 
+            detail: 'High vacancy leads to deteriorating adjacent structures, which increase environmental triggers like mold and dust. However, asthma remains high (13.4%) in densely populated areas like Centerville despite lower vacancy.' 
+        },
+        'leadRisk': { 
+            title: 'Lead Exposure Risk Index', 
+            main: 'Housing age and vacancy are primary drivers of lead exposure risk.', 
+            detail: 'The data correlates poverty (bubble size) with housing instability, indicating that children in high-vacancy areas face the highest risk of exposure to legacy environmental toxins like lead paint.' 
+        },
+        'mentalDistress': { 
+            title: 'Housing & Psychological Stress', 
+            main: 'Living in areas with high vacancy (like Gateway) impacts community mental health.', 
+            detail: 'Neighborhoods with higher vacancy rates and overcrowded housing units (like Cramer Hill at 13%) show a direct spike in reports of frequent mental distress.' 
+        },
+        'diabetes': { 
+            title: 'Housing as a Health Determinant', 
+            main: 'Housing instability makes chronic disease management significantly harder.', 
+            detail: 'When a resident lacks stable housing, medication storage and regular dietary routines become difficult, explaining why high-vacancy tracts also see elevated diabetes rates.' 
+        },
+        'obesity': { 
+            title: 'Housing Density & Obesity', 
+            main: 'Overcrowded housing (17% in Dudley) correlates with limited space for physical activity.', 
+            detail: 'The data suggests that neighborhoods with high housing density and overcrowding issues face higher barriers to maintaining active lifestyles, contributing to elevated obesity rates.' 
+        },
+        'highBloodPressure': { 
+            title: 'Housing Stress & Hypertension', 
+            main: 'The stress of housing insecurity is a cardiovascular risk factor.', 
+            detail: 'Tracts with the highest "Housing Problems" percentage consistently show hypertension rates over 40%, reflecting the physical toll of living in substandard or unstable conditions.' 
+        }
+    };
+
+    // Update the HTML text elements
+    const textData = explanations[outcomeKey];
+    if (textData) {
+        if (document.getElementById('housing-text-title')) document.getElementById('housing-text-title').textContent = textData.title;
+        if (document.getElementById('housing-text-main')) document.getElementById('housing-text-main').textContent = textData.main;
+        if (document.getElementById('housing-text-detail')) document.getElementById('housing-text-detail').textContent = textData.detail;
+    }
+
+    // --- 2. DATA MAPPING ---
     let yDataKey = outcomeKey === 'leadRisk' ? 'poverty' : outcomeKey; 
     
-    // MAP FROM DB & CALCULATE VACANCY RATE
     const bubbleData = window.dbData.map(d => {
-        // Calculate the percentage of vacant units
         const total = d.housing_total || 1; 
         const percentage = ((d.housing_vacant || 0) / total) * 100;
         
         return {
-            x: parseFloat(percentage.toFixed(1)), // The X-axis percentage
+            x: parseFloat(percentage.toFixed(1)), 
             y: d[yDataKey] || 0, 
             r: d.poverty / 4, 
             name: d.name, 
@@ -394,24 +456,48 @@ function createHousingHealthChart() {
         'diabetes': 'Diabetes Rate (%)', 'obesity': 'Obesity Rate (%)', 'highBloodPressure': 'High Blood Pressure (%)'
     };
 
+    // --- 3. DRAW CHART ---
     housingHealthChart = new Chart(ctx, {
         type: 'bubble',
         data: {
             datasets: [{
-                label: `Housing Problems vs ${labels[outcomeKey]}`, data: bubbleData,
-                backgroundColor: 'rgba(255, 193, 7, 0.6)', borderColor: 'rgba(255, 193, 7, 1)',
-                borderWidth: 1, hoverBackgroundColor: 'rgba(255, 193, 7, 0.9)'
+                label: `Housing Problems vs ${labels[outcomeKey]}`, 
+                data: bubbleData,
+                backgroundColor: 'rgba(255, 193, 7, 0.6)', 
+                borderColor: 'rgba(255, 193, 7, 1)',
+                borderWidth: 1, 
+                hoverBackgroundColor: 'rgba(255, 193, 7, 0.9)',
+                clip: false // Prevents bubbles on the edge from being cut off
             }]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
+            responsive: true, 
+            maintainAspectRatio: false,
+            layout: {
+                padding: { top: 20, right: 30, bottom: 20, left: 10 }
+            },
             plugins: {
-                tooltip: { callbacks: { label: function(context) { const raw = context.raw; return `${raw.name}: Vacancy ${raw.x}%, ${labels[outcomeKey]} ${raw.y}%, Poverty ${raw.poverty}%`; } } },
+                tooltip: { 
+                    callbacks: { 
+                        label: function(context) { 
+                            const raw = context.raw; 
+                            return `${raw.name}: Vacancy ${raw.x}%, ${labels[outcomeKey]} ${raw.y}%, Poverty ${raw.poverty}%`; 
+                        } 
+                    } 
+                },
                 legend: { display: false }
             },
             scales: {
-                x: { title: { display: true, text: 'Neighborhood Housing Vacancy Rate (%)' }, min: 0 },
-                y: { title: { display: true, text: labels[outcomeKey] }, beginAtZero: false }
+                x: { 
+                    title: { display: true, text: 'Neighborhood Housing Vacancy Rate (%)' }, 
+                    min: 0,
+                    grace: '5%' // Breathing room for the horizontal axis
+                },
+                y: { 
+                    title: { display: true, text: labels[outcomeKey] }, 
+                    beginAtZero: false,
+                    grace: '5%' // Breathing room for the vertical axis
+                }
             }
         }
     });
@@ -459,11 +545,48 @@ function createMentalHealthChart() {
     const selector = document.getElementById('socialOutcomeSelector');
     const outcomeKey = selector ? selector.value : 'mentalDistress';
     
-    // MAP FROM DB - Ensuring no undefined values for 'r'
+    // --- 1. DATA-DRIVEN TEXT UPDATES ---
+    const explanations = {
+        'mentalDistress': { 
+            title: 'Socioeconomic Stress Patterns', 
+            main: 'Bergen Square faces the highest cumulative stress with 54.3% poverty and 34.2% unemployment.', 
+            detail: 'The data indicates a "Toxic Stress" cycle: as poverty rates climb toward the 50% mark, mental distress reports spike to over 24%, showing the deep psychological toll of extreme economic insecurity.' 
+        },
+        'highBloodPressure': { 
+            title: 'Stress & Cardiovascular Health', 
+            main: 'Unemployment (34% in Bergen Square) is a direct predictor of hypertension.', 
+            detail: 'The "Social Stressor" bubble chart shows that neighborhoods with the highest unemployment rates also carry the heaviest burden of high blood pressure, as economic strain manifests as physical illness.' 
+        },
+        'obesity': { 
+            title: 'Poverty & Metabolic Health', 
+            main: 'Poverty is the primary driver of the obesity epidemic in Camden.', 
+            detail: 'There is a clear cluster: as poverty exceeds 40% (Centerville, Waterfront South), obesity rates stay locked above 44%. Economic scarcity limits health choices, making obesity a symptom of poverty.' 
+        },
+        'diabetes': { 
+            title: 'The Stress-Diabetes Link', 
+            main: 'High poverty rates correlate with the city\'s highest diabetes prevalence.', 
+            detail: 'In Liberty Park (26% poverty), the diabetes rate hits 23.1%. The data suggests that social stressors like unemployment compound the difficulty of managing diabetic health.' 
+        },
+        'asthma': { 
+            title: 'Stress & Respiratory Vulnerability', 
+            main: 'Economic stress increases biological vulnerability to environmental triggers.', 
+            detail: 'While asthma is environmental, the highest rates are found in neighborhoods where poverty and unemployment are elevated, suggesting that social stressors reduce a community\'s overall immune resilience.' 
+        }
+    };
+
+    // Update the HTML text elements
+    const textData = explanations[outcomeKey];
+    if (textData) {
+        if (document.getElementById('social-text-title')) document.getElementById('social-text-title').textContent = textData.title;
+        if (document.getElementById('social-text-main')) document.getElementById('social-text-main').textContent = textData.main;
+        if (document.getElementById('social-text-detail')) document.getElementById('social-text-detail').textContent = textData.detail;
+    }
+
+    // --- 2. MAP FROM DB ---
     const bubbleData = window.dbData.map(d => ({
         x: d.poverty || 0, 
         y: d[outcomeKey] || 0, 
-        r: (d.unemployment || 5) / 2, // Using unemployment rate for bubble size
+        r: (d.unemployment || 5) / 2, // Bubble size based on unemployment
         name: d.name,
         unemployment: d.unemployment || 0
     }));
@@ -476,6 +599,7 @@ function createMentalHealthChart() {
         'asthma': 'Asthma Rate (%)'
     };
 
+    // --- 3. DRAW CHART ---
     mentalHealthChart = new Chart(ctx, {
         type: 'bubble',
         data: {
@@ -484,12 +608,16 @@ function createMentalHealthChart() {
                 data: bubbleData,
                 backgroundColor: 'rgba(111, 66, 193, 0.6)', 
                 borderColor: 'rgba(111, 66, 193, 1)',     
-                borderWidth: 1
+                borderWidth: 1,
+                clip: false // Prevents bubbles on the edge from being cut off
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            layout: {
+                padding: { top: 20, right: 30, bottom: 20, left: 10 }
+            },
             plugins: {
                 tooltip: {
                     callbacks: {
@@ -502,8 +630,16 @@ function createMentalHealthChart() {
                 legend: { display: false }
             },
             scales: {
-                x: { title: { display: true, text: 'Poverty Rate (%)' }, min: 0 },
-                y: { title: { display: true, text: labels[outcomeKey] }, beginAtZero: false }
+                x: { 
+                    title: { display: true, text: 'Poverty Rate (%)' }, 
+                    min: 0,
+                    grace: '5%' // Adds breathing room to the left/right
+                },
+                y: { 
+                    title: { display: true, text: labels[outcomeKey] }, 
+                    beginAtZero: false,
+                    grace: '5%' // Adds breathing room to the top/bottom
+                }
             }
         }
     });
