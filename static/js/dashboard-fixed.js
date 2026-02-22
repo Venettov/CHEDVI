@@ -817,6 +817,9 @@ window.highlightNeighborhood = function(query) {
 };
 
 function populateDataExplorer() {
+    console.log("Initializing Revolutionary Data Explorer...");
+    
+    // 1. Populate the Data Table SAFELY using the camdenNeighborhoods array directly
     const tableBody = document.getElementById('tableBody');
     if (tableBody) {
         tableBody.innerHTML = '';
@@ -835,11 +838,25 @@ function populateDataExplorer() {
         });
     }
 
+    // 2. Setup Event Listeners for ALL Chart Selectors
     const xVar = document.getElementById('xVariable');
     const yVar = document.getElementById('yVariable');
-    if (xVar) { xVar.removeEventListener('change', renderCorrelationChart); xVar.addEventListener('change', renderCorrelationChart); }
-    if (yVar) { yVar.removeEventListener('change', renderCorrelationChart); yVar.addEventListener('change', renderCorrelationChart); }
+    const typeVar = document.getElementById('chartTypeSelector'); // <-- Added this listener
+    
+    if (xVar) {
+        xVar.removeEventListener('change', renderCorrelationChart);
+        xVar.addEventListener('change', renderCorrelationChart);
+    }
+    if (yVar) {
+        yVar.removeEventListener('change', renderCorrelationChart);
+        yVar.addEventListener('change', renderCorrelationChart);
+    }
+    if (typeVar) {
+        typeVar.removeEventListener('change', renderCorrelationChart);
+        typeVar.addEventListener('change', renderCorrelationChart);
+    }
 
+    // 3. Render the Initial Chart
     setTimeout(renderCorrelationChart, 500);
 }
 
@@ -848,19 +865,23 @@ let correlationChart;
 
 function renderCorrelationChart() {
     const canvasEl = document.getElementById('interactiveCorrelationChart') || document.getElementById('correlationChart');
-    
     if (!canvasEl) {
-        console.error("Canvas for Interactive Data Exploration not found in HTML.");
+        console.error("Canvas for Interactive Data Exploration not found.");
         return;
     }
-    
     const ctx = canvasEl.getContext('2d');
 
+    // Get current selections
     const xSelect = document.getElementById('xVariable');
     const ySelect = document.getElementById('yVariable');
+    const typeSelect = document.getElementById('chartTypeSelector');
     if (!xSelect || !ySelect) return;
 
-    // 2. Map HTML dropdown values to exact DB keys
+    let xMetric = xSelect.value;
+    let yMetric = ySelect.value;
+    let chartType = typeSelect ? typeSelect.value : 'scatter';
+
+    // Map HTML dropdown values to exact DB keys
     const getMappedKey = (key) => {
         const keyMap = {
             'poverty': 'poverty_rate', 
@@ -873,11 +894,13 @@ function renderCorrelationChart() {
         return keyMap[key] || key;
     };
 
-    const actualX = getMappedKey(xSelect.value);
-    const actualY = getMappedKey(ySelect.value);
+    const actualX = getMappedKey(xMetric);
+    const actualY = getMappedKey(yMetric);
 
-    // 3. Extract the exact data points for X and Y
-    const scatterData = camdenNeighborhoods.map(n => {
+    if (typeof camdenNeighborhoods === 'undefined' || camdenNeighborhoods.length === 0) return;
+
+    // Extract the exact data points for X and Y
+    let plotData = camdenNeighborhoods.map(n => {
         const dataObj = n.data || {}; 
         return { 
             x: dataObj[actualX] || 0, 
@@ -886,59 +909,109 @@ function renderCorrelationChart() {
         };
     });
 
-    // 4. Destroy old chart if it exists to prevent overlapping
     if (correlationChart) {
         correlationChart.destroy();
     }
 
-    // 5. Draw the fresh scatter plot
-    correlationChart = new Chart(ctx, {
-        type: 'scatter',
-        data: {
-            datasets: [{
-                label: 'Neighborhoods', 
-                data: scatterData,
-                backgroundColor: 'rgba(13, 110, 253, 0.6)', 
-                borderColor: 'rgba(13, 110, 253, 1)',
-                borderWidth: 1, 
-                pointRadius: 6, 
-                pointHoverRadius: 8
-            }]
-        },
-        options: {
-            responsive: true, 
-            maintainAspectRatio: false,
-            layout: { 
-                padding: { top: 20, right: 30, bottom: 20, left: 10 } 
+    let chartConfig;
+
+    if (chartType === 'bar') {
+        // === RANKED BAR CHART MODE ===
+        // Sort data from low to high based on the X variable
+        plotData.sort((a, b) => a.x - b.x);
+
+        // Create a nice gradient for the bars
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(54, 162, 235, 0.9)');
+        gradient.addColorStop(1, 'rgba(54, 162, 235, 0.2)');
+
+        chartConfig = {
+            type: 'bar',
+            data: {
+                labels: plotData.map(d => d.name),
+                datasets: [{
+                    label: getMetricLabel(actualY),
+                    data: plotData.map(d => d.y),
+                    backgroundColor: gradient,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    borderRadius: 3
+                }]
             },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const p = context.raw;
-                            // Add a '$' sign if the metric is income
-                            const xVal = actualX === 'income' ? '$' + p.x.toLocaleString() : p.x;
-                            const yVal = actualY === 'income' ? '$' + p.y.toLocaleString() : p.y;
-                            
-                            return `${p.name}: ${getMetricLabel(actualX)} ${xVal}, ${getMetricLabel(actualY)} ${yVal}`;
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: { padding: { top: 20, right: 20, bottom: 20, left: 10 } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            afterLabel: function(context) {
+                                const raw = plotData[context.dataIndex];
+                                // Format as currency if X is income
+                                let xVal = actualX === 'income' ? '$' + raw.x.toLocaleString() : raw.x;
+                                return `${getMetricLabel(actualX)}: ${xVal}`;
+                            }
                         }
                     }
-                }
-            },
-            scales: {
-                x: { 
-                    title: { display: true, text: getMetricLabel(actualX) }, 
-                    grace: '5%' 
                 },
-                y: { 
-                    title: { display: true, text: getMetricLabel(actualY) }, 
-                    grace: '5%' 
+                scales: {
+                    x: { 
+                        title: { display: true, text: `Ranked by ${getMetricLabel(actualX)} (Low → High)` } 
+                    },
+                    y: { 
+                        beginAtZero: false, 
+                        title: { display: true, text: getMetricLabel(actualY) } 
+                    }
                 }
             }
-        }
-    });
+        };
+
+    } else {
+        // === SCATTER PLOT MODE ===
+        chartConfig = {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Neighborhoods', 
+                    data: plotData,
+                    backgroundColor: 'rgba(13, 110, 253, 0.6)', 
+                    borderColor: 'rgba(13, 110, 253, 1)',
+                    borderWidth: 1, 
+                    pointRadius: 6, 
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true, 
+                maintainAspectRatio: false,
+                layout: { padding: { top: 20, right: 30, bottom: 20, left: 10 } },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const p = context.raw;
+                                const xVal = actualX === 'income' ? '$' + p.x.toLocaleString() : p.x;
+                                const yVal = actualY === 'income' ? '$' + p.y.toLocaleString() : p.y;
+                                return `${p.name}: ${getMetricLabel(actualX)} ${xVal}, ${getMetricLabel(actualY)} ${yVal}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: getMetricLabel(actualX) }, grace: '5%' },
+                    y: { title: { display: true, text: getMetricLabel(actualY) }, grace: '5%' }
+                }
+            }
+        };
+    }
+
+    // Render the selected chart type
+    correlationChart = new Chart(ctx, chartConfig);
 }
 
 window.startTour = function() { alert('Welcome to the Camden Health Dashboard!'); };
 window.exportData = function(format) { alert(`Data export (${format}) coming soon.`); };
+
+console.log('Dashboard script loaded successfully.');
