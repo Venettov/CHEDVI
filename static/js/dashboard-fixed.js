@@ -116,6 +116,29 @@ function getColor(value, min, max, scheme) {
     return scheme[index];
 }
 
+// --- FALLBACK DATA ---
+const fallbackData = {
+    neighborhoods: [
+        'Gateway', 'Bergen Square', 'Cooper Poynt', 'Pyne Point', 'Cramer Hill', 
+        'Beideman', 'Dudley', 'Rosedale', 'Stockton', 'Marlton', 
+        'Parkside', 'Whitman Park', 'Liberty Park', 'Centerville', 'Waterfront South',
+        'Morgan Village', 'Fairview', 'Cooper Grant', 'Lanning Square'
+    ],
+    income: [26750, 12104, 29789, 19412, 28198, 58983, 35491, 51741, 44357, 31312, 45662, 31941, 29210, 22181, 54324, 34796, 41840, 51635, 38447],
+    poverty: [30.78, 54.36, 36.71, 39.82, 38.68, 11.91, 24.96, 19.22, 20.17, 30.43, 19.40, 28.40, 26.21, 42.97, 40.45, 32.57, 20.76, 41.01, 18.62],
+    unemployment: [28.59, 34.22, 11.43, 14.21, 9.42, 9.73, 3.93, 13.15, 5.94, 16.67, 26.16, 18.81, 11.37, 25.90, 8.51, 9.16, 24.87, 14.15, 8.24],
+    education: [69.34, 57.70, 41.41, 36.94, 25.47, 43.14, 37.81, 44.01, 49.38, 45.20, 48.07, 60.14, 55.44, 41.57, 43.90, 61.16, 62.64, 90.55, 61.43],
+    foodAccess: [3.1, 2.2, 3.7, 2.8, 3.5, 7.2, 5.1, 6.8, 6.2, 4.8, 5.9, 4.9, 4.2, 2.8, 6.7, 5.2, 6.1, 6.9, 5.7],
+    insurance: [36.2, 25.1, 25.6, 30.1, 21.2, 45.7, 41.8, 48.5, 47.3, 37.6, 31.9, 36.2, 37.6, 15.6, 45.6, 34.8, 28.3, 70.4, 62.7],
+    diabetes: [17.0, 15.7, 18.9, 21.4, 18.4, 13.4, 22.2, 16.9, 17.9, 19.2, 15.0, 21.5, 23.1, 14.7, 20.3, 17.5, 17.3, 19.4, 18.0],
+    obesity: [43.9, 47.6, 44.8, 46.6, 44.8, 40.2, 41.8, 38.8, 41.9, 43.2, 46.1, 44.8, 48.7, 51.4, 44.3, 45.7, 43.6, 36.0, 41.3],
+    asthma: [20.3, 24.1, 22.3, 22.9, 25.6, 19.1, 20.9, 18.6, 20.1, 21.0, 21.9, 22.0, 24.9, 25.5, 22.1, 22.4, 20.9, 19.2, 21.0],
+    mentalDistress: [20.3, 24.1, 22.3, 22.9, 25.6, 19.1, 20.9, 18.6, 20.1, 21.0, 21.9, 22.0, 24.9, 25.5, 22.1, 22.4, 20.9, 19.2, 21.0],
+    highBloodPressure: [37.4, 40.4, 41.0, 35.6, 48.5, 45.1, 48.7, 38.6, 36.3, 42.7, 40.2, 35.1, 43.6, 35.4, 36.4, 46.7, 40.4, 38.5, 47.7],
+    noPhysicalLeisure: [39.1, 48.2, 41.5, 46.8, 43.1, 32.5, 45.7, 36.4, 38.9, 41.2, 37.5, 42.1, 44.8, 47.6, 43.2, 40.8, 39.5, 28.4, 35.2],
+    depression: [17.0, 20.1, 19.5, 19.3, 21.8, 17.5, 18.4, 16.9, 17.8, 18.2, 17.7, 18.2, 19.6, 20.4, 18.8, 18.7, 18.4, 17.8, 17.4]
+};
+
 // --- GLOBAL STATE ---
 let currentLeftMetric = 'diabetes';  
 let currentRightMetric = 'income';
@@ -173,8 +196,11 @@ function syncDatabaseWithMaps(dbData) {
                 food_access: freshData.foodAccess || 0,
                 poverty_rate: freshData.poverty || 0,
                 unemployment: freshData.unemployment || 0,
-                no_physical_leisure: freshData.no_physical_leisure || 0,
-                lack_health_insurance: freshData.uninsured || 0
+                lack_health_insurance: freshData.uninsured || 0,
+                
+                // NEW VARIABLES:
+                depression_rate: freshData.depression_rate || 0,
+                no_physical_leisure: freshData.no_physical_leisure || 0
             };
         } else {
             // Failsafe if a neighborhood is missing from the DB entirely
@@ -204,6 +230,7 @@ function applyFallbackData() {
                 poverty_rate: fallbackData.poverty[idx],
                 unemployment: fallbackData.unemployment[idx],
                 lack_health_insurance: fallbackData.insurance[idx],
+                depression_rate: fallbackData.depression[idx],
                 no_physical_leisure: fallbackData.noPhysicalLeisure[idx]
             };
         } else {
@@ -395,8 +422,9 @@ function getMetricLabel(metric) {
         mental_distress: 'Mental Distress', high_blood_pressure: 'High Blood Pressure',
         income: 'Median Income', education: 'Education Level', food_access: 'Food Access Score',
         poverty_rate: 'Poverty Rate', unemployment: 'Unemployment Rate', healthcare_access: 'Healthcare Access',
+        lack_health_insurance: 'Uninsured Rate', visited_dentist: 'Visited Dentist', air_quality: 'Air Quality Index',
         no_physical_leisure: 'No Physical Activity',
-        lack_health_insurance: 'Uninsured Rate', visited_dentist: 'Visited Dentist', air_quality: 'Air Quality Index'
+        depression_rate: 'Depression Rate'
     };
     return labels[metric] || metric;
 }
@@ -649,7 +677,11 @@ function renderCorrelationChart() {
             'uninsured': 'lack_health_insurance',
             'foodAccess': 'food_access', 
             'mentalDistress': 'mental_distress', 
-            'highBloodPressure': 'high_blood_pressure'
+            'highBloodPressure': 'high_blood_pressure',
+            
+            // NEW MAPPINGS:
+            'depression': 'depression_rate',
+            'noPhysicalLeisure': 'no_physical_leisure'
         };
         return keyMap[key] || key;
     };
