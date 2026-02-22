@@ -565,6 +565,7 @@ window.highlightNeighborhood = function(query) {
     }
 };
 
+// Inside dashboard-fixed.js
 function populateDataExplorer() {
     console.log("Initializing Revolutionary Data Explorer...");
     
@@ -575,6 +576,8 @@ function populateDataExplorer() {
         camdenNeighborhoods.forEach((n) => {
             const d = n.data || {};
             const row = document.createElement('tr');
+            
+            // Build row with all values matching the new headers
             row.innerHTML = `
                 <td class="ps-3 fw-bold">${n.name}</td>
                 <td>$${(d.income || 0).toLocaleString()}</td>
@@ -582,6 +585,11 @@ function populateDataExplorer() {
                 <td>${d.diabetes || 0}%</td>
                 <td>${d.obesity || 0}%</td>
                 <td>${d.asthma || 0}%</td>
+                <td>${d.food_access || 0}</td>
+                <td>${d.lack_health_insurance || 0}%</td>
+                <td>${d.education || 0}%</td>
+                <td>${d.mental_distress || 0}%</td>
+                <td>${d.high_blood_pressure || 0}%</td>
             `;
             tableBody.appendChild(row);
         });
@@ -590,7 +598,7 @@ function populateDataExplorer() {
     // 2. Setup Event Listeners for ALL Chart Selectors
     const xVar = document.getElementById('xVariable');
     const yVar = document.getElementById('yVariable');
-    const typeVar = document.getElementById('chartTypeSelector'); // <-- Added this listener
+    const typeVar = document.getElementById('chartTypeSelector');
     
     if (xVar) {
         xVar.removeEventListener('change', renderCorrelationChart);
