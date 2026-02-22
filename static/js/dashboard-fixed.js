@@ -173,6 +173,7 @@ function syncDatabaseWithMaps(dbData) {
                 food_access: freshData.foodAccess || 0,
                 poverty_rate: freshData.poverty || 0,
                 unemployment: freshData.unemployment || 0,
+                no_physical_leisure: freshData.no_physical_leisure || 0,
                 lack_health_insurance: freshData.uninsured || 0
             };
         } else {
@@ -202,7 +203,8 @@ function applyFallbackData() {
                 food_access: fallbackData.foodAccess[idx],
                 poverty_rate: fallbackData.poverty[idx],
                 unemployment: fallbackData.unemployment[idx],
-                lack_health_insurance: fallbackData.insurance[idx]
+                lack_health_insurance: fallbackData.insurance[idx],
+                no_physical_leisure: fallbackData.noPhysicalLeisure[idx]
             };
         } else {
             neighborhood.data = {};
@@ -393,6 +395,7 @@ function getMetricLabel(metric) {
         mental_distress: 'Mental Distress', high_blood_pressure: 'High Blood Pressure',
         income: 'Median Income', education: 'Education Level', food_access: 'Food Access Score',
         poverty_rate: 'Poverty Rate', unemployment: 'Unemployment Rate', healthcare_access: 'Healthcare Access',
+        no_physical_leisure: 'No Physical Activity',
         lack_health_insurance: 'Uninsured Rate', visited_dentist: 'Visited Dentist', air_quality: 'Air Quality Index'
     };
     return labels[metric] || metric;
