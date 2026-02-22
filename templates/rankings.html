@@ -201,142 +201,44 @@
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
-    // 1. GET DATA FROM SERVER
-    const rankingsData = {{ rankings_data | tojson | safe }};
-    let myChart = null;
+    document.addEventListener('DOMContentLoaded', function() {
+        const metricSelector = document.getElementById('metricSelector');
+        const sortOrder = document.getElementById('sortOrder');
 
-    // 2. FUNCTION TO RENDER TABLE
-    function renderPage() {
-        const metric = document.getElementById('metricSelector').value;
-        const order = document.getElementById('sortOrder').value;
-        const tbody = document.getElementById('rankingsBody');
-        
-        // Update Header Text
-        const headerMap = {
-            'diabetes': 'Diabetes Rate (%)',
-            'income': 'Median Income ($)',
-            'poverty': 'Poverty Rate (%)',
-            'population': 'Total Population'
-        };
-        const label = headerMap[metric];
-        document.getElementById('valueHeader').innerText = label;
-
-        // Sort Data
-        rankingsData.sort((a, b) => {
-            let valA = a[metric];
-            let valB = b[metric];
-            return order === 'asc' ? valA - valB : valB - valA;
-        });
-
-        // --- RENDER TABLE ---
-        tbody.innerHTML = '';
-        rankingsData.forEach((item, index) => {
-            let valueDisplay = item[metric];
-            let rawValue = valueDisplay; 
-            
-            // Formatting
-            if(metric === 'income') valueDisplay = '$' + valueDisplay.toLocaleString();
-            else if(metric === 'population') valueDisplay = valueDisplay.toLocaleString();
-            else valueDisplay = valueDisplay + '%';
-
-            // Badge Logic
-            let badgeClass = 'bg-secondary';
-            let badgeText = 'Neutral';
-            
-            if (metric === 'income') {
-                if (rawValue > 50000) { badgeClass = 'bg-success'; badgeText = 'High'; }
-                else if (rawValue < 25000) { badgeClass = 'bg-danger'; badgeText = 'Critical'; }
-                else { badgeClass = 'bg-warning text-dark'; badgeText = 'Medium'; }
-            } else if (metric === 'diabetes' || metric === 'poverty') {
-                if (rawValue > 20) { badgeClass = 'bg-danger'; badgeText = 'High Risk'; }
-                else if (rawValue < 15) { badgeClass = 'bg-success'; badgeText = 'Low Risk'; }
-                else { badgeClass = 'bg-warning text-dark'; badgeText = 'Moderate'; }
-            }
-
-            const row = `
-                <tr>
-                    <td class="ps-4"><strong>#${index + 1}</strong></td>
-                    <td>${item.name}</td>
-                    <td><strong>${valueDisplay}</strong></td>
-                    <td><span class="badge ${badgeClass}">${badgeText}</span></td>
-                </tr>
-            `;
-            tbody.innerHTML += row;
-        });
-
-        // --- RENDER CHART ---
-        renderChart(metric, label);
-    }
-
-    // 3. FUNCTION TO RENDER CHART
-    function renderChart(metric, label) {
-        const ctx = document.getElementById('rankingsChart').getContext('2d');
-        
-        const top10 = rankingsData.slice(0, 10);
-        const labels = top10.map(d => d.name);
-        const data = top10.map(d => d[metric]);
-
-        if (myChart) {
-            myChart.destroy();
-        }
-
-        myChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: label,
-                    data: data,
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true }
+        // A. Fetch live data from the database
+        fetch('/api/neighborhood-data')
+            .then(response => {
+                if (!response.ok) throw new Error("Database fetch failed");
+                return response.json();
+            })
+            .then(dbData => {
+                // B. Pass the fresh data to rankings.js to sync and render
+                if (typeof window.initializeRankingsWithDB === 'function') {
+                    window.initializeRankingsWithDB(dbData);
+                } else {
+                    console.error("Error: rankings.js functions are not available.");
                 }
-            }
-        });
-    }
+            })
+            .catch(error => {
+                console.error('Data Load Error. Using Fallback Data:', error);
+                // C. Fallback: If DB is offline, tell rankings.js to render its backup array
+                if (typeof window.sortAndRenderRankings === 'function') {
+                    window.sortAndRenderRankings();
+                }
+            });
 
-    // 4. NEW EXPORT FUNCTION
-    function exportToCSV() {
-        if (!rankingsData || rankingsData.length === 0) {
-            alert("No data to export");
-            return;
+        // D. Attach Listeners so the page updates when the user changes dropdowns
+        if (metricSelector) {
+            metricSelector.addEventListener('change', window.sortAndRenderRankings);
         }
+        if (sortOrder) {
+            sortOrder.addEventListener('change', window.sortAndRenderRankings);
+        }
+    });
 
-        // Create CSV Headers
-        let csvContent = "data:text/csv;charset=utf-8,";
-        csvContent += "Neighborhood,Population,Median Income,Diabetes Rate,Poverty Rate\n";
-
-        // Add Rows
-        rankingsData.forEach(function(row) {
-            let rowString = `"${row.name}",${row.population},${row.income},${row.diabetes},${row.poverty}`;
-            csvContent += rowString + "\n";
-        });
-
-        // Encode and Create Download Link
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", "Camden_Health_Rankings.csv");
-        document.body.appendChild(link);
-        
-        // Trigger Download
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    // 5. EVENT LISTENERS
-    document.getElementById('metricSelector').addEventListener('change', renderPage);
-    document.getElementById('sortOrder').addEventListener('change', renderPage);
-
-    // Initial Load
-    renderPage();
+    // Note: The exportToCSV() function is now globally available via rankings.js, 
+    // so the HTML "Export CSV" button will automatically call it!
 </script>
 {% endblock %}
