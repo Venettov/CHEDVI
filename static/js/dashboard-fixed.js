@@ -181,29 +181,32 @@ function syncDatabaseWithMaps(dbData) {
     camdenNeighborhoods.forEach(neighborhood => {
         const freshData = dbData.find(d => d.name === neighborhood.name);
         
-        // Ensure neighborhood.data is an object before we start adding things to it
         neighborhood.data = neighborhood.data || {};
         
         if (freshData) {
+            // Helper function to find a value even if keys vary slightly (e.g., depression vs depression_rate)
+            const findVal = (primary, secondary) => {
+                return freshData[primary] !== undefined ? freshData[primary] : (freshData[secondary] || 0);
+            };
+
             neighborhood.data = {
-                diabetes: freshData.diabetes || 0,
-                obesity: freshData.obesity || 0,
-                asthma: freshData.asthma || 0,
-                mental_distress: freshData.mentalDistress || 0,
-                high_blood_pressure: freshData.highBloodPressure || 0,
-                income: freshData.income || 0,
-                education: freshData.education || 0,
-                food_access: freshData.foodAccess || 0,
-                poverty_rate: freshData.poverty || 0,
-                unemployment: freshData.unemployment || 0,
-                lack_health_insurance: freshData.uninsured || 0,
+                diabetes: findVal('diabetes', 'diabetes_rate'),
+                obesity: findVal('obesity', 'obesity_rate'),
+                asthma: findVal('asthma', 'asthma_rate'),
+                mental_distress: findVal('mental_distress', 'mentalDistress'),
+                high_blood_pressure: findVal('high_blood_pressure', 'highBloodPressure'),
+                income: findVal('income', 'median_income'),
+                education: findVal('education', 'education_rate'),
+                food_access: findVal('food_access', 'foodAccess'),
+                poverty_rate: findVal('poverty_rate', 'poverty'),
+                unemployment: findVal('unemployment', 'unemployment_rate'),
+                lack_health_insurance: findVal('lack_health_insurance', 'uninsured'),
                 
-                // NEW VARIABLES:
-                depression_rate: freshData.depression_rate || 0,
-                no_physical_leisure: freshData.no_physical_leisure || 0
+                // FIXED KEYS:
+                depression_rate: findVal('depression', 'depression_rate'),
+                no_physical_leisure: findVal('no_physical_leisure', 'noPhysicalLeisure')
             };
         } else {
-            // Failsafe if a neighborhood is missing from the DB entirely
             neighborhood.data = {};
         }
     });
@@ -672,17 +675,26 @@ function renderCorrelationChart() {
     // Map HTML dropdown values to exact DB keys
     const getMappedKey = (key) => {
         const keyMap = {
-            'poverty': 'poverty_rate', 
-            'insurance': 'lack_health_insurance', 
+            // Social Determinants / Influence (X-Axis)
+            'income': 'income',
+            'poverty': 'poverty_rate',
+            'foodAccess': 'food_access',
+            'insurance': 'lack_health_insurance',
             'uninsured': 'lack_health_insurance',
-            'foodAccess': 'food_access', 
-            'mentalDistress': 'mental_distress', 
+            'education': 'education',
+            'noPhysicalLeisure': 'no_physical_leisure',
+
+            // Health Outcomes (Y-Axis)
+            'diabetes': 'diabetes',
+            'obesity': 'obesity',
+            'asthma': 'asthma',
+            'mentalDistress': 'mental_distress',
             'highBloodPressure': 'high_blood_pressure',
-            
-            // NEW MAPPINGS:
-            'depression': 'depression_rate',
-            'noPhysicalLeisure': 'no_physical_leisure'
+            'depression': 'depression_rate'
         };
+
+        // This ensures if the key is already correct (like 'income'), 
+        // it just returns it; otherwise, it uses the map.
         return keyMap[key] || key;
     };
 
