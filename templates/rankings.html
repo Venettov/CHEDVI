@@ -202,6 +202,8 @@
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<script src="{{ url_for('static', filename='js/rankings.js') }}"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const metricSelector = document.getElementById('metricSelector');
@@ -218,7 +220,7 @@
                 if (typeof window.initializeRankingsWithDB === 'function') {
                     window.initializeRankingsWithDB(dbData);
                 } else {
-                    console.error("Error: rankings.js functions are not available.");
+                    console.error("Error: rankings.js is still not loaded properly.");
                 }
             })
             .catch(error => {
@@ -237,8 +239,5 @@
             sortOrder.addEventListener('change', window.sortAndRenderRankings);
         }
     });
-
-    // Note: The exportToCSV() function is now globally available via rankings.js, 
-    // so the HTML "Export CSV" button will automatically call it!
 </script>
 {% endblock %}
