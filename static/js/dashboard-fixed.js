@@ -389,90 +389,79 @@ const camdenNeighborhoods = [
 ];
 
 // --- COLOR SCALES ---
-// Blue Scale for Health Metrics (Diabetes, Asthma, etc.)
 const COLORS_BLUE = ['#eff3ff', '#bdd7e7', '#6baed6', '#3182bd', '#08519c']; 
-
-// Green Scale for "Positive" Social Determinants (Income, Education)
 const COLORS_GREEN = ['#edf8e9', '#bae4b3', '#74c476', '#31a354', '#006d2c'];
-
-// Metrics where "Higher is Better" (Uses Green Scale)
 const POSITIVE_METRICS = ['income', 'education', 'healthcare_access', 'food_access', 'visited_dentist'];
 
 function getColor(value, min, max, scheme) {
     if (value === undefined || value === null) return '#ccc';
-    if (max === min) return scheme[2]; // Flat data
-    
-    // Normalize value to 0-1 range
+    if (max === min) return scheme[2]; 
     const pct = (value - min) / (max - min);
-    
-    // Map percentage to color index (0 to 4)
     let index = Math.floor(pct * (scheme.length));
     if (index >= scheme.length) index = scheme.length - 1;
-    
     return scheme[index];
 }
 
-// ==========================================
-// HYBRID DATA ARCHITECTURE (DB + FALLBACK)
-// ==========================================
-
-// 1. Define the Hardcoded "Safety Net" (Your original data)
-const fallbackData = {
-    neighborhoods: [
-        'Gateway', 'Bergen Square', 'Cooper Poynt', 'Pyne Point', 'Cramer Hill', 
-        'Beideman', 'Dudley', 'Rosedale', 'Stockton', 'Marlton', 
-        'Parkside', 'Whitman Park', 'Liberty Park', 'Centerville', 'Waterfront South',
-        'Morgan Village', 'Fairview', 'Cooper Grant', 'Lanning Square'
-    ],
-    income: [26750, 12104, 29789, 19412, 28198, 58983, 35491, 51741, 44357, 31312, 45662, 31941, 29210, 22181, 54324, 34796, 41840, 51635, 38447],
-    poverty: [30.78, 54.36, 36.71, 39.82, 38.68, 11.91, 24.96, 19.22, 20.17, 30.43, 19.40, 28.40, 26.21, 42.97, 40.45, 32.57, 20.76, 41.01, 18.62],
-    unemployment: [28.59, 34.22, 11.43, 14.21, 9.42, 9.73, 3.93, 13.15, 5.94, 16.67, 26.16, 18.81, 11.37, 25.90, 8.51, 9.16, 24.87, 14.15, 8.24],
-    education: [69.34, 57.70, 41.41, 36.94, 25.47, 43.14, 37.81, 44.01, 49.38, 45.20, 48.07, 60.14, 55.44, 41.57, 43.90, 61.16, 62.64, 90.55, 61.43],
-    foodAccess: [3.1, 2.2, 3.7, 2.8, 3.5, 7.2, 5.1, 6.8, 6.2, 4.8, 5.9, 4.9, 4.2, 2.8, 6.7, 5.2, 6.1, 6.9, 5.7],
-    insurance: [36.2, 25.1, 25.6, 30.1, 21.2, 45.7, 41.8, 48.5, 47.3, 37.6, 31.9, 36.2, 37.6, 15.6, 45.6, 34.8, 28.3, 70.4, 62.7],
-    diabetes: [17.0, 15.7, 18.9, 21.4, 18.4, 13.4, 22.2, 16.9, 17.9, 19.2, 15.0, 21.5, 23.1, 14.7, 20.3, 17.5, 17.3, 19.4, 18.0],
-    obesity: [43.9, 47.6, 44.8, 46.6, 44.8, 40.2, 41.8, 38.8, 41.9, 43.2, 46.1, 44.8, 48.7, 51.4, 44.3, 45.7, 43.6, 36.0, 41.3],
-    asthma: [20.3, 24.1, 22.3, 22.9, 25.6, 19.1, 20.9, 18.6, 20.1, 21.0, 21.9, 22.0, 24.9, 25.5, 22.1, 22.4, 20.9, 19.2, 21.0],
-    mentalDistress: [20.3, 24.1, 22.3, 22.9, 25.6, 19.1, 20.9, 18.6, 20.1, 21.0, 21.9, 22.0, 24.9, 25.5, 22.1, 22.4, 20.9, 19.2, 21.0],
-    highBloodPressure: [37.4, 40.4, 41.0, 35.6, 48.5, 45.1, 48.7, 38.6, 36.3, 42.7, 40.2, 35.1, 43.6, 35.4, 36.4, 46.7, 40.4, 38.5, 47.7]
-};
-
-// 2. Initialize Data with Intelligent Merge
-let dashboardData;
-
-if (typeof dbPayload !== 'undefined' && dbPayload !== null) {
-    console.log("✅ Using Live Database Data");
-    
-    // INTELLIGENT MERGE:
-    // This takes the fallback data and OVERWRITES it with database values.
-    // Crucially, since 'education' is missing in your DB, it keeps the fallback 'education' values!
-    dashboardData = { ...fallbackData, ...dbPayload };
-    
-} else {
-    console.warn("⚠️ Database unavailable. Using Fallback Data.");
-    dashboardData = fallbackData;
-}
-
 // --- GLOBAL STATE ---
-// Set your desired defaults here. These will apply immediately on load.
 let currentLeftMetric = 'diabetes';  
 let currentRightMetric = 'income';
 
-// Initialize when page loads
+// ==========================================
+// 1. SINGLE MASTER INITIALIZATION BLOCK
+// ==========================================
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Initializing Camden Health Dashboard...');
+    console.log('Fetching live database data for Dashboard...');
     
     if (typeof L === 'undefined') {
         console.error('Leaflet library not loaded');
         return;
     }
-    
-    // Set dropdowns to match our JS defaults (sync UI with Logic)
+
     const leftSel = document.getElementById('leftMapSelector');
     const rightSel = document.getElementById('rightMapSelector');
     if(leftSel) leftSel.value = currentLeftMetric;
     if(rightSel) rightSel.value = currentRightMetric;
 
+    // FETCH FRESH DATA FROM THE DATABASE
+    fetch('/api/neighborhood-data')
+        .then(response => response.json())
+        .then(dbResults => {
+            console.log("✅ Database data received. Merging with Map bounds...");
+            syncDatabaseWithMaps(dbResults);
+            startupDashboard();
+        })
+        .catch(error => {
+            console.error('⚠️ DB Fetch failed. Falling back to hardcoded data:', error);
+            startupDashboard(); // Fallback to array if server is offline
+        });
+});
+
+// ==========================================
+// 2. DATA SYNCHRONIZATION
+// ==========================================
+function syncDatabaseWithMaps(dbData) {
+    camdenNeighborhoods.forEach(neighborhood => {
+        const freshData = dbData.find(d => d.name === neighborhood.name);
+        if (freshData) {
+            // Update data but keep the map bounds intact
+            neighborhood.data = {
+                diabetes: freshData.diabetes || neighborhood.data.diabetes,
+                obesity: freshData.obesity || neighborhood.data.obesity,
+                asthma: freshData.asthma || neighborhood.data.asthma,
+                mental_distress: freshData.mentalDistress || neighborhood.data.mental_distress,
+                high_blood_pressure: freshData.highBloodPressure || neighborhood.data.high_blood_pressure,
+                income: freshData.income || neighborhood.data.income,
+                education: freshData.education || neighborhood.data.education,
+                food_access: freshData.foodAccess || neighborhood.data.food_access,
+                poverty_rate: freshData.poverty || neighborhood.data.poverty_rate,
+                unemployment: freshData.unemployment || neighborhood.data.unemployment,
+                lack_health_insurance: freshData.uninsured || neighborhood.data.lack_health_insurance
+            };
+        }
+    });
+}
+
+function startupDashboard() {
     initializeMaps();
     setupEventListeners();
     loadInitialData();
@@ -481,167 +470,111 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof populateDataExplorer === 'function') {
         populateDataExplorer(); 
     }
-});
 
-// --- STYLING ---
-const STYLE_BLUE = {
-    color: "#2c3e50", weight: 2, opacity: 1, 
-    fillColor: "#87CEEB", fillOpacity: 0.7 
-};
+    // Handle Global Search from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const searchParam = urlParams.get('search');
+    if (searchParam) {
+        setTimeout(() => {
+            if(window.highlightNeighborhood) window.highlightNeighborhood(searchParam);
+            const searchBox = document.getElementById('globalSearchInput');
+            if(searchBox) searchBox.value = searchParam;
+        }, 1000);
+    }
+}
 
-const STYLE_HIGHLIGHT = {
-    color: "#1e8449", weight: 3, opacity: 1, 
-    fillColor: "#2ecc71", fillOpacity: 0.8 
-};
-
-// 3. INITIALIZE MAPS
+// ==========================================
+// 3. MAP RENDERING
+// ==========================================
 function initializeMaps() {
     try {
-        // Left Map
         leftMap = L.map('leftMap', { zoomControl: true, scrollWheelZoom: false }).setView([39.9259, -75.1196], 11.5);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(leftMap);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(leftMap);
 
-        // Right Map
         rightMap = L.map('rightMap', { zoomControl: true, scrollWheelZoom: false }).setView([39.9259, -75.1196], 11.5);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap contributors' }).addTo(rightMap);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(rightMap);
 
-        // Render Initial Polygons using the Global Defaults
         renderMapPolygons(leftMap, leftPolygons, 'left', currentLeftMetric);
         renderMapPolygons(rightMap, rightPolygons, 'right', currentRightMetric);
-
-        console.log('Maps initialized with:', currentLeftMetric, currentRightMetric);
-
     } catch (error) { console.error('Error initializing maps:', error); }
 }
 
-// 4. CORE RENDER FUNCTION (UPDATED WITH COLOR SCALES & LEGEND)
 function renderMapPolygons(mapInstance, polygonArray, mapSide, metric) {
-    // 1. Clear existing layers
     polygonArray.forEach(p => mapInstance.removeLayer(p));
     polygonArray.length = 0; 
 
-    // 2. Clear existing legend if it exists
-    if (mapInstance.legendControl) {
-        mapInstance.removeControl(mapInstance.legendControl);
-    }
+    if (mapInstance.legendControl) mapInstance.removeControl(mapInstance.legendControl);
 
-    // 3. Calculate Min/Max for this metric across ALL neighborhoods
-    // We filter out undefined values to prevent errors
     const values = camdenNeighborhoods.map(n => n.data[metric]).filter(v => v !== undefined);
     const min = Math.min(...values);
     const max = Math.max(...values);
-    
-    // 4. Determine Color Scheme (Green for good, Red for bad)
     const scheme = POSITIVE_METRICS.includes(metric) ? COLORS_GREEN : COLORS_BLUE;
 
-    // 5. Add new polygons with Dynamic Colors
     camdenNeighborhoods.forEach(n => {
         const val = n.data[metric];
         const dynamicColor = getColor(val, min, max, scheme);
         
-        // Create a style object that overrides the default blue
-        const polyStyle = {
-            color: "#2c3e50", 
-            weight: 2, 
-            opacity: 1, 
-            fillColor: dynamicColor, 
-            fillOpacity: 0.7 
-        };
-
+        const polyStyle = { color: "#2c3e50", weight: 2, opacity: 1, fillColor: dynamicColor, fillOpacity: 0.7 };
         const popupContent = createPopupContent(n, metric);
         
         const poly = L.polygon(n.bounds, polyStyle).addTo(mapInstance);
         poly.bindPopup(popupContent);
-        
-        // Metadata for interactions
         poly.neighborhoodName = n.name;
-        poly.defaultStyle = polyStyle; // Save this color so hover effects reset correctly
+        poly.defaultStyle = polyStyle; 
         
-        // Click Event
         poly.on('click', (e) => handlePolygonClick(e, mapSide));
-        
         polygonArray.push(poly);
     });
 
-    // 6. Add the Legend Control
     addLegend(mapInstance, min, max, scheme, metric);
 }
 
 function addLegend(mapInstance, min, max, scheme, metric) {
     const legend = L.control({position: 'bottomright'});
-
-    legend.onAdd = function (map) {
+    legend.onAdd = function () {
         const div = L.DomUtil.create('div', 'info legend');
-        
-        // Format numbers (Currency vs Percent)
         const format = (num) => {
             if (metric === 'income') return '$' + (num/1000).toFixed(0) + 'k';
             if (['food_access'].includes(metric)) return num.toFixed(1);
             return num.toFixed(0) + '%';
         };
 
-        // CSS for the Legend Box
         div.style.backgroundColor = 'white';
         div.style.padding = '10px';
         div.style.borderRadius = '5px';
         div.style.boxShadow = '0 0 15px rgba(0,0,0,0.2)';
         div.style.fontSize = '12px';
-        div.style.lineHeight = '18px';
-
+        
         div.innerHTML += `<strong>${getMetricLabel(metric)}</strong><br>`;
-
-        // Loop through our color intervals
-        // We divide the range into 5 steps matching our 5 colors
         const step = (max - min) / scheme.length;
         
         for (let i = 0; i < scheme.length; i++) {
             const rangeStart = min + (i * step);
             const rangeEnd = min + ((i + 1) * step);
-            
-            div.innerHTML +=
-                `<i style="background:${scheme[i]}; width:18px; height:18px; float:left; margin-right:8px; opacity:0.7"></i> ` +
-                `${format(rangeStart)} – ${format(rangeEnd)}<br>`;
+            div.innerHTML += `<i style="background:${scheme[i]}; width:18px; height:18px; float:left; margin-right:8px; opacity:0.7"></i> ${format(rangeStart)} – ${format(rangeEnd)}<br>`;
         }
-
         return div;
     };
-
     legend.addTo(mapInstance);
-    mapInstance.legendControl = legend; // Store reference to remove it later
+    mapInstance.legendControl = legend; 
 }
 
-// 5. CREATE POPUP CONTENT
 function createPopupContent(n, metric) {
-    let statsHtml = '';
-
-    // If we have a valid metric, show ONLY that metric
-    if (metric && metric !== "" && n.data[metric] !== undefined) {
-        const label = getMetricLabel(metric);
+    let statsHtml = `<div style="color:#666; font-style:italic;">Select a metric...</div>`;
+    if (metric && n.data[metric] !== undefined) {
         let value = n.data[metric];
-        
-        if (typeof value === 'number') {
-            value = (metric === 'income') ? `$${value.toLocaleString()}` : `${value.toFixed(1)}%`;
-        } 
-
-        statsHtml = `<div style="font-size: 1.1rem; color: #1e8449; margin-top:5px;">
-                        <strong>${label}:</strong> ${value}
-                     </div>`;
-    } else {
-        // Fallback: This should rarely be seen if defaults are set correctly
-        statsHtml = `<div style="color:#666; font-style:italic;">Select a metric...</div>`;
+        if (typeof value === 'number') value = (metric === 'income') ? `$${value.toLocaleString()}` : `${value.toFixed(1)}%`;
+        statsHtml = `<div style="font-size: 1.1rem; color: #1e8449; margin-top:5px;"><strong>${getMetricLabel(metric)}:</strong> ${value}</div>`;
     }
-
-    return `
-        <div style="text-align: left; min-width: 150px;">
-            <h6 style="color: #2c3e50; font-weight: bold; margin: 0 0 5px 0; border-bottom: 2px solid #eee; padding-bottom: 5px;">
-                ${n.name}
-            </h6>
-            ${statsHtml}
-        </div>
-    `;
+    return `<div style="text-align: left; min-width: 150px;">
+                <h6 style="color: #2c3e50; font-weight: bold; margin: 0 0 5px 0; border-bottom: 2px solid #eee; padding-bottom: 5px;">${n.name}</h6>
+                ${statsHtml}
+            </div>`;
 }
 
-// 6. EVENT LISTENERS
+// ==========================================
+// 4. MAP INTERACTIONS & HELPERS
+// ==========================================
 function setupEventListeners() {
     const leftSelector = document.getElementById('leftMapSelector');
     const rightSelector = document.getElementById('rightMapSelector');
@@ -649,7 +582,7 @@ function setupEventListeners() {
 
     if (leftSelector) {
         leftSelector.addEventListener('change', function() {
-            currentLeftMetric = this.value; // Update global state
+            currentLeftMetric = this.value; 
             renderMapPolygons(leftMap, leftPolygons, 'left', currentLeftMetric);
             updateMetrics();
         });
@@ -657,13 +590,12 @@ function setupEventListeners() {
 
     if (rightSelector) {
         rightSelector.addEventListener('change', function() {
-            currentRightMetric = this.value; // Update global state
+            currentRightMetric = this.value; 
             renderMapPolygons(rightMap, rightPolygons, 'right', currentRightMetric);
             updateMetrics();
         });
     }
 
-    // Sync Logic
     let isSyncing = false;
     if (overlayToggle) {
         overlayToggle.addEventListener('change', function() {
@@ -686,38 +618,25 @@ function setupEventListeners() {
     }
 }
 
-// 7. CLICK HANDLER (Green Highlight)
 function handlePolygonClick(e, sourceMap) {
     const targetName = e.target.neighborhoodName;
-
-    // --- ADD THIS LINE TO LINK TO DATABASE ---
     window.currentSelection = targetName; 
-    // -----------------------------------------
 
-    // Reset styles
     leftPolygons.forEach(p => p.setStyle(p.defaultStyle));
     rightPolygons.forEach(p => p.setStyle(p.defaultStyle));
 
-    // Highlight targets
     const leftTarget = leftPolygons.find(p => p.neighborhoodName === targetName);
     const rightTarget = rightPolygons.find(p => p.neighborhoodName === targetName);
 
-    if (leftTarget) {
-        leftTarget.setStyle(STYLE_HIGHLIGHT);
-        if(sourceMap === 'left') leftTarget.openPopup();
-    }
-    if (rightTarget) {
-        rightTarget.setStyle(STYLE_HIGHLIGHT);
-        if(sourceMap === 'right') rightTarget.openPopup();
-    }
+    const STYLE_HIGHLIGHT = { color: "#1e8449", weight: 3, opacity: 1, fillColor: "#2ecc71", fillOpacity: 0.8 };
+
+    if (leftTarget) { leftTarget.setStyle(STYLE_HIGHLIGHT); if(sourceMap === 'left') leftTarget.openPopup(); }
+    if (rightTarget) { rightTarget.setStyle(STYLE_HIGHLIGHT); if(sourceMap === 'right') rightTarget.openPopup(); }
 
     updateMetrics(targetName);
 }
 
-// 8. HELPERS
-function loadInitialData() {
-    updateMetrics(); 
-}
+function loadInitialData() { updateMetrics(); }
 
 function getMetricLabel(metric) {
     const labels = {
@@ -731,7 +650,6 @@ function getMetricLabel(metric) {
 }
 
 function updateMetrics() {
-    // Use the GLOBAL variables instead of reading DOM to be safe
     const leftValues = camdenNeighborhoods.map(n => n.data[currentLeftMetric]).filter(v => v !== undefined);
     const rightValues = camdenNeighborhoods.map(n => n.data[currentRightMetric]).filter(v => v !== undefined);
     
@@ -764,16 +682,15 @@ function calculateCorrelation(x, y) {
     return denominator === 0 ? 0 : (n * sumXY - sumX * sumY) / denominator;
 }
 
-// 8. INITIALIZE ALL CHARTS (Full Restoration)
+// ==========================================
+// 5. STATIC OVERVIEW CHARTS
+// ==========================================
 function initializeAllCharts() {
     console.log('Initializing all dashboard charts...');
     
-    // 1. Neighborhood Chart (Bar: Top 10 Diabetes)
     const neighborhoodCanvas = document.getElementById('neighborhoodChart');
     if (neighborhoodCanvas) {
-        // Destroy existing chart if it exists to prevent overlap
         if (Chart.getChart(neighborhoodCanvas)) Chart.getChart(neighborhoodCanvas).destroy();
-        
         const ctx = neighborhoodCanvas.getContext('2d');
         const sorted = [...camdenNeighborhoods].sort((a, b) => (b.data.diabetes || 0) - (a.data.diabetes || 0)).slice(0, 10);
         
@@ -789,19 +706,16 @@ function initializeAllCharts() {
                 }]
             },
             options: { 
-                responsive: true, 
-                maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { display: false }, title: { display: true, text: 'Top 10 Neighborhoods by Diabetes Rate' } },
                 scales: { y: { beginAtZero: true, title: { display: true, text: 'Rate (%)' } } }
             }
         });
     }
     
-    // 2. Demographics Chart (Doughnut: Income Ranges)
     const demographicsCanvas = document.getElementById('demographicsChart');
     if (demographicsCanvas) {
         if (Chart.getChart(demographicsCanvas)) Chart.getChart(demographicsCanvas).destroy();
-
         const ctx = demographicsCanvas.getContext('2d');
         const incomeRanges = [
             { range: '< $25K', count: camdenNeighborhoods.filter(n => n.data.income < 25000).length },
@@ -816,23 +730,19 @@ function initializeAllCharts() {
                 labels: incomeRanges.map(r => r.range),
                 datasets: [{
                     data: incomeRanges.map(r => r.count),
-                    backgroundColor: ['#dc3545', '#ffc107', '#17a2b8', '#28a745'],
-                    borderWidth: 1
+                    backgroundColor: ['#dc3545', '#ffc107', '#17a2b8', '#28a745'], borderWidth: 1
                 }]
             },
             options: { 
-                responsive: true, 
-                maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 plugins: { legend: { position: 'right' }, title: { display: true, text: 'Neighborhoods by Income Level' } } 
             }
         });
     }
     
-    // 3. Trend Chart (Scatter: Income vs Diabetes)
     const trendCanvas = document.getElementById('trendChart');
     if (trendCanvas) {
         if (Chart.getChart(trendCanvas)) Chart.getChart(trendCanvas).destroy();
-
         const ctx = trendCanvas.getContext('2d');
         new Chart(ctx, {
             type: 'scatter',
@@ -840,25 +750,14 @@ function initializeAllCharts() {
                 datasets: [{
                     label: 'Neighborhoods',
                     data: camdenNeighborhoods.map(n => ({ x: n.data.income/1000, y: n.data.diabetes })),
-                    backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    pointRadius: 6,
-                    pointHoverRadius: 8
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)', borderColor: 'rgba(54, 162, 235, 1)', pointRadius: 6, pointHoverRadius: 8
                 }]
             },
             options: { 
-                responsive: true, 
-                maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 plugins: { 
-                    legend: { display: false },
-                    title: { display: true, text: 'Correlation: Income vs Diabetes' },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `Income: $${context.parsed.x}k, Diabetes: ${context.parsed.y}%`;
-                            }
-                        }
-                    }
+                    legend: { display: false }, title: { display: true, text: 'Correlation: Income vs Diabetes' },
+                    tooltip: { callbacks: { label: function(context) { return `Income: $${context.parsed.x}k, Diabetes: ${context.parsed.y}%`; } } }
                 },
                 scales: { 
                     x: { title: { display: true, text: 'Median Income ($1k)' } }, 
@@ -868,11 +767,9 @@ function initializeAllCharts() {
         });
     }
     
-    // 4. SDOH Chart (Radar: City Averages)
     const sdohCanvas = document.getElementById('sdohChart');
     if (sdohCanvas) {
         if (Chart.getChart(sdohCanvas)) Chart.getChart(sdohCanvas).destroy();
-
         const ctx = sdohCanvas.getContext('2d');
         const avgs = {
             pov: camdenNeighborhoods.reduce((s, n) => s + (n.data.poverty_rate || 0), 0) / 19,
@@ -888,15 +785,12 @@ function initializeAllCharts() {
                 datasets: [{
                     label: 'City Average',
                     data: [avgs.pov, avgs.unemp, avgs.edu, avgs.ins],
-                    backgroundColor: 'rgba(255, 159, 64, 0.2)', 
-                    borderColor: 'rgba(255, 159, 64, 1)',
-                    pointBackgroundColor: 'rgba(255, 159, 64, 1)',
-                    borderWidth: 2
+                    backgroundColor: 'rgba(255, 159, 64, 0.2)', borderColor: 'rgba(255, 159, 64, 1)',
+                    pointBackgroundColor: 'rgba(255, 159, 64, 1)', borderWidth: 2
                 }]
             },
             options: { 
-                responsive: true, 
-                maintainAspectRatio: false,
+                responsive: true, maintainAspectRatio: false,
                 scales: { r: { beginAtZero: true, suggestMax: 60 } },
                 plugins: { title: { display: true, text: 'Social Determinants Profile' } }
             }
@@ -904,294 +798,109 @@ function initializeAllCharts() {
     }
 }
 
-// --- SEARCH FUNCTIONALITY BRIDGE ---
-
-// 1. Define the function that main.js is trying to call
+// ==========================================
+// 6. REVOLUTIONARY DATA EXPLORER & GLOBAL SEARCH
+// ==========================================
 window.highlightNeighborhood = function(query) {
     if (!query) return;
-    
-    // Normalize text (lowercase, trim)
     const searchTerm = query.toLowerCase().trim();
-    
-    // Find the neighborhood
     const target = camdenNeighborhoods.find(n => n.name.toLowerCase() === searchTerm);
     
     if (target) {
-        console.log("Search found:", target.name);
-        
-        // Find the polygon on the map
         const poly = leftPolygons.find(p => p.neighborhoodName === target.name);
-        
         if (poly) {
-            // Trigger the click logic (turns it Green & Updates Stats)
             poly.fire('click'); 
-            
-            // Zoom to it
             leftMap.fitBounds(poly.getBounds());
             rightMap.fitBounds(poly.getBounds());
         }
-    } else {
-        alert("Neighborhood not found: " + query);
     }
 };
 
-// 2. Check URL for search params (Handle redirect from other pages)
-document.addEventListener('DOMContentLoaded', function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const searchParam = urlParams.get('search');
-    
-    if (searchParam) {
-        // Wait 1 second for maps to initialize, then search
-        setTimeout(() => {
-            window.highlightNeighborhood(searchParam);
-            
-            // Fill the search box so user sees what they searched
-            const searchBox = document.getElementById('globalSearchInput');
-            if(searchBox) searchBox.value = searchParam;
-            
-        }, 1000);
-    }
-});
-
-
-// --- 4. REVOLUTIONARY DATA EXPLORER (Table + Chart + Analytics) ---
-
-// Redefine the existing function so it triggers everything automatically
 function populateDataExplorer() {
-    console.log("Initializing Revolutionary Data Explorer...");
-    
-    // 1. Populate the Data Table
     const tableBody = document.getElementById('tableBody');
     if (tableBody) {
         tableBody.innerHTML = '';
-        dashboardData.neighborhoods.forEach((name, i) => {
+        camdenNeighborhoods.forEach((n) => {
+            const d = n.data || {};
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td class="ps-3 fw-bold">${name}</td>
-                <td>$${dashboardData.income[i].toLocaleString()}</td>
-                <td>${dashboardData.poverty[i]}%</td>
-                <td>${dashboardData.diabetes[i]}%</td>
-                <td>${dashboardData.obesity[i]}%</td>
-                <td>${dashboardData.asthma[i]}%</td>
+                <td class="ps-3 fw-bold">${n.name}</td>
+                <td>$${(d.income || 0).toLocaleString()}</td>
+                <td>${d.poverty_rate || 0}%</td>
+                <td>${d.diabetes || 0}%</td>
+                <td>${d.obesity || 0}%</td>
+                <td>${d.asthma || 0}%</td>
             `;
             tableBody.appendChild(row);
         });
     }
 
-    // 2. Setup Event Listeners for the Command Center
-    const ids = ['xVariable', 'yVariable', 'chartTypeSelector'];
-    ids.forEach(id => {
-        const el = document.getElementById(id);
-        if(el) {
-            // Remove old listeners to be safe, then add new one
-            el.replaceWith(el.cloneNode(true)); 
-            document.getElementById(id).addEventListener('change', renderCorrelationChart);
-        }
-    });
+    const xVar = document.getElementById('xVariable');
+    const yVar = document.getElementById('yVariable');
+    if (xVar) { xVar.removeEventListener('change', renderCorrelationChart); xVar.addEventListener('change', renderCorrelationChart); }
+    if (yVar) { yVar.removeEventListener('change', renderCorrelationChart); yVar.addEventListener('change', renderCorrelationChart); }
 
-    // 3. Render the Initial Chart
-    renderCorrelationChart();
+    setTimeout(renderCorrelationChart, 500);
 }
 
-// --- MAIN CHART RENDERING LOGIC ---
-let correlationChart = null;
-
+let correlationChart;
 function renderCorrelationChart() {
-    const ctx = document.getElementById('interactiveCorrelationChart');
+    const ctx = document.getElementById('correlationChart');
     if (!ctx) return;
 
-    // Get current selections
-    const xVar = document.getElementById('xVariable').value;
-    const yVar = document.getElementById('yVariable').value;
-    const chartType = document.getElementById('chartTypeSelector').value;
+    const xSelect = document.getElementById('xVariable');
+    const ySelect = document.getElementById('yVariable');
+    if (!xSelect || !ySelect) return;
 
-    // Configuration Map for Labels
-    const labelsMap = {
-        'income': { label: 'Median Income ($)', isCurrency: true },
-        'poverty': { label: 'Poverty Rate (%)', isCurrency: false },
-        'foodAccess': { label: 'Food Access Score', isCurrency: false },
-        'insurance': { label: 'Uninsured Rate (%)', isCurrency: false },
-        'education': { label: 'Education Rate (%)', isCurrency: false },
-        'diabetes': { label: 'Diabetes Rate (%)' },
-        'obesity': { label: 'Obesity Rate (%)' },
-        'asthma': { label: 'Asthma Rate (%)' },
-        'mentalDistress': { label: 'Mental Distress (%)' },
-        'highBloodPressure': { label: 'High Blood Pressure (%)' }
+    // Map HTML dropdown values to exact DB keys
+    const getMappedKey = (key) => {
+        const keyMap = {
+            'poverty': 'poverty_rate', 'insurance': 'lack_health_insurance', 'uninsured': 'lack_health_insurance',
+            'foodAccess': 'food_access', 'mentalDistress': 'mental_distress', 'highBloodPressure': 'high_blood_pressure'
+        };
+        return keyMap[key] || key;
     };
 
-    // 1. Prepare Data for Charting
-    let plotData = dashboardData.neighborhoods.map((name, i) => ({
-        name: name,
-        x: dashboardData[xVar] ? dashboardData[xVar][i] : 0,
-        y: dashboardData[yVar] ? dashboardData[yVar][i] : 0
-    }));
+    const actualX = getMappedKey(xSelect.value);
+    const actualY = getMappedKey(ySelect.value);
 
-    // 2. Run Statistical Analysis (Regression)
-    const stats = calculateRegression(plotData);
-    updateCorrelationBadge(stats.r);
-    updateInsightText(labelsMap[xVar].label, labelsMap[yVar].label, stats.r);
-
-    // 3. Build Chart Configuration
-    let chartConfig;
-
-    if (chartType === 'bar') {
-        // === MODE A: RANKED BAR CHART ===
-        plotData.sort((a, b) => a.x - b.x); // Sort Low to High
-
-        // Create a Gradient for the bars
-        const gradient = ctx.getContext('2d').createLinearGradient(0, 0, 0, 400);
-        gradient.addColorStop(0, 'rgba(54, 162, 235, 0.9)');
-        gradient.addColorStop(1, 'rgba(54, 162, 235, 0.2)');
-
-        chartConfig = {
-            type: 'bar',
-            data: {
-                labels: plotData.map(d => d.name),
-                datasets: [{
-                    label: labelsMap[yVar].label,
-                    data: plotData.map(d => d.y),
-                    backgroundColor: gradient,
-                    borderColor: 'rgba(54, 162, 235, 1)',
-                    borderWidth: 1,
-                    borderRadius: 3
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            afterLabel: function(context) {
-                                const raw = plotData[context.dataIndex];
-                                let xVal = labelsMap[xVar].isCurrency ? '$' + raw.x.toLocaleString() : raw.x + '%';
-                                return `${labelsMap[xVar].label}: ${xVal}`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: { ticks: { display: false }, title: { display: true, text: `Ranked by ${labelsMap[xVar].label} (Low → High)` } },
-                    y: { beginAtZero: false, title: { display: true, text: labelsMap[yVar].label } }
-                }
-            }
-        };
-    } else {
-        // === MODE B: SCATTER PLOT + TREND LINE ===
-        
-        // Calculate Trend Line Points
-        const minX = Math.min(...plotData.map(d => d.x));
-        const maxX = Math.max(...plotData.map(d => d.x));
-        const trendLine = [
-            { x: minX, y: (stats.m * minX) + stats.b },
-            { x: maxX, y: (stats.m * maxX) + stats.b }
-        ];
-
-        chartConfig = {
-            type: 'scatter',
-            data: {
-                datasets: [
-                    {
-                        label: 'Neighborhoods',
-                        data: plotData,
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        pointRadius: 6,
-                        pointHoverRadius: 9
-                    },
-                    {
-                        label: 'Trend Line',
-                        data: trendLine,
-                        type: 'line',
-                        borderColor: '#dc3545',
-                        borderWidth: 2,
-                        borderDash: [5, 5],
-                        pointRadius: 0,
-                        tension: 0
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                if (context.dataset.type === 'line') return null;
-                                let p = context.raw;
-                                let xStr = labelsMap[xVar].isCurrency ? '$' + p.x.toLocaleString() : p.x;
-                                return `${p.name}: ${xStr} vs ${p.y}%`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: { 
-                        type: 'linear', position: 'bottom', 
-                        title: { display: true, text: labelsMap[xVar].label },
-                        ticks: { callback: val => labelsMap[xVar].isCurrency ? '$' + val.toLocaleString() : val }
-                    },
-                    y: { title: { display: true, text: labelsMap[yVar].label } }
-                }
-            }
-        };
-    }
+    const scatterData = camdenNeighborhoods.map(n => {
+        const dataObj = n.data || {}; 
+        return { x: dataObj[actualX] || 0, y: dataObj[actualY] || 0, name: n.name };
+    });
 
     if (correlationChart) correlationChart.destroy();
-    correlationChart = new Chart(ctx, chartConfig);
-}
 
-// --- HELPER: MATH & STATISTICS ---
-function calculateRegression(data) {
-    const n = data.length;
-    let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
-    data.forEach(p => {
-        sumX += p.x; sumY += p.y;
-        sumXY += (p.x * p.y); sumX2 += (p.x * p.x); sumY2 += (p.y * p.y);
+    correlationChart = new Chart(ctx, {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Neighborhoods', data: scatterData,
+                backgroundColor: 'rgba(13, 110, 253, 0.6)', borderColor: 'rgba(13, 110, 253, 1)',
+                borderWidth: 1, pointRadius: 6, pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            layout: { padding: { top: 20, right: 30, bottom: 20, left: 10 } },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const p = context.raw;
+                            return `${p.name}: ${getMetricLabel(actualX)} ${p.x}, ${getMetricLabel(actualY)} ${p.y}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { title: { display: true, text: getMetricLabel(actualX) }, grace: '5%' },
+                y: { title: { display: true, text: getMetricLabel(actualY) }, grace: '5%' }
+            }
+        }
     });
-    
-    const m = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-    const b = (sumY - m * sumX) / n;
-    
-    const num = (n * sumXY) - (sumX * sumY);
-    const den = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
-    const r = den === 0 ? 0 : num / den;
-
-    return { m, b, r };
-}
-
-function updateCorrelationBadge(r) {
-    const badge = document.getElementById('rValue');
-    if (!badge) return;
-    
-    const absR = Math.abs(r);
-    let text = "Weak Link";
-    let color = "text-muted";
-
-    if (absR > 0.7) { text = "Very Strong Link"; color = "text-success"; }
-    else if (absR > 0.5) { text = "Strong Link"; color = "text-primary"; }
-    else if (absR > 0.3) { text = "Moderate Link"; color = "text-info"; }
-
-    badge.className = `fw-bold ${color}`;
-    badge.innerHTML = `${text} (r=${r.toFixed(2)})`;
-}
-
-function updateInsightText(xName, yName, r) {
-    const box = document.getElementById('correlationInsight');
-    if (!box) return;
-    
-    let msg = "";
-    if (r < -0.5) msg = `<strong>Protective Factor:</strong> Higher levels of <em>${xName}</em> are strongly associated with lower <em>${yName}</em>.`;
-    else if (r > 0.5) msg = `<strong>Risk Factor:</strong> As <em>${xName}</em> increases, <em>${yName}</em> tends to rise sharply.`;
-    else msg = `<strong>Complex Relationship:</strong> There is no simple linear link between <em>${xName}</em> and <em>${yName}</em>. Use the map to explore specific neighborhoods.`;
-
-    box.innerHTML = `<h6 class="alert-heading fw-bold text-primary"><i class="fas fa-robot me-2"></i>Preliminary Analysis</h6><p class="mb-0 text-muted">${msg}</p>`;
 }
 
 window.startTour = function() { alert('Welcome to the Camden Health Dashboard!'); };
 window.exportData = function(format) { alert(`Data export (${format}) coming soon.`); };
-
-console.log('Dashboard script loaded with GLOBAL DEFAULTS');
