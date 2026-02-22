@@ -843,20 +843,32 @@ function populateDataExplorer() {
     setTimeout(renderCorrelationChart, 500);
 }
 
+// --- INTERACTIVE DATA EXPLORATION CHART ---
 let correlationChart;
+
 function renderCorrelationChart() {
-    const ctx = document.getElementById('correlationChart');
-    if (!ctx) return;
+    const canvasEl = document.getElementById('interactiveCorrelationChart') || document.getElementById('correlationChart');
+    
+    if (!canvasEl) {
+        console.error("Canvas for Interactive Data Exploration not found in HTML.");
+        return;
+    }
+    
+    const ctx = canvasEl.getContext('2d');
 
     const xSelect = document.getElementById('xVariable');
     const ySelect = document.getElementById('yVariable');
     if (!xSelect || !ySelect) return;
 
-    // Map HTML dropdown values to exact DB keys
+    // 2. Map HTML dropdown values to exact DB keys
     const getMappedKey = (key) => {
         const keyMap = {
-            'poverty': 'poverty_rate', 'insurance': 'lack_health_insurance', 'uninsured': 'lack_health_insurance',
-            'foodAccess': 'food_access', 'mentalDistress': 'mental_distress', 'highBloodPressure': 'high_blood_pressure'
+            'poverty': 'poverty_rate', 
+            'insurance': 'lack_health_insurance', 
+            'uninsured': 'lack_health_insurance',
+            'foodAccess': 'food_access', 
+            'mentalDistress': 'mental_distress', 
+            'highBloodPressure': 'high_blood_pressure'
         };
         return keyMap[key] || key;
     };
@@ -864,39 +876,65 @@ function renderCorrelationChart() {
     const actualX = getMappedKey(xSelect.value);
     const actualY = getMappedKey(ySelect.value);
 
+    // 3. Extract the exact data points for X and Y
     const scatterData = camdenNeighborhoods.map(n => {
         const dataObj = n.data || {}; 
-        return { x: dataObj[actualX] || 0, y: dataObj[actualY] || 0, name: n.name };
+        return { 
+            x: dataObj[actualX] || 0, 
+            y: dataObj[actualY] || 0, 
+            name: n.name 
+        };
     });
 
-    if (correlationChart) correlationChart.destroy();
+    // 4. Destroy old chart if it exists to prevent overlapping
+    if (correlationChart) {
+        correlationChart.destroy();
+    }
 
+    // 5. Draw the fresh scatter plot
     correlationChart = new Chart(ctx, {
         type: 'scatter',
         data: {
             datasets: [{
-                label: 'Neighborhoods', data: scatterData,
-                backgroundColor: 'rgba(13, 110, 253, 0.6)', borderColor: 'rgba(13, 110, 253, 1)',
-                borderWidth: 1, pointRadius: 6, pointHoverRadius: 8
+                label: 'Neighborhoods', 
+                data: scatterData,
+                backgroundColor: 'rgba(13, 110, 253, 0.6)', 
+                borderColor: 'rgba(13, 110, 253, 1)',
+                borderWidth: 1, 
+                pointRadius: 6, 
+                pointHoverRadius: 8
             }]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
-            layout: { padding: { top: 20, right: 30, bottom: 20, left: 10 } },
+            responsive: true, 
+            maintainAspectRatio: false,
+            layout: { 
+                padding: { top: 20, right: 30, bottom: 20, left: 10 } 
+            },
             plugins: {
                 legend: { display: false },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
                             const p = context.raw;
-                            return `${p.name}: ${getMetricLabel(actualX)} ${p.x}, ${getMetricLabel(actualY)} ${p.y}`;
+                            // Add a '$' sign if the metric is income
+                            const xVal = actualX === 'income' ? '$' + p.x.toLocaleString() : p.x;
+                            const yVal = actualY === 'income' ? '$' + p.y.toLocaleString() : p.y;
+                            
+                            return `${p.name}: ${getMetricLabel(actualX)} ${xVal}, ${getMetricLabel(actualY)} ${yVal}`;
                         }
                     }
                 }
             },
             scales: {
-                x: { title: { display: true, text: getMetricLabel(actualX) }, grace: '5%' },
-                y: { title: { display: true, text: getMetricLabel(actualY) }, grace: '5%' }
+                x: { 
+                    title: { display: true, text: getMetricLabel(actualX) }, 
+                    grace: '5%' 
+                },
+                y: { 
+                    title: { display: true, text: getMetricLabel(actualY) }, 
+                    grace: '5%' 
+                }
             }
         }
     });
