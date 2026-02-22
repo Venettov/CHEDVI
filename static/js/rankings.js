@@ -1,10 +1,9 @@
-// CHEDVI - Rankings JavaScript 
+// CHEDVI - Rankings JavaScript (Live DB Sync Version)
 
 let rankingsData = []; // This will hold our final merged data
 let rankingsChart;
 
 // 1. HARDCODED FALLBACK DATA (Safety Net)
-// Used if the database fetch fails or a neighborhood is missing
 const camdenRankingsData = [
     { name: 'Gateway', diabetes: 17.0, obesity: 43.9, asthma: 12.1, mental_distress: 20.3, high_blood_pressure: 37.4, income: 26750, education: 69.34, food_access: 34.04, poverty_rate: 30.78, unemployment: 28.59, population: 1693, healthcare_access: 77.1, lack_health_insurance: 22.7 },
     { name: 'Bergen Square', diabetes: 15.7, obesity: 47.6, asthma: 11.7, mental_distress: 24.1, high_blood_pressure: 40.4, income: 12104, education: 57.70, food_access: 77.61, poverty_rate: 54.36, unemployment: 34.22, population: 2766, healthcare_access: 76.1, lack_health_insurance: 29.8 },
@@ -33,7 +32,6 @@ const camdenRankingsData = [
 window.initializeRankingsWithDB = function(dbResults) {
     console.log("✅ Rankings received live data. Syncing...");
     
-    // Merge DB results into our structure
     rankingsData = camdenRankingsData.map(neighborhood => {
         const fresh = dbResults.find(d => d.name === neighborhood.name);
         if (fresh) {
@@ -53,10 +51,10 @@ window.initializeRankingsWithDB = function(dbResults) {
                 lack_health_insurance: fresh.uninsured || neighborhood.lack_health_insurance
             };
         }
-        return neighborhood; // Use fallback if not found in DB
+        return neighborhood;
     });
 
-    sortAndRenderRankings();
+    window.sortAndRenderRankings();
 };
 
 // ==========================================
@@ -68,10 +66,27 @@ window.sortAndRenderRankings = function() {
     
     if (!metricElement || !sortElement) return;
 
-    const metric = metricElement.value;
+    const rawMetric = metricElement.value;
     const sortOrder = sortElement.value;
 
-    // Sort the data array based on selection
+    // MAP HTML VALUES TO DB KEYS
+    const keyMap = {
+        'poverty': 'poverty_rate',
+        'insurance': 'lack_health_insurance',
+        'uninsured': 'lack_health_insurance',
+        'foodAccess': 'food_access',
+        'mentalDistress': 'mental_distress',
+        'highBloodPressure': 'high_blood_pressure'
+    };
+    const metric = keyMap[rawMetric] || rawMetric;
+
+    // Update Header Text above the table
+    const headerEl = document.getElementById('valueHeader');
+    if (headerEl) {
+        headerEl.innerText = getMetricDisplayName(metric);
+    }
+
+    // Sort Data Array
     rankingsData.sort((a, b) => {
         const valA = a[metric] || 0;
         const valB = b[metric] || 0;
@@ -84,25 +99,44 @@ window.sortAndRenderRankings = function() {
 
 // --- Render the HTML Table ---
 function renderRankingsTable(data, metric) {
-    const tbody = document.getElementById('rankingsTableBody');
+    const tbody = document.getElementById('rankingsBody'); // Fixed ID
     if (!tbody) return;
     tbody.innerHTML = '';
 
     data.forEach((row, index) => {
         const tr = document.createElement('tr');
         
+        let rawValue = row[metric] || 0;
+        let valDisplay = rawValue;
+        
         // Format Currency vs Percentage vs Raw Number
-        let valDisplay = row[metric];
         if (metric === 'income') {
-            valDisplay = `$${row[metric].toLocaleString()}`;
+            valDisplay = `$${rawValue.toLocaleString()}`;
         } else if (metric !== 'population' && metric !== 'food_access') {
-            valDisplay = `${row[metric]}%`;
+            valDisplay = `${rawValue}%`;
+        } else {
+            valDisplay = rawValue.toLocaleString();
+        }
+
+        // Restore Badge Logic
+        let badgeClass = 'bg-secondary';
+        let badgeText = 'Neutral';
+        
+        if (metric === 'income') {
+            if (rawValue > 50000) { badgeClass = 'bg-success'; badgeText = 'High'; }
+            else if (rawValue < 25000) { badgeClass = 'bg-danger'; badgeText = 'Critical'; }
+            else { badgeClass = 'bg-warning text-dark'; badgeText = 'Medium'; }
+        } else if (['diabetes', 'poverty_rate', 'obesity', 'asthma', 'mental_distress', 'lack_health_insurance'].includes(metric)) {
+            if (rawValue > 20) { badgeClass = 'bg-danger'; badgeText = 'High Risk'; }
+            else if (rawValue < 15) { badgeClass = 'bg-success'; badgeText = 'Low Risk'; }
+            else { badgeClass = 'bg-warning text-dark'; badgeText = 'Moderate'; }
         }
         
         tr.innerHTML = `
-            <td class="fw-bold">${index + 1}</td>
+            <td class="ps-4"><strong>#${index + 1}</strong></td>
             <td>${row.name}</td>
             <td class="text-primary fw-bold">${valDisplay}</td>
+            <td><span class="badge ${badgeClass}">${badgeText}</span></td>
             <td>
                 <button class="btn btn-sm btn-outline-primary" onclick="viewNeighborhoodRankingDetails('${row.name}')">
                     <i class="fas fa-search-plus"></i>
@@ -118,17 +152,20 @@ function updateRankingsChart(data, metric) {
     const ctx = document.getElementById('rankingsChart');
     if (!ctx) return;
 
+    // Slice for Top 10 visualization!
+    const top10Data = data.slice(0, 10);
+
     if (rankingsChart) rankingsChart.destroy();
 
     rankingsChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: data.map(d => d.name),
+            labels: top10Data.map(d => d.name),
             datasets: [{
                 label: getMetricDisplayName(metric),
-                data: data.map(d => d[metric]),
-                backgroundColor: 'rgba(13, 110, 253, 0.7)',
-                borderColor: 'rgba(13, 110, 253, 1)',
+                data: top10Data.map(d => d[metric]),
+                backgroundColor: 'rgba(54, 162, 235, 0.6)', // Restored original blue
+                borderColor: 'rgba(54, 162, 235, 1)',
                 borderWidth: 1,
                 borderRadius: 4
             }]
@@ -182,7 +219,6 @@ function getMetricDisplayName(metric) {
     return metricNames[metric] || metric;
 }
 
-// Global function to show details on click
 window.viewNeighborhoodRankingDetails = function(name) {
     alert(`Detailed ranking information for ${name} will be available in the next update.`);
 };
@@ -194,21 +230,24 @@ window.exportToCSV = function() {
         return;
     }
 
-    const metric = document.getElementById('metricSelector').value;
-    const metricLabel = getMetricDisplayName(metric).replace(/,/g, ''); // Clean commas
+    const metricSelect = document.getElementById('metricSelector');
+    let metric = metricSelect ? metricSelect.value : 'diabetes';
+    
+    // Map the key for export
+    const keyMap = { 'poverty': 'poverty_rate', 'insurance': 'lack_health_insurance' };
+    metric = keyMap[metric] || metric;
 
-    // Create CSV Headers dynamically based on what they are currently viewing
+    const metricLabel = getMetricDisplayName(metric).replace(/,/g, ''); 
+
     let csvContent = "data:text/csv;charset=utf-8,";
     csvContent += `Rank,Neighborhood,${metricLabel}\n`;
 
-    // Add Rows
     rankingsData.forEach(function(row, index) {
         let val = row[metric];
         let rowString = `${index + 1},"${row.name}",${val}`;
         csvContent += rowString + "\n";
     });
 
-    // Encode and Create Download Link
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
