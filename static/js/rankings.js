@@ -99,7 +99,7 @@ window.sortAndRenderRankings = function() {
 
 // --- Render the HTML Table ---
 function renderRankingsTable(data, metric) {
-    const tbody = document.getElementById('rankingsBody'); // Fixed ID
+    const tbody = document.getElementById('rankingsBody'); 
     if (!tbody) return;
     tbody.innerHTML = '';
 
@@ -132,16 +132,12 @@ function renderRankingsTable(data, metric) {
             else { badgeClass = 'bg-warning text-dark'; badgeText = 'Moderate'; }
         }
         
+        // The button <td> has been removed below:
         tr.innerHTML = `
             <td class="ps-4"><strong>#${index + 1}</strong></td>
             <td>${row.name}</td>
             <td class="text-primary fw-bold">${valDisplay}</td>
             <td><span class="badge ${badgeClass}">${badgeText}</span></td>
-            <td>
-                <button class="btn btn-sm btn-outline-primary" onclick="viewNeighborhoodRankingDetails('${row.name}')">
-                    <i class="fas fa-search-plus"></i>
-                </button>
-            </td>
         `;
         tbody.appendChild(tr);
     });
@@ -218,10 +214,6 @@ function getMetricDisplayName(metric) {
     };
     return metricNames[metric] || metric;
 }
-
-window.viewNeighborhoodRankingDetails = function(name) {
-    alert(`Detailed ranking information for ${name} will be available in the next update.`);
-};
 
 // Global CSV Export Function
 window.exportToCSV = function() {
