@@ -283,8 +283,6 @@
         } else {
             console.log("Using Live Database Data.");
         }
-        
-        if(sourceIndicator) sourceIndicator.innerText = `Source: ${dataSource}`;
 
         // Transform Data (Normalize Keys & Types)
         const realCamdenData = rawDbData.map(d => {
