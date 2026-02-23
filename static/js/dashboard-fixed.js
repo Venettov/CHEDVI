@@ -184,26 +184,26 @@ function syncDatabaseWithMaps(dbData) {
         neighborhood.data = neighborhood.data || {};
         
         if (freshData) {
-            // Helper function to find a value even if keys vary slightly (e.g., depression vs depression_rate)
-            const findVal = (primary, secondary) => {
-                return freshData[primary] !== undefined ? freshData[primary] : (freshData[secondary] || 0);
+            // Helper: Find value under multiple possible DB column names
+            const findVal = (key1, key2) => {
+                if (freshData[key1] !== undefined && freshData[key1] !== null) return parseFloat(freshData[key1]);
+                if (key2 && freshData[key2] !== undefined && freshData[key2] !== null) return parseFloat(freshData[key2]);
+                return 0;
             };
 
             neighborhood.data = {
-                diabetes: findVal('diabetes', 'diabetes_rate'),
-                obesity: findVal('obesity', 'obesity_rate'),
-                asthma: findVal('asthma', 'asthma_rate'),
-                mental_distress: findVal('mental_distress', 'mentalDistress'),
+                diabetes: findVal('diabetes_rate', 'diabetes'),
+                obesity: findVal('obesity_rate', 'obesity'),
+                asthma: findVal('asthma_rate', 'asthma'),
+                mental_distress: findVal('mental_distress_rate', 'mentalDistress'),
                 high_blood_pressure: findVal('high_blood_pressure', 'highBloodPressure'),
-                income: findVal('income', 'median_income'),
-                education: findVal('education', 'education_rate'),
-                food_access: findVal('food_access', 'foodAccess'),
+                income: findVal('median_income', 'income'),
+                education: findVal('high_school_higher', 'education'),
+                food_access: findVal('food_access_score', 'foodAccess'),
                 poverty_rate: findVal('poverty_rate', 'poverty'),
-                unemployment: findVal('unemployment', 'unemployment_rate'),
+                unemployment: findVal('unemployment_rate', 'unemployment'),
                 lack_health_insurance: findVal('lack_health_insurance', 'uninsured'),
-                
-                // FIXED KEYS:
-                depression_rate: findVal('depression', 'depression_rate'),
+                depression_rate: findVal('depression_rate', 'depression'),
                 no_physical_leisure: findVal('no_physical_leisure', 'noPhysicalLeisure')
             };
         } else {
@@ -682,7 +682,7 @@ function renderCorrelationChart() {
             'insurance': 'lack_health_insurance',
             'uninsured': 'lack_health_insurance',
             'education': 'education',
-            'noPhysicalLeisure': 'no_physical_leisure',
+            'noPhysicalLeisure': 'no_physical_leisure', // Must be here for Interactive Chart
 
             // Health Outcomes (Y-Axis)
             'diabetes': 'diabetes',
@@ -690,11 +690,9 @@ function renderCorrelationChart() {
             'asthma': 'asthma',
             'mentalDistress': 'mental_distress',
             'highBloodPressure': 'high_blood_pressure',
-            'depression': 'depression_rate'
+            'depression': 'depression_rate' // Must be here for Interactive Chart
         };
 
-        // This ensures if the key is already correct (like 'income'), 
-        // it just returns it; otherwise, it uses the map.
         return keyMap[key] || key;
     };
 
