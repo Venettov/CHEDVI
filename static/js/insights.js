@@ -42,23 +42,23 @@ function createIncomeHealthChart() {
     const explanations = {
         'diabetes': { 
             title: 'Income & Diabetes', 
-            main: 'Higher-income tracts like Waterfront South ($54k) show significantly more stability in diabetes rates compared to those under $20k.', 
-            detail: 'The data reveals that as median income crosses the $50,000 threshold, the prevalence of type 2 diabetes drops by nearly 30%, likely due to increased healthcare access and more consistent nutritional options.' 
+            main: 'Communities with lower median incomes have higher diabetes rates, declining from 20-23% in low-income areas to 13-20% in higher-income communities. The relationship shows moderate strength, with a 10 percentage-point range across the income spectrum. Notable variation exists at each income level, with communities earning similar amounts showing up to 5-10 percentage point differences in diabetes prevalence.', 
+            detail: 'Lower income restricts access to healthy food, regular healthcare visits, diabetes medications, and safe spaces for physical activity. It also increases chronic stress, which directly affects blood sugar regulation. Higher medical costs from diabetes can further trap families in poverty, creating a cycle where economic hardship and disease reinforce each other.' 
         },
         'obesity': { 
             title: 'Income & Obesity', 
-            main: 'While obesity is high across the city, the "Income Shield" is visible in Waterfront South.', 
-            detail: 'Despite being an industrial-adjacent area, Waterfront South’s higher median income provides a buffer, with obesity rates lower than the 47% seen in Bergen Square, Camden’s lowest-income tract.' 
+            main: 'There is a clear inverse relationship: as neighborhood income rises, obesity rates tend to fall. The red line shows obesity declining from approximately 42-48% in the lowest-income communities to 36-42% in higher-income areas. However, the relationship shows considerable fluctuation, with some middle-income communities experiencing obesity rates similar to both poor and wealthy areas, indicating income alone does not determine obesity outcomes.', 
+            detail: 'Low-income areas often lack affordable gyms and fresh produce markets (food deserts), making a healthy lifestyle prohibitively expensive for many residents in both money and time. When you are working two jobs to make ends meet, there is no time for the gym or meal prep. When processed foods cost less than fresh vegetables, and you are on a tight budget, the choice is economically rational even if unhealthy. Additionally, chronic economic stress affects metabolism and fat storage through cortisol pathways.' 
         },
         'highBloodPressure': { 
             title: 'Income & Hypertension', 
-            main: 'Income stability in tracts like Waterfront South correlates with lower hypertension reports.', 
-            detail: 'Financial security reduces the "Toxic Stress" that drives chronic high blood pressure. Residents in the $50k+ income bracket show better cardiovascular health indicators than those in the city\'s high-poverty quadrants.' 
+            main: 'Financial stress and lower income are strong predictors of high blood pressure in Camden neighborhoods. The red line shows blood pressure rates ranging from approximately 35-38% in wealthier communities to 45-49% in the poorest areas. The relationship is relatively consistent with some fluctuation in the middle-income range, where blood pressure rates vary between 38-48% despite similar income levels.', 
+            detail: 'Chronic financial stress releases cortisol, which raises blood pressure and damages the cardiovascular system over time. Lower-income residents also face a double burden: they are more likely to consume cheaper processed foods high in sodium (a major hypertension risk factor), AND less likely to afford blood pressure medications or have insurance for regular monitoring and treatment. This creates a vicious cycle where poverty causes hypertension, and untreated hypertension leads to expensive medical crises that further impoverish families.' 
         },
         'mentalDistress': { 
             title: 'Income & Mental Health', 
-            main: 'Economic security in areas like Waterfront South acts as a stabilizer for community mental health.', 
-            detail: 'The lower reports of frequent mental distress in higher-income neighborhoods underscore the link between financial stability and psychological well-being.' 
+            main: 'Mental distress reports are nearly double in the lowest-income neighborhoods (around 24-25%) compared to the wealthiest ones (around 19-20%). The red line shows a general downward trend as income rises, but with notable fluctuations—some moderate-income communities show mental distress as high as very low-income areas. The relationship is present but not perfectly linear.', 
+            detail: 'The daily burden of poverty—housing instability, bill anxiety, food insecurity, and lack of resources—takes a severe toll on mental wellbeing. What makes this particularly devastating is that low-income communities typically have the least access to mental health services while experiencing the greatest need. The stress of economic insecurity is not just psychological—it is a constant cognitive load that affects decision-making, relationships, physical health, and the ability to escape poverty itself.' 
         },
         'asthma': { 
             title: 'Income & Environmental Impact', 
@@ -67,8 +67,8 @@ function createIncomeHealthChart() {
         },
         'poverty': { 
             title: 'The Wealth-Poverty Gap', 
-            main: 'Waterfront South stands as an example of economic resilience within Camden.', 
-            detail: 'While many Camden neighborhoods are trapped in a low-income/high-poverty cycle, Waterfront South demonstrates that higher median incomes are essential for breaking that pattern and improving overall health equity.' 
+            main: 'This bar chart reveals a stark inverse relationship between median income and poverty rate. As median income drops from $58,000 to $12,000 across neighborhoods, poverty rate skyrockets from approximately 12% to 54%. The red line tracking poverty shows a dramatic upward trend as income bars decline. The lowest-income communities experience poverty rates over 4 times higher than the wealthiest communities.', 
+            detail: 'In the most distressed neighborhoods, over 50% of families live below the poverty line, creating a concentrated cycle where essential health resources become unaffordable luxuries. This is not just about individual hardship—when poverty exceeds 40-50% in a community, it fundamentally changes the neighborhood ecosystem: businesses close, services withdraw, tax base erodes, schools lose funding, and collective resources disappear. Breaking this cycle requires addressing both individual income AND community-level disinvestment.' 
         }
     };
 
@@ -155,23 +155,23 @@ function createFoodObesityChart() {
     const explanations = {
         'obesity': { 
             title: 'The 44% Obesity Cluster', 
-            main: 'Obesity rates exceed 44% in over half of Camden neighborhoods, peaking at 51.4% in Centerville.', 
-            detail: 'The data shows a "High-Risk Cluster" (Liberty Park, Bergen Square, Centerville) where obesity remains high regardless of the food access score, indicating that calorie-dense processed foods are likely the dominant dietary source city-wide.' 
+            main: 'Communities with lower food access scores show somewhat higher obesity rates, but this is one of the weaker correlations. The relationship spans from approximately 36-44% obesity in better access areas to 44-51% in poor access communities, with substantial overlap. Communities with identical food access scores show obesity rates varying by 8-12 percentage points, indicating food access is a poor predictor of obesity outcomes.', 
+            detail: 'Without easy access to fresh, nutritious food, residents often rely on processed options that are high in calories but low in nutrients, directly contributing to weight gain. However, the weak correlation reveals that simply opening a grocery store wont solve obesity—affordability matters as much as proximity, time to cook matters, nutrition knowledge matters, and cultural food preferences matter. The scatter shows that obesity is driven more by economic constraints, built environment, and lifestyle factors than by food access alone.' 
         },
         'diabetes': { 
             title: 'Food Access & Diabetes', 
-            main: 'Low food access correlates with a 21.5% diabetes prevalence in Whitman Park.', 
-            detail: 'Managing blood sugar requires consistent access to fresh produce. When a neighborhood score is near zero (like Pyne Point at 0.31), residents face a "Geographic Tax" on health due to the travel required to find healthy food.' 
+            main: 'Better food access is associated with lower diabetes rates, but this is one of the weaker relationships observed. Communities with identical food access scores show diabetes rates spanning 5 percentage points. The broad scatter pattern suggests that while the food environment plays a role, it iss not a dominant predictor of diabetes outcomes in Camden.', 
+            detail: 'Having a grocery store nearby does nott guarantee diabetes prevention if residents cannot afford healthy options, lack knowledge about diabetes-friendly cooking, cannot access healthcare for screening and management, or face time constraints that make meal preparation difficult. Food access creates opportunity, but does not overcome other barriers to diabetes prevention.' 
         },
         'highBloodPressure': { 
             title: 'Food Access & Hypertension', 
-            main: 'High-sodium diets replace fresh options in low-access zones.', 
-            detail: 'The correlation suggests that a lack of heart-healthy produce leads to a higher reliance on shelf-stable processed goods, contributing to Camden’s hypertension crisis.' 
+            main: 'Limited food access correlates with higher blood pressure rates, showing communities with poor access at 40-49% prevalence versus 36-45% in better access areas. This represents one of the clearer food-health relationships in the dataset. However, a 12 percentage point spread exists among communities with similar food access scores.', 
+            detail: 'Reliance on processed, shelf-stable foods in food deserts means higher sodium intake, a direct contributor to hypertension. Beyond diet, many residents in these areas lack blood pressure monitoring, cannot afford antihypertensive medications, or do not know they have high blood pressure. Untreated hypertension leads to heart attacks, strokes, and kidney disease.' 
         },
         'mentalDistress': { 
             title: 'Food Access & Mental Health', 
-            main: 'Food insecurity acts as a persistent psychological stressor on Camden families.', 
-            detail: 'The uncertainty of "food deserts" compounds the mental health burden. Areas with low access scores show higher reports of frequent mental distress, reflecting the intersection of nutritional gaps and economic anxiety.' 
+            main: 'Communities with limited food access show moderately elevated mental distress (22-26%) compared to better access areas (19-22%). The relationship shows moderate strength, with mental health concerns prevalent across the entire food access spectrum. Even the best food access communities still have nearly 1 in 5 residents experiencing frequent mental distress.', 
+            detail: 'The daily uncertainty of not knowing where your next meal will come from creates chronic anxiety and stress. Food insecurity forces impossible choices between food, rent, and medicine. Poor nutrition from limited access also affects brain chemistry, mood regulation, and energy levels, making it harder to cope with other life challenges.' 
         },
         'asthma': { 
             title: 'Nutrition & Respiratory Resilience', 
@@ -180,8 +180,8 @@ function createFoodObesityChart() {
         },
         'poverty': { 
             title: 'The Nutrition-Poverty Intersection', 
-            main: 'In Camden, low food access and high poverty are nearly synonymous.', 
-            detail: 'This visualization maps the "Double Burden": families with the least financial capital also face the highest geographic barriers to the food required to maintain health.' 
+            main: 'This is the strongest correlation in the dataset. Communities with higher poverty rates consistently show lower food access scores, with the relationship spanning from 54% poverty/poor access to 12% poverty/good access. Despite the strong pattern, a 4-point spread in food access still exists among communities with similar poverty rates.', 
+            detail: 'Grocery chains avoid high-poverty areas due to perceived lower profitability and higher risk, leaving residents dependent on corner stores with limited selection and higher prices. Residents in poor neighborhoods often lack cars and face limited public transit, making it difficult to reach distant supermarkets. This creates a "poverty tax" where the poorest pay most for the lowest quality food.' 
         }
     };
     
@@ -262,28 +262,28 @@ function createEducationHealthChart() {
     const explanations = {
         'diabetes': { 
             title: 'Education & Diabetes Resilience', 
-            main: 'Higher graduation rates do not always guarantee lower diabetes rates in Camden.', 
-            detail: 'While Cramer Hill has the lowest HS grad rate (25.4%), neighborhoods with higher education like Dudley (37.8%) and Liberty Park (55.4%) actually report higher diabetes prevalence (22-23%), suggesting environmental factors often override education.' 
+            main: 'Higher graduation rates associate with lower diabetes prevalence, ranging from 20-23% in low-education communities to 13-19% in high-education areas. The relationship is moderate, with communities at similar education levels showing diabetes rates differing by 6-9 percentage points. A general downward trend is visible but with considerable variation.', 
+            detail: 'Education improves health literacy—the ability to read nutrition labels, understand medication instructions, recognize diabetes symptoms, and navigate the healthcare system. Higher educational attainment also typically means better health insurance, regular access to preventive care, and jobs with sick leave that allow time for doctor appointments and diabetes self-management.' 
         },
         'obesity': { 
             title: 'Education & Obesity', 
-            main: 'Educational attainment acts as a proxy for "Health Literacy" in our neighborhood data.', 
-            detail: 'In neighborhoods where graduation rates are lower, there is often a higher prevalence of metabolic disease due to systemic barriers to health information and preventative resources.' 
+            main: 'This is the weakest correlation in the dataset. Communities across vastly different education levels show remarkably similar obesity rates clustering around 40-48%. Communities with 40% graduation show rates (38-44%) that completely overlap with 60% graduation communities (43-48%). Education appears to be a poor predictor of obesity outcomes.', 
+            detail: 'Obesity reflects factors that cut across education levels: neighborhood walkability, availability of parks and recreation facilities, proximity to fast food versus healthy options, work schedules that leave no time for exercise, and food prices that make calorie-dense processed foods the most affordable choice. The weak relationship suggests interventions should focus on environment and access rather than education.' 
         },
         'poverty': { 
             title: 'The Education-Poverty Cycle', 
-            main: 'Graduation rates are the strongest predictor of neighborhood poverty levels.', 
-            detail: 'The data shows a clear inverse relationship: as graduation rates climb toward 60% in areas like Fairview, poverty rates drop significantly, proving education is a key tool for economic mobility.' 
+            main: 'This shows one of the strongest correlations observed, with higher graduation rates strongly associated with lower poverty. The relationship spans from 54% poverty in low-education areas to as low as 11% in some moderate-education communities. However, dramatic outliers exist, including a 90% graduation community with 41% poverty—higher than many communities with half the graduation rate.', 
+            detail: 'High school graduation opens access to jobs that pay living wages, while lacking a diploma excludes people from most employment above minimum wage. The generational cycle is self-perpetuating: children in poor families face barriers to graduation, limiting their future earning potential and repeating the pattern. Breaking this cycle is difficult but not impossible, as outlier communities demonstrate.' 
         },
         'mentalDistress': { 
             title: 'Education & Mental Well-being', 
-            main: 'Higher educational attainment provides better coping mechanisms for social stress.', 
-            detail: 'The data reflects that neighborhoods with higher graduation rates generally report lower instances of frequent mental distress, likely due to better job security and reduced financial anxiety.' 
+            main: 'Communities with lower education show slightly higher mental distress (21-26%) versus higher education areas (19-22%), but this is one of the weakest relationships observed. Most communities cluster tightly around 20-23% mental distress regardless of education level. A 90% graduation community shows nearly identical mental distress to many 40-50% graduation communities.', 
+            detail: 'Mental distress appears more evenly distributed across education levels than other health outcomes, suggesting it stems from experiences common to many communities: economic uncertainty, social isolation, lack of accessible mental health services, and exposure to trauma. Education may provide some protective factors like problem-solving skills and social networks, but does not shield communities from mental health challenges.' 
         },
         'income': { 
             title: 'Education & Income', 
-            main: 'High school graduation is the primary gatekeeper for income levels in Camden.', 
-            detail: 'This chart shows a near-perfect correlation: every 10% increase in the graduation rate corresponds to a measurable spike in median household income, as seen in the contrast between Cramer Hill and Fairview.' 
+            main: 'This shows a strong positive correlation, with higher graduation rates associated with higher median incomes ranging from $12k-$30k in low-education areas to $26k-$58k in high-education communities. Despite the strong pattern, communities with identical graduation rates show income differences of $15k-$25k, and some lower-education communities out-earn higher-education ones.', 
+            detail: 'Educational credentials serve as gatekeepers to better-paying jobs in todays economy. High school graduation is often the minimum requirement for jobs offering living wages, benefits, and career advancement. However, the exceptions reveal that strong local industries—manufacturing, trades, union jobs—can provide middle-class incomes without requiring high educational attainment, showing alternative pathways to economic security exist.' 
         }
     };
 
@@ -397,8 +397,8 @@ function createHousingHealthChart() {
     const explanations = {
         'asthma': { 
             title: 'Housing Stability & Asthma', 
-            main: 'Neighborhoods with high vacancy, like Gateway (29%), see different respiratory trends than stable ones like Stockton (2.9%).', 
-            detail: 'High vacancy leads to deteriorating adjacent structures, which increase environmental triggers like mold and dust. However, asthma remains high (13.4%) in densely populated areas like Centerville despite lower vacancy.' 
+            main: 'Communities with more housing problems show elevated asthma rates (21-26%) compared to better housing areas (19-21%). The bubble size reveals that the poorest communities (largest bubbles) experience a "triple threat"—they cluster at the intersection of high poverty, severe housing problems, and elevated asthma. This visualization effectively shows how disadvantages compound.', 
+            detail: 'Substandard housing exposes residents to mold, pest allergens, poor ventilation, and environmental toxins that trigger and worsen asthma. Children in these conditions miss school due to asthma attacks, parents miss work, and medical costs accumulate. Overcrowding spreads respiratory infections that exacerbate asthma. These communities often also sit near highways and industrial facilities, adding outdoor air pollution to indoor housing hazards.' 
         },
         'leadRisk': { 
             title: 'Lead Exposure Risk Index', 
