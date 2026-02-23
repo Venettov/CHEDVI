@@ -180,31 +180,32 @@ document.addEventListener('DOMContentLoaded', function() {
 function syncDatabaseWithMaps(dbData) {
     camdenNeighborhoods.forEach(neighborhood => {
         const freshData = dbData.find(d => d.name === neighborhood.name);
+        const idx = fallbackData.neighborhoods.indexOf(neighborhood.name); // Get fallback index
         
         neighborhood.data = neighborhood.data || {};
         
         if (freshData) {
-            // Helper: Find value under multiple possible DB column names
-            const findVal = (key1, key2) => {
+            const findVal = (key1) => {
                 if (freshData[key1] !== undefined && freshData[key1] !== null) return parseFloat(freshData[key1]);
-                if (key2 && freshData[key2] !== undefined && freshData[key2] !== null) return parseFloat(freshData[key2]);
-                return 0;
+                return undefined; // Return undefined if the API didn't send it
             };
 
             neighborhood.data = {
-                diabetes: findVal('diabetes_rate', 'diabetes'),
-                obesity: findVal('obesity_rate', 'obesity'),
-                asthma: findVal('asthma_rate', 'asthma'),
-                mental_distress: findVal('mental_distress_rate', 'mentalDistress'),
-                high_blood_pressure: findVal('high_blood_pressure', 'highBloodPressure'),
-                income: findVal('median_income', 'income'),
-                education: findVal('high_school_higher', 'education'),
-                food_access: findVal('food_access_score', 'foodAccess'),
-                poverty_rate: findVal('poverty_rate', 'poverty'),
-                unemployment: findVal('unemployment_rate', 'unemployment'),
-                lack_health_insurance: findVal('lack_health_insurance', 'uninsured'),
-                depression_rate: findVal('depression_rate', 'depression'),
-                no_physical_leisure: findVal('no_physical_leisure', 'noPhysicalLeisure')
+                diabetes: findVal('diabetes_rate') || fallbackData.diabetes[idx],
+                obesity: findVal('obesity_rate') || fallbackData.obesity[idx],
+                asthma: findVal('asthma_rate') || fallbackData.asthma[idx],
+                mental_distress: findVal('mental_distress_rate') || fallbackData.mentalDistress[idx],
+                high_blood_pressure: findVal('high_blood_pressure') || fallbackData.highBloodPressure[idx],
+                income: findVal('median_income') || fallbackData.income[idx],
+                education: findVal('high_school_higher') || fallbackData.education[idx],
+                food_access: findVal('food_access_score') || fallbackData.foodAccess[idx],
+                poverty_rate: findVal('poverty_rate') || fallbackData.poverty[idx],
+                unemployment: findVal('unemployment_rate') || fallbackData.unemployment[idx],
+                lack_health_insurance: findVal('lack_health_insurance') || fallbackData.insurance[idx],
+                
+                // IF THE API FORGETS TO SEND THESE, STEAL THEM FROM THE FALLBACK ARRAYS:
+                depression_rate: findVal('depression_rate') || fallbackData.depression[idx],
+                no_physical_leisure: findVal('no_physical_leisure') || fallbackData.noPhysicalLeisure[idx]
             };
         } else {
             neighborhood.data = {};
@@ -602,8 +603,6 @@ window.highlightNeighborhood = function(query) {
 // Inside dashboard-fixed.js
 function populateDataExplorer() {
     console.log("Initializing Revolutionary Data Explorer...");
-    
-    // 1. Populate the Data Table SAFELY using the camdenNeighborhoods array directly
     const tableBody = document.getElementById('tableBody');
     if (tableBody) {
         tableBody.innerHTML = '';
@@ -611,7 +610,7 @@ function populateDataExplorer() {
             const d = n.data || {};
             const row = document.createElement('tr');
             
-            // Build row with all values matching the new headers
+            // Added Depression and No Leisure to the end of the row
             row.innerHTML = `
                 <td class="ps-3 fw-bold">${n.name}</td>
                 <td>$${(d.income || 0).toLocaleString()}</td>
@@ -624,30 +623,20 @@ function populateDataExplorer() {
                 <td>${d.education || 0}%</td>
                 <td>${d.mental_distress || 0}%</td>
                 <td>${d.high_blood_pressure || 0}%</td>
+                <td class="table-info fw-bold">${d.depression_rate || 0}%</td>
+                <td class="table-info fw-bold">${d.no_physical_leisure || 0}%</td>
             `;
             tableBody.appendChild(row);
         });
     }
-
-    // 2. Setup Event Listeners for ALL Chart Selectors
-    const xVar = document.getElementById('xVariable');
-    const yVar = document.getElementById('yVariable');
-    const typeVar = document.getElementById('chartTypeSelector');
     
-    if (xVar) {
-        xVar.removeEventListener('change', renderCorrelationChart);
-        xVar.addEventListener('change', renderCorrelationChart);
-    }
-    if (yVar) {
-        yVar.removeEventListener('change', renderCorrelationChart);
-        yVar.addEventListener('change', renderCorrelationChart);
-    }
-    if (typeVar) {
-        typeVar.removeEventListener('change', renderCorrelationChart);
-        typeVar.addEventListener('change', renderCorrelationChart);
-    }
+    // Refresh chart listeners
+    const controls = ['xVariable', 'yVariable', 'chartTypeSelector'];
+    controls.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('change', renderCorrelationChart);
+    });
 
-    // 3. Render the Initial Chart
     setTimeout(renderCorrelationChart, 500);
 }
 
@@ -675,24 +664,15 @@ function renderCorrelationChart() {
     // Map HTML dropdown values to exact DB keys
     const getMappedKey = (key) => {
         const keyMap = {
-            // Social Determinants / Influence (X-Axis)
-            'income': 'income',
-            'poverty': 'poverty_rate',
-            'foodAccess': 'food_access',
-            'insurance': 'lack_health_insurance',
+            'poverty': 'poverty_rate', 
+            'insurance': 'lack_health_insurance', 
             'uninsured': 'lack_health_insurance',
-            'education': 'education',
-            'noPhysicalLeisure': 'no_physical_leisure', // Must be here for Interactive Chart
-
-            // Health Outcomes (Y-Axis)
-            'diabetes': 'diabetes',
-            'obesity': 'obesity',
-            'asthma': 'asthma',
-            'mentalDistress': 'mental_distress',
+            'foodAccess': 'food_access', 
+            'mentalDistress': 'mental_distress', 
             'highBloodPressure': 'high_blood_pressure',
-            'depression': 'depression_rate' // Must be here for Interactive Chart
+            'depression': 'depression_rate',        // Connects chart dropdown to data
+            'noPhysicalLeisure': 'no_physical_leisure' // Connects chart dropdown to data
         };
-
         return keyMap[key] || key;
     };
 
