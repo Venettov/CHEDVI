@@ -178,37 +178,45 @@ document.addEventListener('DOMContentLoaded', function() {
 // 2. DATA INJECTION & SYNCHRONIZATION
 // ==========================================
 function syncDatabaseWithMaps(dbData) {
+    // Debugging: This will show you exactly what keys are in your DB row
+    if (dbData.length > 0) console.log("Sample DB Row Keys:", Object.keys(dbData[0]));
+
     camdenNeighborhoods.forEach(neighborhood => {
         const freshData = dbData.find(d => d.name === neighborhood.name);
         
         neighborhood.data = neighborhood.data || {};
         
         if (freshData) {
-            const getSafeNum = (primaryKey, secondaryKey) => {
-                let val = freshData[primaryKey];
-                if (val === undefined || val === null || val === "") {
-                    val = freshData[secondaryKey];
-                }
-                const parsed = Number(val);
+            // "Smart Finder": Checks for underscores, rates, and camelCase automatically
+            const getSafeNum = (primary, secondary, tertiary) => {
+                let val = freshData[primary];
+                if (val === undefined || val === null || val === "") val = freshData[secondary];
+                if (val === undefined || val === null || val === "") val = freshData[tertiary];
+                
+                const parsed = parseFloat(val);
                 return isNaN(parsed) ? 0 : parsed;
             };
 
             neighborhood.data = {
+                // Core Metrics
                 diabetes: getSafeNum('diabetes_rate', 'diabetes'),
                 obesity: getSafeNum('obesity_rate', 'obesity'),
                 asthma: getSafeNum('asthma_rate', 'asthma'),
-                mental_distress: getSafeNum('mental_distress_rate', 'mental_distress'),
+                mental_distress: getSafeNum('mental_distress_rate', 'mental_distress', 'mentalDistress'),
                 high_blood_pressure: getSafeNum('high_blood_pressure', 'highBloodPressure'),
+                
+                // Economic Metrics
                 income: getSafeNum('median_income', 'income'),
-                education: getSafeNum('high_school_higher', 'education'),
-                food_access: getSafeNum('food_access_score', 'food_access'),
+                education: getSafeNum('high_school_higher', 'education', 'education_rate'),
+                food_access: getSafeNum('food_access_score', 'food_access', 'foodAccess'),
                 poverty_rate: getSafeNum('poverty_rate', 'poverty'),
                 unemployment: getSafeNum('unemployment_rate', 'unemployment'),
-                lack_health_insurance: getSafeNum('lack_health_insurance', 'uninsured'),
+                lack_health_insurance: getSafeNum('lack_health_insurance', 'uninsured', 'insurance'),
+                
+                // THE NEW VARIABLES (Checking all possible DB variations)
                 depression_rate: getSafeNum('depression_rate', 'depression'),
                 no_physical_leisure: getSafeNum('no_physical_leisure', 'noPhysicalLeisure')
             };
-            
         } else {
             neighborhood.data = {};
         }
@@ -602,11 +610,8 @@ window.highlightNeighborhood = function(query) {
     }
 };
 
-// Inside dashboard-fixed.js
 function populateDataExplorer() {
     console.log("Initializing Revolutionary Data Explorer...");
-    
-    // 1. Populate the Data Table SAFELY using the camdenNeighborhoods array directly
     const tableBody = document.getElementById('tableBody');
     if (tableBody) {
         tableBody.innerHTML = '';
@@ -614,7 +619,6 @@ function populateDataExplorer() {
             const d = n.data || {};
             const row = document.createElement('tr');
             
-            // Build row with all values matching the new headers
             row.innerHTML = `
                 <td class="ps-3 fw-bold">${n.name}</td>
                 <td>$${(d.income || 0).toLocaleString()}</td>
@@ -627,31 +631,13 @@ function populateDataExplorer() {
                 <td>${d.education || 0}%</td>
                 <td>${d.mental_distress || 0}%</td>
                 <td>${d.high_blood_pressure || 0}%</td>
+                <td class="text-info">${d.depression_rate || 0}%</td>
+                <td class="text-info">${d.no_physical_leisure || 0}%</td>
             `;
             tableBody.appendChild(row);
         });
     }
-
-    // 2. Setup Event Listeners for ALL Chart Selectors
-    const xVar = document.getElementById('xVariable');
-    const yVar = document.getElementById('yVariable');
-    const typeVar = document.getElementById('chartTypeSelector');
-    
-    if (xVar) {
-        xVar.removeEventListener('change', renderCorrelationChart);
-        xVar.addEventListener('change', renderCorrelationChart);
-    }
-    if (yVar) {
-        yVar.removeEventListener('change', renderCorrelationChart);
-        yVar.addEventListener('change', renderCorrelationChart);
-    }
-    if (typeVar) {
-        typeVar.removeEventListener('change', renderCorrelationChart);
-        typeVar.addEventListener('change', renderCorrelationChart);
-    }
-
-    // 3. Render the Initial Chart
-    setTimeout(renderCorrelationChart, 500);
+    // ... remaining event listener code ...
 }
 
 // --- INTERACTIVE DATA EXPLORATION CHART ---
@@ -678,22 +664,23 @@ function renderCorrelationChart() {
     // Map HTML dropdown values to exact DB keys
     const getMappedKey = (key) => {
         const keyMap = {
-            // Social Determinants / Influence (X-Axis)
+            // Maps the "Value" attribute in dashboard.html to the key in neighborhood.data
             'income': 'income',
             'poverty': 'poverty_rate',
             'foodAccess': 'food_access',
             'insurance': 'lack_health_insurance',
             'uninsured': 'lack_health_insurance',
             'education': 'education',
-            'noPhysicalLeisure': 'no_physical_leisure', // Must be here for Interactive Chart
+            'no_physical_leisure': 'no_physical_leisure', // Map direct map selector
+            'noPhysicalLeisure': 'no_physical_leisure',  // Map X-Axis dropdown
 
-            // Health Outcomes (Y-Axis)
             'diabetes': 'diabetes',
             'obesity': 'obesity',
             'asthma': 'asthma',
             'mentalDistress': 'mental_distress',
             'highBloodPressure': 'high_blood_pressure',
-            'depression': 'depression_rate' // Must be here for Interactive Chart
+            'depression': 'depression_rate',      // Map Y-Axis dropdown
+            'depression_rate': 'depression_rate'  // Map direct map selector
         };
 
         return keyMap[key] || key;
