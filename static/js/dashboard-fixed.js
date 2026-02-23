@@ -623,8 +623,8 @@ function populateDataExplorer() {
                 <td>${d.education || 0}%</td>
                 <td>${d.mental_distress || 0}%</td>
                 <td>${d.high_blood_pressure || 0}%</td>
-                <td class="table-info fw-bold">${d.depression_rate || 0}%</td>
-                <td class="table-info fw-bold">${d.no_physical_leisure || 0}%</td>
+                <td>${d.depression_rate || 0}%</td>
+                <td>${d.no_physical_leisure || 0}%</td>
             `;
             tableBody.appendChild(row);
         });
