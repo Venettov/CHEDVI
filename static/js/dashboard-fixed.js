@@ -184,30 +184,31 @@ function syncDatabaseWithMaps(dbData) {
         neighborhood.data = neighborhood.data || {};
         
         if (freshData) {
-            // Helper: Find value under multiple possible DB column names to prevent 0.0% errors
-            const findVal = (key1, key2) => {
-                if (freshData[key1] !== undefined && freshData[key1] !== null) return parseFloat(freshData[key1]);
-                if (key2 && freshData[key2] !== undefined && freshData[key2] !== null) return parseFloat(freshData[key2]);
-                return 0;
+            const getSafeNum = (primaryKey, secondaryKey) => {
+                let val = freshData[primaryKey];
+                if (val === undefined || val === null || val === "") {
+                    val = freshData[secondaryKey];
+                }
+                const parsed = Number(val);
+                return isNaN(parsed) ? 0 : parsed;
             };
 
             neighborhood.data = {
-                diabetes: findVal('diabetes_rate', 'diabetes'),
-                obesity: findVal('obesity_rate', 'obesity'),
-                asthma: findVal('asthma_rate', 'asthma'),
-                mental_distress: findVal('mental_distress_rate', 'mental_distress'),
-                high_blood_pressure: findVal('high_blood_pressure', 'highBloodPressure'),
-                income: findVal('median_income', 'income'),
-                education: findVal('high_school_higher', 'education'),
-                food_access: findVal('food_access_score', 'food_access'),
-                poverty_rate: findVal('poverty_rate', 'poverty'),
-                unemployment: findVal('unemployment_rate', 'unemployment'),
-                lack_health_insurance: findVal('lack_health_insurance', 'uninsured'),
-                
-                // FIXED VARIABLES:
-                depression_rate: findVal('depression_rate', 'depression'),
-                no_physical_leisure: findVal('no_physical_leisure', 'noPhysicalLeisure')
+                diabetes: getSafeNum('diabetes_rate', 'diabetes'),
+                obesity: getSafeNum('obesity_rate', 'obesity'),
+                asthma: getSafeNum('asthma_rate', 'asthma'),
+                mental_distress: getSafeNum('mental_distress_rate', 'mental_distress'),
+                high_blood_pressure: getSafeNum('high_blood_pressure', 'highBloodPressure'),
+                income: getSafeNum('median_income', 'income'),
+                education: getSafeNum('high_school_higher', 'education'),
+                food_access: getSafeNum('food_access_score', 'food_access'),
+                poverty_rate: getSafeNum('poverty_rate', 'poverty'),
+                unemployment: getSafeNum('unemployment_rate', 'unemployment'),
+                lack_health_insurance: getSafeNum('lack_health_insurance', 'uninsured'),
+                depression_rate: getSafeNum('depression_rate', 'depression'),
+                no_physical_leisure: getSafeNum('no_physical_leisure', 'noPhysicalLeisure')
             };
+            
         } else {
             neighborhood.data = {};
         }
