@@ -427,7 +427,6 @@ function createHousingHealthChart() {
         }
     };
 
-    // Update the HTML text elements
     const textData = explanations[outcomeKey];
     if (textData) {
         if (document.getElementById('housing-text-title')) document.getElementById('housing-text-title').textContent = textData.title;
@@ -440,7 +439,6 @@ function createHousingHealthChart() {
     
     const bubbleData = window.dbData.map(d => {
         return {
-            // Directly pull overcrowded_housing from your DB record
             x: parseFloat((d.overcrowded_housing || 0).toFixed(1)), 
             y: d[yDataKey] || 0, 
             r: d.poverty / 4, 
@@ -465,21 +463,20 @@ function createHousingHealthChart() {
                 borderColor: 'rgba(255, 193, 7, 1)',
                 borderWidth: 1, 
                 hoverBackgroundColor: 'rgba(255, 193, 7, 0.9)',
-                clip: false // Prevents bubbles on the edge from being cut off
+                clip: 10 // Prevents the bubbles on the very edge from being cut off
             }]
         },
         options: {
             responsive: true, 
             maintainAspectRatio: false,
             layout: {
-                padding: { top: 20, right: 30, bottom: 20, left: 10 }
+                padding: { top: 20, right: 30, bottom: 20, left: 30 } // Increased padding to prevent overlap
             },
             plugins: {
                 tooltip: { 
                     callbacks: { 
                         label: function(context) { 
                             const raw = context.raw; 
-                            // Changed Tooltip to display "Overcrowded"
                             return `${raw.name}: Overcrowded ${raw.x}%, ${labels[outcomeKey]} ${raw.y}%, Poverty ${raw.poverty}%`; 
                         } 
                     } 
@@ -488,15 +485,14 @@ function createHousingHealthChart() {
             },
             scales: {
                 x: { 
-                    // Changed X-Axis Title
                     title: { display: true, text: 'Overcrowded Housing Rate (%)' }, 
-                    min: 0,
-                    grace: '5%' // Breathing room for the horizontal axis
+                    min: -1, // Setting this slightly below 0 pushes the 0-value bubbles off the Y-axis line
+                    grace: '15%' // Provides extra space at both ends of the axis
                 },
                 y: { 
                     title: { display: true, text: labels[outcomeKey] }, 
                     beginAtZero: false,
-                    grace: '5%' // Breathing room for the vertical axis
+                    grace: '5%' 
                 }
             }
         }
