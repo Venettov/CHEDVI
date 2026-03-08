@@ -439,6 +439,7 @@ function createHousingHealthChart() {
     
     const bubbleData = window.dbData.map(d => {
         return {
+            // Directly pull the overcrowded_housing value from your database
             x: parseFloat((d.overcrowded_housing || 0).toFixed(1)), 
             y: d[yDataKey] || 0, 
             r: d.poverty / 4, 
@@ -463,14 +464,14 @@ function createHousingHealthChart() {
                 borderColor: 'rgba(255, 193, 7, 1)',
                 borderWidth: 1, 
                 hoverBackgroundColor: 'rgba(255, 193, 7, 0.9)',
-                clip: 10 // Prevents the bubbles on the very edge from being cut off
+                clip: 15 // Increased clipping margin
             }]
         },
         options: {
             responsive: true, 
             maintainAspectRatio: false,
             layout: {
-                padding: { top: 20, right: 30, bottom: 20, left: 30 } // Increased padding to prevent overlap
+                padding: { top: 20, right: 30, bottom: 20, left: 40 } // Extra left padding for axis
             },
             plugins: {
                 tooltip: { 
@@ -486,8 +487,8 @@ function createHousingHealthChart() {
             scales: {
                 x: { 
                     title: { display: true, text: 'Overcrowded Housing Rate (%)' }, 
-                    min: -1, // Setting this slightly below 0 pushes the 0-value bubbles off the Y-axis line
-                    grace: '15%' // Provides extra space at both ends of the axis
+                    min: -3, // Pushes 0-value bubbles to the right so they don't overlap the Y-axis
+                    grace: '10%' 
                 },
                 y: { 
                     title: { display: true, text: labels[outcomeKey] }, 
