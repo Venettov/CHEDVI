@@ -386,44 +386,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // --- 4. HOUSING & HEALTH CHART ---
 function createHousingHealthChart() {
-    const canvas = document.getElementById('housingHealthChart');
-    if (!canvas || !window.dbData || window.dbData.length === 0) return;
+    const ctx = document.getElementById('housingHealthChart');
+    if (!ctx || !window.dbData || window.dbData.length === 0) return;
     if (housingHealthChart) housingHealthChart.destroy();
 
-    const ctx = canvas.getContext('2d');
     const selector = document.getElementById('housingOutcomeSelector');
     const outcomeKey = selector ? selector.value : 'asthma';
 
+    // 1. DATA-DRIVEN TEXT UPDATES
     const explanations = {
-        asthma: {
-            title: 'Overcrowding & Respiratory Health',
-            main: 'Neighborhoods with higher overcrowding rates show a strong correlation with elevated asthma prevalence.',
-            detail: 'Overcrowded housing units often face higher wear and tear, leading to increased moisture, mold, and pest allergens.'
+        asthma: { 
+            title: 'Overcrowding & Respiratory Health', 
+            main: 'Neighborhoods with higher overcrowding rates (such as Dudley at 17.3%) show a strong correlation with elevated asthma prevalence. Concentrated living conditions often exacerbate environmental triggers and indoor air quality issues.', 
+            detail: 'Overcrowded housing units often face higher wear and tear, leading to increased moisture, mold, and pest allergens—all primary triggers for asthma attacks. The data suggests that as the percentage of overcrowded units increases, the respiratory burden on the community climbs significantly.' 
         },
-        leadRisk: {
-            title: 'Lead Exposure Risk Index',
-            main: 'Housing age and overcrowding are primary drivers of lead exposure risk.',
-            detail: 'The data correlates poverty (bubble size) with housing instability, indicating higher environmental toxin exposure risk.'
+        leadRisk: { 
+            title: 'Lead Exposure Risk Index', 
+            main: 'Housing age and overcrowding are primary drivers of lead exposure risk.', 
+            detail: 'The data correlates poverty (bubble size) with housing instability, indicating that children in overcrowded areas face the highest risk of exposure to legacy environmental toxins like lead paint.' 
         },
-        mentalDistress: {
-            title: 'Housing & Psychological Stress',
-            main: 'Living in areas with high overcrowding impacts community mental health.',
-            detail: 'Neighborhoods with higher overcrowded housing units show a direct spike in reports of frequent mental distress.'
+        mentalDistress: { 
+            title: 'Housing & Psychological Stress', 
+            main: 'Living in areas with high overcrowding impacts community mental health.', 
+            detail: 'Neighborhoods with higher overcrowded housing units (like Cramer Hill at 13.1%) show a direct spike in reports of frequent mental distress.' 
         },
-        diabetes: {
-            title: 'Housing as a Health Determinant',
-            main: 'Housing density and instability make chronic disease management significantly harder.',
-            detail: 'Lack of adequate space and housing stability can disrupt medication storage and healthy routines.'
+        diabetes: { 
+            title: 'Housing as a Health Determinant', 
+            main: 'Housing density and instability makes chronic disease management significantly harder.', 
+            detail: 'When a resident lacks adequate space and stable housing, medication storage and regular dietary routines become difficult, explaining why overcrowded tracts also see elevated diabetes rates.' 
         },
-        obesity: {
-            title: 'Housing Density & Obesity',
-            main: 'Overcrowded housing correlates with limited space for physical activity.',
-            detail: 'Neighborhoods with high housing density and overcrowding face higher barriers to maintaining active lifestyles.'
+        obesity: { 
+            title: 'Housing Density & Obesity', 
+            main: 'Overcrowded housing (17.3% in Dudley) correlates with limited space for physical activity.', 
+            detail: 'The data suggests that neighborhoods with high housing density and overcrowding issues face higher barriers to maintaining active lifestyles, contributing to elevated obesity rates.' 
         },
-        highBloodPressure: {
-            title: 'Housing Stress & Hypertension',
-            main: 'The stress of housing insecurity is a cardiovascular risk factor.',
-            detail: 'Areas with the highest overcrowding often also show elevated hypertension rates.'
+        highBloodPressure: { 
+            title: 'Housing Stress & Hypertension', 
+            main: 'The stress of housing insecurity is a cardiovascular risk factor.', 
+            detail: 'Tracts with the highest overcrowding percentage consistently show hypertension rates over 40%, reflecting the physical toll of living in cramped, substandard, or unstable conditions.' 
         }
     };
 
@@ -438,6 +438,18 @@ function createHousingHealthChart() {
         if (detailEl) detailEl.textContent = textData.detail;
     }
 
+    // 2. MAP FRONTEND SELECTOR KEYS TO ACTUAL DATABASE/API FIELD NAMES
+    const dataKeys = {
+        asthma: 'asthma_rate',
+        leadRisk: 'poverty_rate',              // proxy used for this view
+        mentalDistress: 'mental_distress_rate',
+        diabetes: 'diabetes_rate',
+        obesity: 'obesity_rate',
+        highBloodPressure: 'high_blood_pressure'
+    };
+
+    const yDataKey = dataKeys[outcomeKey];
+
     const labels = {
         asthma: 'Asthma Rate (%)',
         leadRisk: 'Lead Exposure Risk Index',
@@ -447,64 +459,36 @@ function createHousingHealthChart() {
         highBloodPressure: 'High Blood Pressure (%)'
     };
 
-    function toNumber(value) {
-        if (value === null || value === undefined || value === '') return null;
-        if (typeof value === 'number') return Number.isFinite(value) ? value : null;
-        const num = parseFloat(String(value).replace(/[%,$\s]/g, ''));
-        return Number.isFinite(num) ? num : null;
-    }
-
-    function getOutcomeValue(d, key) {
-        const map = {
-            asthma: ['asthma', 'asthma_rate'],
-            mentalDistress: ['mentalDistress', 'mental_distress', 'mental_distress_rate'],
-            diabetes: ['diabetes', 'diabetes_rate'],
-            obesity: ['obesity', 'obesity_rate'],
-            highBloodPressure: ['highBloodPressure', 'high_blood_pressure'],
-            leadRisk: ['leadRisk', 'lead_risk', 'poverty', 'poverty_rate'] // temporary proxy if you are using poverty as lead-risk stand-in
-        };
-
-        const possibleKeys = map[key] || [key];
-        for (const k of possibleKeys) {
-            const val = toNumber(d[k]);
-            if (val !== null) return val;
-        }
-        return null;
-    }
-
+    // 3. BUILD BUBBLE DATA
     const bubbleData = window.dbData
         .map(d => {
-            const xVal = toNumber(
-                d.overcrowded_housing ??
-                d.overcrowding ??
-                d.overcrowdedHousing ??
-                d.housing_overcrowding
-            );
+            const xVal = parseFloat(d.overcrowded_housing);
+            const yVal = parseFloat(d[yDataKey]);
+            const povertyVal = parseFloat(d.poverty_rate);
 
-            const yVal = getOutcomeValue(d, outcomeKey);
-            const povertyVal = toNumber(d.poverty ?? d.poverty_rate);
-
-            if (xVal === null || yVal === null) return null;
+            if (!Number.isFinite(xVal) || !Number.isFinite(yVal)) return null;
 
             return {
-                x: xVal,
+                x: parseFloat(xVal.toFixed(1)),
                 y: yVal,
-                r: Math.max(5, (povertyVal ?? 0) / 4),
+                r: Number.isFinite(povertyVal) ? Math.max(povertyVal / 4, 4) : 4,
                 name: d.name || 'Unknown',
-                poverty: povertyVal ?? 0
+                poverty: Number.isFinite(povertyVal) ? povertyVal : 0
             };
         })
         .filter(Boolean);
 
-    if (!bubbleData.length) {
-        console.warn('Housing chart: no valid data found', window.dbData[0]);
+    if (bubbleData.length === 0) {
+        console.warn('No valid data found for housing chart');
         return;
     }
 
+    // 4. DYNAMIC X-AXIS RANGE
     const xValues = bubbleData.map(d => d.x);
     const minX = Math.min(...xValues);
     const maxX = Math.max(...xValues);
 
+    // 5. DRAW CHART
     housingHealthChart = new Chart(ctx, {
         type: 'bubble',
         data: {
@@ -514,14 +498,15 @@ function createHousingHealthChart() {
                 backgroundColor: 'rgba(255, 193, 7, 0.6)',
                 borderColor: 'rgba(255, 193, 7, 1)',
                 borderWidth: 1,
-                hoverBackgroundColor: 'rgba(255, 193, 7, 0.9)'
+                hoverBackgroundColor: 'rgba(255, 193, 7, 0.9)',
+                clip: 15
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             layout: {
-                padding: { top: 20, right: 20, bottom: 20, left: 20 }
+                padding: { top: 20, right: 30, bottom: 20, left: 40 }
             },
             plugins: {
                 tooltip: {
@@ -536,10 +521,10 @@ function createHousingHealthChart() {
             },
             scales: {
                 x: {
-                    type: 'linear',
                     title: { display: true, text: 'Overcrowded Housing Rate (%)' },
                     min: Math.max(0, minX - 1),
-                    max: maxX + 1
+                    max: maxX + 1,
+                    grace: '5%'
                 },
                 y: {
                     title: { display: true, text: labels[outcomeKey] },
