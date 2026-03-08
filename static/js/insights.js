@@ -386,48 +386,60 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // --- 4. HOUSING & HEALTH CHART ---
 function createHousingHealthChart() {
+
     const ctx = document.getElementById('housingHealthChart');
     if (!ctx || !window.dbData || window.dbData.length === 0) return;
+
     if (housingHealthChart) housingHealthChart.destroy();
 
     const selector = document.getElementById('housingOutcomeSelector');
     const outcomeKey = selector ? selector.value : 'asthma';
 
+    // ----- TEXT CONTENT -----
     const explanations = {
-        asthma: { 
-            title: 'Overcrowding & Respiratory Health', 
-            main: 'Neighborhoods with higher overcrowding rates (such as Dudley at 17.3%) show a strong correlation with elevated asthma prevalence. Concentrated living conditions often exacerbate environmental triggers and indoor air quality issues.', 
-            detail: 'Overcrowded housing units often face higher wear and tear, leading to increased moisture, mold, and pest allergens—all primary triggers for asthma attacks. The data suggests that as the percentage of overcrowded units increases, the respiratory burden on the community climbs significantly.' 
+
+        asthma: {
+            title: 'Overcrowding & Respiratory Health',
+            main: 'Neighborhoods with higher overcrowding rates (such as Dudley at 17.3%) show a strong correlation with elevated asthma prevalence.',
+            detail: 'Overcrowded housing units often face higher moisture, mold, and allergen exposure — all major asthma triggers.'
         },
-        leadRisk: { 
-            title: 'Lead Exposure Risk Index', 
-            main: 'Housing age and overcrowding are primary drivers of lead exposure risk.', 
-            detail: 'The data correlates poverty (bubble size) with housing instability, indicating that children in overcrowded areas face the highest risk of exposure to legacy environmental toxins like lead paint.' 
+
+        leadRisk: {
+            title: 'Lead Exposure Risk Index',
+            main: 'Housing age and overcrowding are primary drivers of lead exposure risk.',
+            detail: 'Children in overcrowded housing are more likely to be exposed to environmental toxins such as lead paint.'
         },
-        mentalDistress: { 
-            title: 'Housing & Psychological Stress', 
-            main: 'Living in areas with high overcrowding impacts community mental health.', 
-            detail: 'Neighborhoods with higher overcrowded housing units show a direct spike in reports of frequent mental distress.' 
+
+        mentalDistress: {
+            title: 'Housing & Psychological Stress',
+            main: 'Living in areas with high overcrowding impacts community mental health.',
+            detail: 'Overcrowded housing environments increase stress levels and contribute to elevated mental distress.'
         },
-        diabetes: { 
-            title: 'Housing as a Health Determinant', 
-            main: 'Housing density and instability makes chronic disease management significantly harder.', 
-            detail: 'When a resident lacks adequate space and stable housing, medication storage and regular dietary routines become difficult, explaining why overcrowded tracts also see elevated diabetes rates.' 
+
+        diabetes: {
+            title: 'Housing as a Health Determinant',
+            main: 'Housing density and instability makes chronic disease management significantly harder.',
+            detail: 'Residents in overcrowded homes often face barriers to proper medication storage and healthy routines.'
         },
-        obesity: { 
-            title: 'Housing Density & Obesity', 
-            main: 'Overcrowded housing correlates with limited space for physical activity.', 
-            detail: 'The data suggests that neighborhoods with high housing density and overcrowding issues face higher barriers to maintaining active lifestyles, contributing to elevated obesity rates.' 
+
+        obesity: {
+            title: 'Housing Density & Obesity',
+            main: 'Overcrowded housing correlates with limited space for physical activity.',
+            detail: 'Neighborhoods with housing density issues often lack adequate recreational space.'
         },
-        highBloodPressure: { 
-            title: 'Housing Stress & Hypertension', 
-            main: 'The stress of housing insecurity is a cardiovascular risk factor.', 
-            detail: 'Tracts with the highest overcrowding percentage consistently show elevated hypertension rates.' 
+
+        highBloodPressure: {
+            title: 'Housing Stress & Hypertension',
+            main: 'Housing insecurity is a cardiovascular risk factor.',
+            detail: 'Residents living in cramped housing environments experience chronic stress that contributes to hypertension.'
         }
+
     };
 
     const textData = explanations[outcomeKey];
+
     if (textData) {
+
         const titleEl = document.getElementById('housing-text-title');
         const mainEl = document.getElementById('housing-text-main');
         const detailEl = document.getElementById('housing-text-detail');
@@ -435,8 +447,10 @@ function createHousingHealthChart() {
         if (titleEl) titleEl.textContent = textData.title;
         if (mainEl) mainEl.textContent = textData.main;
         if (detailEl) detailEl.textContent = textData.detail;
+
     }
 
+    // ----- AXIS LABELS -----
     const labels = {
         asthma: 'Asthma Rate (%)',
         leadRisk: 'Lead Exposure Risk Index',
@@ -446,12 +460,15 @@ function createHousingHealthChart() {
         highBloodPressure: 'High Blood Pressure (%)'
     };
 
+    // ----- BUILD DATA -----
     const bubbleData = window.dbData
         .map(d => {
+
             const xVal = parseFloat(d.overcrowded_housing);
             const yVal = outcomeKey === 'leadRisk'
                 ? parseFloat(d.poverty)
                 : parseFloat(d[outcomeKey]);
+
             const povertyVal = parseFloat(d.poverty);
 
             if (!Number.isFinite(xVal) || !Number.isFinite(yVal)) return null;
@@ -461,8 +478,9 @@ function createHousingHealthChart() {
                 y: yVal,
                 r: Number.isFinite(povertyVal) ? Math.max(povertyVal / 4, 4) : 4,
                 name: d.name || 'Unknown',
-                poverty: Number.isFinite(povertyVal) ? povertyVal : 0
+                poverty: povertyVal || 0
             };
+
         })
         .filter(Boolean);
 
@@ -472,54 +490,98 @@ function createHousingHealthChart() {
     }
 
     const xValues = bubbleData.map(d => d.x);
+
     const minX = Math.min(...xValues);
     const maxX = Math.max(...xValues);
 
+    // ----- DRAW CHART -----
     housingHealthChart = new Chart(ctx, {
+
         type: 'bubble',
+
         data: {
             datasets: [{
                 label: `Overcrowded Housing vs ${labels[outcomeKey]}`,
                 data: bubbleData,
-                backgroundColor: 'rgba(255, 193, 7, 0.6)',
-                borderColor: 'rgba(255, 193, 7, 1)',
+                backgroundColor: 'rgba(255,193,7,0.6)',
+                borderColor: 'rgba(255,193,7,1)',
                 borderWidth: 1,
-                hoverBackgroundColor: 'rgba(255, 193, 7, 0.9)',
+                hoverBackgroundColor: 'rgba(255,193,7,0.9)',
                 clip: 15
             }]
         },
+
         options: {
+
             responsive: true,
             maintainAspectRatio: false,
+
             layout: {
                 padding: { top: 20, right: 30, bottom: 20, left: 40 }
             },
+
             plugins: {
+
                 tooltip: {
                     callbacks: {
                         label: function(context) {
+
                             const raw = context.raw;
+
                             return `${raw.name}: Overcrowded ${raw.x}%, ${labels[outcomeKey]} ${raw.y}%, Poverty ${raw.poverty}%`;
+
                         }
                     }
                 },
+
                 legend: { display: false }
+
             },
+
             scales: {
+
                 x: {
-                    title: { display: true, text: 'Overcrowded Housing Rate (%)' },
-                    min: Math.max(0, minX - 1),
-                    max: maxX + 1,
-                    grace: '5%'
+                    title: {
+                        display: true,
+                        text: 'Overcrowded Housing Rate (%)'
+                    },
+
+                    // 👇 pushes axis slightly left so 0 values are visible
+                    min: -0.8,
+                    max: maxX + 1.2,
+
+                    ticks: {
+                        stepSize: 2
+                    },
+
+                    grid: {
+                        lineWidth: 1
+                    }
+
                 },
+
                 y: {
-                    title: { display: true, text: labels[outcomeKey] },
+                    title: {
+                        display: true,
+                        text: labels[outcomeKey]
+                    },
+
                     beginAtZero: false,
-                    grace: '5%'
+
+                    grace: '5%',
+
+                    grid: {
+                        lineWidth: 1.2
+                    }
+
                 }
+
             }
+
         }
+
     });
+
 }
 
 // --- 5. HEALTHCARE ACCESS CHART ---
