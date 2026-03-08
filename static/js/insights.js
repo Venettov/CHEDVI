@@ -630,22 +630,22 @@ function createMentalHealthChart() {
     const explanations = {
         'mentalDistress': { 
             title: 'Socioeconomic Stress Patterns', 
-            main: 'Bergen Square faces the highest cumulative stress with 54.3% poverty and 34.2% unemployment.', 
-            detail: 'The data indicates a "Toxic Stress" cycle: as poverty rates climb toward the 50% mark, mental distress reports spike to over 24%, showing the deep psychological toll of extreme economic insecurity.' 
+            main: 'Higher poverty associates with moderately elevated mental distress (19% in low-poverty areas to 24-26% in high-poverty communities), but the relationship shows substantial scatter. Communities with both high poverty AND high unemployment (largest bubbles) tend toward higher mental distress around 24-26%, revealing a compounding effect. However, the relatively narrow range (19-26%) across vastly different poverty levels suggests mental distress affects communities more evenly than other health outcomes.', 
+            detail: 'Chronic financial instability creates constant worry about bills, food, and housing that fuels anxiety and depression. When unemployment compounds poverty (the largest bubbles), mental health worsens further as people lose income, insurance, purpose, and social connections simultaneously. This economic trauma blocks access to mental health treatment that could help.' 
         },
         'highBloodPressure': { 
             title: 'Stress & Cardiovascular Health', 
-            main: 'Unemployment (34% in Bergen Square) is a direct predictor of hypertension.', 
-            detail: 'The "Social Stressor" bubble chart shows that neighborhoods with the highest unemployment rates also carry the heaviest burden of high blood pressure, as economic strain manifests as physical illness.' 
+            main: 'The relationship between poverty and high blood pressure shows weak to moderate strength with substantial scatter. Blood pressure rates range from 35-49% across communities spanning 10-60% poverty. The bubble size (unemployment) reveals some compounding effect, larger bubbles like Bergen Square at 55% poverty with 40% blood pressure show elevated unemployment. However, communities with similar poverty rates show blood pressure varying by 10-15 percentage points. Notably, Beideman (12% poverty, 45% blood pressure, 10% unemployment) has higher blood pressure than many communities with 3-4 times its poverty rate, while some high-poverty areas show relatively lower blood pressure rates.', 
+            detail: 'Chronic financial stress keeps the body in a fight or flight mode, releasing cortisol that damages the cardiovascular system over time. When unemployment compounds poverty (the largest bubbles), the cardiovascular toll intensifies through loss of health insurance, medication access, and preventive care. However, poverty also creates structural barriers beyond stress: inability to afford blood pressure medications, reliance on processed foods, and lack of healthcare access for monitoring and treatment.' 
         },
         'obesity': { 
             title: 'Poverty & Metabolic Health', 
-            main: 'Poverty is the primary driver of the obesity epidemic in Camden.', 
-            detail: 'There is a clear cluster: as poverty exceeds 40% (Centerville, Waterfront South), obesity rates stay locked above 44%. Economic scarcity limits health choices, making obesity a symptom of poverty.' 
+            main: 'This shows a weak relationship between poverty and obesity with substantial scatter. Obesity ranges from 36% to 51% across poverty levels from 10% to 55%. Critically, some low-poverty communities (10-20%) show obesity rates of 40-46%, while some high-poverty communities (40-45%) show similar or even lower rates around 36-44%. ', 
+            detail: 'Poverty limits access to affordable, healthy food and safe places for physical activity, while chronic stress triggers cortisol release that promotes weight gain and fat storage. Time poverty from working multiple jobs leaves no time for exercise or meal preparation. However, the weak correlation suggests obesity is driven more by food environment, built environment quality, and cultural factors than by poverty level alone, indicating interventions should focus on infrastructure and access.' 
         },
         'diabetes': { 
-            title: 'The Stress-Diabetes Link', 
-            main: 'High poverty rates correlate with the city\'s highest diabetes prevalence.', 
+            title: 'Higher poverty shows a moderate positive relationship with diabetes rates, ranging from 13-18% in low-poverty areas to 17-23% in high-poverty communities. The bubble size (unemployment) reveals some compounding effect, larger bubbles tend toward higher diabetes rates. However, substantial scatter exists: communities with similar poverty levels show diabetes varying by 5-7 percentage points. Notably, some moderate-poverty communities (30-35%) show diabetes rates of 17-19%, similar to much higher-poverty areas, while one high-poverty community (~55%) shows relatively lower diabetes around 16%.', 
+            main: 'Poverty creates barriers to diabetes prevention and management through multiple pathways: limited access to healthy food and healthcare, inability to afford medications and blood glucose monitors, chronic stress that dysregulates blood sugar, and time poverty that makes diabetes self-care difficult. When unemployment compounds poverty (larger bubbles), the burden intensifies through loss of health insurance and daily routine. However, the variation among similar communities suggests some have protective factors, such as better healthcare access, food programs, or community support worth studying and replicating.', 
             detail: 'In Liberty Park (26% poverty), the diabetes rate hits 23.1%. The data suggests that social stressors like unemployment compound the difficulty of managing diabetic health.' 
         },
         'asthma': { 
