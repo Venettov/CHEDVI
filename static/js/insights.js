@@ -472,6 +472,8 @@ function createHousingHealthChart() {
         highBloodPressure: ['highBloodPressure', 'high_blood_pressure']
     };
 
+    console.log('housing row sample:', window.dbData[0]);
+
     const bubbleData = window.dbData
         .map(d => {
             const xVal = getFirstNumber(d, [
