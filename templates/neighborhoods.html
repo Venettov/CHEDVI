@@ -1,453 +1,580 @@
 {% extends "base.html" %}
 
-{% block title %}Neighborhoods - Camden Health Equity Data Visualization Initiative{% endblock %}
+{% block title %}Neighborhood Profiles - Camden Health Equity Data Visualization Initiative{% endblock %}
 
 {% block content %}
 <style>
     :root {
-        --main-theme-color: #2c3e50; /* Dark Slate Blue */
+        --chedvi-navy: #22354a;
+        --chedvi-blue: #2d74da;
+        --chedvi-sky: #eaf3ff;
+        --chedvi-gold: #f5b301;
+        --chedvi-gold-soft: #fff7df;
+        --chedvi-green: #198754;
+        --chedvi-red: #dc3545;
+        --chedvi-slate: #667085;
+        --chedvi-border: #d9e2ec;
+        --chedvi-panel: #ffffff;
+        --chedvi-bg: #f4f7fb;
+        --chedvi-ink: #1f2937;
     }
 
-    .bg-theme {
-        background-color: var(--main-theme-color) !important;
-        color: white !important;
-    }
-    
-    .text-theme {
-        color: var(--main-theme-color) !important;
-    }
-    
-    .border-theme {
-        border-color: var(--main-theme-color) !important;
+    .profiles-page {
+        background: linear-gradient(180deg, #f7f9fc 0%, #f2f5fa 100%);
     }
 
-    .btn-theme {
-        background-color: white;
-        color: var(--main-theme-color);
-        border: 1px solid white;
+    .profile-hero {
+        background:
+            radial-gradient(circle at top right, rgba(245, 179, 1, 0.18), transparent 24%),
+            linear-gradient(135deg, var(--chedvi-navy) 0%, #2d4f74 55%, #3d6289 100%);
+        color: #fff;
+        border-radius: 26px;
+        overflow: hidden;
+        box-shadow: 0 22px 50px rgba(34, 53, 74, 0.18);
     }
-    
-    .btn-theme:hover {
-        background-color: rgba(255, 255, 255, 0.9);
-        color: var(--main-theme-color);
+
+    .profile-hero .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        background: rgba(255, 255, 255, 0.14);
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        border-radius: 999px;
+        padding: 0.45rem 0.85rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+    }
+
+    .selector-card,
+    .info-panel,
+    .metric-card,
+    .tab-shell {
+        border: 1px solid var(--chedvi-border);
+        border-radius: 24px;
+        background: var(--chedvi-panel);
+        box-shadow: 0 12px 30px rgba(31, 41, 55, 0.06);
+    }
+
+    .selector-card .card-body {
+        padding: 1.6rem;
+    }
+
+    .selector-label {
+        font-size: 0.92rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+        color: var(--chedvi-slate);
+    }
+
+    .selector-card .form-select {
+        min-height: 62px;
+        font-size: 1.15rem;
+        font-weight: 600;
+        border-radius: 16px;
+        border: 1px solid #cfd8e3;
+    }
+
+    .section-overline {
+        color: var(--chedvi-blue);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        font-weight: 800;
+    }
+
+    .profile-name {
+        font-size: clamp(2.3rem, 3.8vw, 3.5rem);
+        font-weight: 800;
+        line-height: 1.05;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.55rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.12rem;
+        color: rgba(255, 255, 255, 0.92);
+        max-width: 800px;
+        line-height: 1.75;
+    }
+
+    .hero-stat-box {
+        background: rgba(255, 255, 255, 0.13);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 22px;
+        padding: 1.15rem 1.2rem;
+        min-width: 200px;
+        backdrop-filter: blur(4px);
+    }
+
+    .hero-stat-label {
+        display: block;
+        color: rgba(255, 255, 255, 0.78);
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.08em;
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+    }
+
+    .hero-stat-value {
+        font-size: 1.85rem;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .metrics-grid .metric-card {
+        padding: 1.35rem 1.35rem 1.25rem;
+        min-height: 170px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .metrics-grid .metric-card::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto auto 0;
+        width: 100%;
+        height: 6px;
+        background: linear-gradient(90deg, var(--chedvi-blue), var(--chedvi-gold));
+    }
+
+    .metric-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--chedvi-sky);
+        color: var(--chedvi-blue);
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .metric-label {
+        color: var(--chedvi-slate);
+        font-size: 0.92rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        margin-bottom: 0.55rem;
+    }
+
+    .metric-value {
+        font-size: clamp(1.7rem, 2.7vw, 2.35rem);
+        line-height: 1.05;
+        font-weight: 800;
+        color: var(--chedvi-ink);
+        margin-bottom: 0.45rem;
+    }
+
+    .metric-note {
+        color: #5c6b7a;
+        font-size: 0.98rem;
+        line-height: 1.55;
+    }
+
+    .info-panel {
+        padding: 1.45rem 1.45rem 1.25rem;
+        height: 100%;
+    }
+
+    .info-panel-title {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: var(--chedvi-navy);
+        margin-bottom: 1rem;
+    }
+
+    .info-panel-title .icon-wrap {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--chedvi-gold-soft);
+        color: #9c6d00;
+    }
+
+    .insight-copy,
+    .tab-copy {
+        font-size: 1.07rem;
+        line-height: 1.8;
+        color: #344054;
+    }
+
+    .priority-list {
+        list-style: none;
+        padding-left: 0;
+        margin-bottom: 0;
+    }
+
+    .priority-list li {
+        display: flex;
+        gap: 0.8rem;
+        align-items: flex-start;
+        font-size: 1.03rem;
+        line-height: 1.7;
+        padding: 0.8rem 0;
+        border-bottom: 1px dashed #d8dee6;
+    }
+
+    .priority-list li:last-child {
+        border-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .priority-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        margin-top: 0.45rem;
+        flex: 0 0 auto;
+        background: var(--chedvi-gold);
+        box-shadow: 0 0 0 4px rgba(245, 179, 1, 0.18);
+    }
+
+    .priority-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.9rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        border-radius: 999px;
+        padding: 0.5rem 0.8rem;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+    }
+
+    .priority-low {
+        background: #e9f7ef;
+        color: #177245;
+    }
+
+    .priority-medium {
+        background: #fff4d6;
+        color: #9a6b00;
+    }
+
+    .priority-high {
+        background: #fde7d9;
+        color: #b54708;
+    }
+
+    .priority-critical {
+        background: #fde7ea;
+        color: #b42318;
+    }
+
+    .tab-shell {
+        overflow: hidden;
+    }
+
+    .tab-nav-wrap {
+        background: #f8fafc;
+        border-bottom: 1px solid var(--chedvi-border);
+        padding: 0.9rem 1rem 0;
+    }
+
+    .nav-profile-tabs {
+        gap: 0.6rem;
+        border-bottom: 0;
+    }
+
+    .nav-profile-tabs .nav-link {
+        border: 0;
+        color: #475467;
+        font-weight: 800;
+        font-size: 1rem;
+        border-radius: 16px 16px 0 0;
+        padding: 0.95rem 1.15rem;
+        background: transparent;
+    }
+
+    .nav-profile-tabs .nav-link.active {
+        background: #fff;
+        color: var(--chedvi-navy);
+        box-shadow: inset 0 -3px 0 var(--chedvi-gold);
+    }
+
+    .tab-panel-content {
+        padding: 1.5rem 1.6rem 1.7rem;
+    }
+
+    .tab-panel-content h4 {
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: var(--chedvi-navy);
+        margin-bottom: 0.85rem;
+    }
+
+    .tab-panel-content h5 {
+        font-size: 1.06rem;
+        font-weight: 800;
+        color: var(--chedvi-blue);
+        margin-top: 1.35rem;
+        margin-bottom: 0.55rem;
+    }
+
+    .tab-panel-content ul {
+        padding-left: 1.2rem;
+        margin-bottom: 0;
+    }
+
+    .tab-panel-content li {
+        margin-bottom: 0.6rem;
+        line-height: 1.75;
+        color: #344054;
+        font-size: 1.02rem;
+    }
+
+    .mini-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem 1.35rem;
+        margin-top: 0.9rem;
+    }
+
+    .mini-meta .meta-chip {
+        background: #f7f9fc;
+        border: 1px solid #e2e8f0;
+        border-radius: 999px;
+        padding: 0.55rem 0.85rem;
+        font-size: 0.96rem;
+        color: #475467;
+        font-weight: 700;
+    }
+
+    .empty-state {
+        border-radius: 24px;
+        border: 2px dashed #c9d4e0;
+        background: #f8fbff;
+        padding: 3.5rem 1.5rem;
+        text-align: center;
+        color: #667085;
+    }
+
+    .empty-state i {
+        font-size: 2.2rem;
+        color: var(--chedvi-blue);
+        margin-bottom: 0.75rem;
+    }
+
+    @media (max-width: 991.98px) {
+        .hero-stat-box {
+            min-width: 0;
+            width: 100%;
+        }
+
+        .metrics-grid .metric-card {
+            min-height: 156px;
+        }
     }
 </style>
 
-<section class="py-5 bg-light border-bottom">
+<section class="profiles-page py-5">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-8">
-                <h1 class="display-5 fw-bold mb-2">Neighborhood Profiles</h1>
-                <p class="lead text-muted">
-                    Detailed health, economic, and social profiles for Camden's 19 neighborhoods.
-                </p>
-            </div>
-            <div class="col-lg-4 text-lg-end">
-                <div class="d-inline-flex align-items-center gap-2 text-muted small bg-white px-3 py-2 rounded shadow-sm">
-                    <i class="fas fa-database text-primary"></i>
-                    <span>Data Source: 2022 Census & CDC PLACES</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
-
-<section class="py-5">
-    <div class="container">
-        
-        <div class="row mb-5">
-            <div class="col-lg-10 mx-auto">
-                <div class="card shadow border-0 overflow-hidden">
-                    <div class="card-header bg-theme p-4">
-                        <h4 class="mb-0"><i class="fas fa-search-location me-2"></i>Neighborhood Selector</h4>
+        <div class="selector-card mb-4">
+            <div class="card-body">
+                <div class="row align-items-center g-3">
+                    <div class="col-lg-4">
+                        <div class="section-overline mb-2">Neighborhood Selector</div>
+                        <h1 class="h2 fw-bold mb-1">Camden Neighborhood Profiles</h1>
+                        <p class="text-muted mb-0">
+                            Select a neighborhood to view a larger overview, key insight, priority areas, and audience-specific detail tabs.
+                        </p>
                     </div>
-                    <div class="card-body p-4 bg-light">
-                        <label class="form-label fw-bold text-uppercase small text-muted">Choose a neighborhood to view full report:</label>
-                        <select class="form-select form-select-lg shadow-sm border-0" id="neighborhood-selector">
-                            <option value="">Select a Neighborhood...</option>
+
+                    <div class="col-lg-8">
+                        <label class="selector-label mb-2" for="neighborhood-selector">
+                            Choose a neighborhood
+                        </label>
+                        <select class="form-select shadow-sm" id="neighborhood-selector">
+                            <option value="">Select a neighborhood...</option>
                             {% for n in neighborhood_data %}
                             <option value="{{ n.name }}">{{ n.name }}</option>
                             {% endfor %}
                         </select>
-                        <div id="data-source-indicator" class="mt-2 small text-muted fst-italic text-end"></div>
+                        <div id="data-source-indicator" class="mt-2 small text-muted text-end"></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="neighborhood-profile" style="display: none;">
-            
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="d-flex flex-wrap justify-content-between align-items-end border-bottom pb-3">
-                        <div>
-                            <span class="badge bg-secondary mb-2">Camden, NJ</span>
-                            <h2 class="display-4 fw-bold text-dark mb-0" id="profile-name">--</h2>
+        <div id="empty-state" class="empty-state">
+            <i class="fas fa-map-marked-alt"></i>
+            <h3 class="h4 fw-bold mb-2">Select a neighborhood to begin</h3>
+            <p class="mb-0">
+                The profile will populate with live health, economic, and audience-specific neighborhood information.
+            </p>
+        </div>
+
+        <div id="neighborhood-profile" style="display:none;">
+            <div class="profile-hero p-4 p-lg-5 mb-4">
+                <div class="row g-4 align-items-end">
+                    <div class="col-lg-8">
+                        <div class="hero-badge mb-3">
+                            <i class="fas fa-location-dot"></i>
+                            Camden, New Jersey
                         </div>
-                        <div class="d-flex gap-4 text-end mt-3 mt-lg-0">
-                            <div>
-                                <small class="text-muted fw-bold d-block text-uppercase">Population</small>
-                                <span class="h4 mb-0" id="profile-pop">--</span>
+                        <div class="section-overline text-white-50 mb-2">Neighborhood Overview</div>
+                        <h2 class="profile-name" id="profile-name">--</h2>
+                        <p class="hero-subtitle mb-0" id="profile-overview-copy">--</p>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="d-grid gap-3">
+                            <div class="hero-stat-box">
+                                <span class="hero-stat-label">Population</span>
+                                <span class="hero-stat-value" id="profile-population">--</span>
                             </div>
-                            <div>
-                                <small class="text-muted fw-bold d-block text-uppercase">Coordinates</small>
-                                <span class="h4 mb-0" id="profile-coords">--</span>
+                            <div class="hero-stat-box">
+                                <span class="hero-stat-label">Coordinates</span>
+                                <span class="hero-stat-value fs-4" id="profile-coordinates">--</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="row g-4 mb-5">
-                <div class="col-lg-4 col-md-6">
-                    <div class="card h-100 border-0 shadow-sm hover-card">
-                        <div class="card-body p-4 text-center position-relative overflow-hidden">
-                            <div class="position-absolute top-0 end-0 p-3 opacity-10">
-                                <i class="fas fa-wallet fa-5x text-success"></i>
-                            </div>
-                            <h6 class="text-muted text-uppercase fw-bold mb-3">Median Income</h6>
-                            <h3 class="display-5 fw-bold text-success mb-2" id="profile-income">--</h3>
-                            <div class="d-flex justify-content-center align-items-center gap-2">
-                                <span class="badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill">
-                                    Rank #<span id="rank-income">--</span>
-                                </span>
-                                <small class="text-muted" id="income-context">--</small>
-                            </div>
-                        </div>
+            <div class="row g-4 metrics-grid mb-4">
+                <div class="col-xl-4 col-md-6">
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-dollar-sign"></i></div>
+                        <div class="metric-label">Median Income</div>
+                        <div class="metric-value" id="metric-income">--</div>
+                        <div class="metric-note" id="metric-income-note">--</div>
                     </div>
                 </div>
 
-                <div class="col-lg-4 col-md-6">
-                    <div class="card h-100 border-0 shadow-sm hover-card">
-                        <div class="card-body p-4 text-center position-relative overflow-hidden">
-                            <div class="position-absolute top-0 end-0 p-3 opacity-10">
-                                <i class="fas fa-heartbeat fa-5x text-danger"></i>
-                            </div>
-                            <h6 class="text-muted text-uppercase fw-bold mb-3">Diabetes Prevalence</h6>
-                            <h3 class="display-5 fw-bold text-danger mb-2" id="profile-diabetes">--</h3>
-                            <div class="d-flex justify-content-center align-items-center gap-2">
-                                <span class="badge bg-danger bg-opacity-10 text-danger px-3 py-2 rounded-pill">
-                                    Rank #<span id="rank-diabetes">--</span>
-                                </span>
-                                <small class="text-muted" id="health-context">--</small>
-                            </div>
-                        </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-weight-scale"></i></div>
+                        <div class="metric-label">Obesity</div>
+                        <div class="metric-value" id="metric-obesity">--</div>
+                        <div class="metric-note" id="metric-obesity-note">--</div>
                     </div>
                 </div>
 
-                <div class="col-lg-4 col-md-12">
-                    <div class="card h-100 border-0 shadow-sm hover-card">
-                        <div class="card-body p-4 text-center position-relative overflow-hidden">
-                            <div class="position-absolute top-0 end-0 p-3 opacity-10">
-                                <i class="fas fa-home fa-5x text-warning"></i>
-                            </div>
-                            <h6 class="text-muted text-uppercase fw-bold mb-3">Poverty Rate</h6>
-                            <h3 class="display-5 fw-bold text-warning mb-2" id="profile-poverty">--</h3>
-                            <div class="d-flex justify-content-center align-items-center gap-2">
-                                <span class="badge bg-warning bg-opacity-10 text-warning px-3 py-2 rounded-pill">
-                                    Rank #<span id="rank-poverty">--</span>
-                                </span>
-                                <small class="text-muted">of Households</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row g-4">
-                
-                <div class="col-lg-7">
-                    <div class="card shadow-sm border-0 h-100">
-                        <div class="card-header bg-white py-3 border-bottom-0">
-                            <h5 class="fw-bold mb-0 text-theme">
-                                <i class="fas fa-microscope me-2"></i>Neighborhood Context
-                            </h5>
-                        </div>
-                        <div class="card-body p-4 pt-0">
-                            <div class="alert alert-light border-start border-4 border-theme mb-4" role="alert">
-                                <div id="context-paragraph" class="text-muted"></div>
-                            </div>
-                            
-                            <h6 class="fw-bold text-uppercase small text-muted mb-3">Identified Health Challenges</h6>
-                            <ul class="list-group list-group-flush" id="challenges-list"></ul>
-
-                            <div class="mt-4 row align-items-center g-3">
-                                <div class="col-auto">
-                                    <div class="d-flex align-items-center text-muted small">
-                                        <i class="fas fa-exclamation-circle me-2"></i>
-                                        <span>Economic Strain Index:</span>
-                                    </div>
-                                </div>
-                                <div class="col">
-                                    <div class="progress" style="height: 8px;">
-                                        <div id="strain-bar" class="progress-bar bg-warning" role="progressbar" style="width: 0%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-heartbeat"></i></div>
+                        <div class="metric-label">Diabetes</div>
+                        <div class="metric-value" id="metric-diabetes">--</div>
+                        <div class="metric-note" id="metric-diabetes-note">--</div>
                     </div>
                 </div>
 
-                <div class="col-lg-5">
-                    <div class="card shadow-lg border-0 h-100 bg-theme position-relative overflow-hidden">
-                        <div class="position-absolute bottom-0 end-0 translate-middle-y p-3 opacity-10">
-                            <i class="fas fa-clipboard-check fa-8x text-white"></i>
-                        </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-chart-line"></i></div>
+                        <div class="metric-label">Poverty Rate</div>
+                        <div class="metric-value" id="metric-poverty">--</div>
+                        <div class="metric-note" id="metric-poverty-note">--</div>
+                    </div>
+                </div>
 
-                        <div class="card-header bg-transparent border-bottom border-white border-opacity-25 py-3">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="fw-bold mb-0">Action Plan</h5>
-                                <span class="badge bg-white text-theme" id="priority-badge">--</span>
-                            </div>
-                        </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-basket-shopping"></i></div>
+                        <div class="metric-label">Low Food Access</div>
+                        <div class="metric-value" id="metric-food-access">--</div>
+                        <div class="metric-note" id="metric-food-access-note">--</div>
+                    </div>
+                </div>
 
-                        <div class="card-body p-4 position-relative d-flex flex-column" style="z-index: 1; min-height: 300px;">
-                            
-                            <h6 class="text-white text-opacity-75 text-uppercase small fw-bold mb-3">Strategic Recommendations</h6>
-                            <div id="strategy-list" class="flex-grow-1"></div>
-
-                            <div class="mt-4 pt-3 border-top border-white border-opacity-25">
-                                <div class="p-3 rounded bg-black bg-opacity-25 backdrop-blur">
-                                    <div class="d-flex align-items-center justify-content-between mb-2">
-                                        <small class="text-white text-opacity-90 fw-bold text-uppercase">
-                                            <i class="fas fa-info-circle me-1"></i>Next Steps
-                                        </small>
-                                    </div>
-                                    <p class="small text-white text-opacity-75 mb-3 lh-sm">
-                                        Connect with local organizations already working on these challenges.
-                                    </p>
-                                    <button class="btn btn-light w-100 fw-bold text-theme shadow-lg py-2" onclick="window.location.href='{{ url_for('resources') }}'">
-                                        <i class="fas fa-handshake me-2"></i>Find Local Partners
-                                    </button>
-                                </div>
-                            </div>
-
-                        </div>
+                <div class="col-xl-4 col-md-6">
+                    <div class="metric-card">
+                        <div class="metric-icon"><i class="fas fa-brain"></i></div>
+                        <div class="metric-label">Mental Distress</div>
+                        <div class="metric-value" id="metric-mental">--</div>
+                        <div class="metric-note" id="metric-mental-note">--</div>
                     </div>
                 </div>
             </div>
 
-        </div> 
+            <div class="row g-4 mb-4">
+                <div class="col-lg-6">
+                    <div class="info-panel">
+                        <div class="info-panel-title">
+                            <span class="icon-wrap"><i class="fas fa-lightbulb"></i></span>
+                            Key Insight
+                        </div>
+                        <div class="insight-copy" id="key-insight-copy">--</div>
+                        <div class="mini-meta">
+                            <span class="meta-chip" id="city-comparison-chip">--</span>
+                            <span class="meta-chip" id="priority-chip">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="info-panel">
+                        <div class="info-panel-title">
+                            <span class="icon-wrap"><i class="fas fa-bullseye"></i></span>
+                            Priority Areas
+                        </div>
+                        <ul class="priority-list" id="priority-areas-list">
+                            <li>--</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-shell">
+                <div class="tab-nav-wrap">
+                    <ul class="nav nav-tabs nav-profile-tabs" id="profileTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview-panel" type="button" role="tab">
+                                General Overview
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="policy-tab" data-bs-toggle="tab" data-bs-target="#policy-panel" type="button" role="tab">
+                                Policy Maker
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="research-tab" data-bs-toggle="tab" data-bs-target="#research-panel" type="button" role="tab">
+                                Researcher
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="community-tab" data-bs-toggle="tab" data-bs-target="#community-panel" type="button" role="tab">
+                                Community Organization / Resident
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="tab-content">
+                    <div class="tab-pane fade show active tab-panel-content" id="overview-panel" role="tabpanel">
+                        <div id="overview-tab-content"></div>
+                    </div>
+                    <div class="tab-pane fade tab-panel-content" id="policy-panel" role="tabpanel">
+                        <div id="policy-tab-content"></div>
+                    </div>
+                    <div class="tab-pane fade tab-panel-content" id="research-panel" role="tabpanel">
+                        <div id="research-tab-content"></div>
+                    </div>
+                    <div class="tab-pane fade tab-panel-content" id="community-panel" role="tabpanel">
+                        <div id="community-tab-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </section>
-{% endblock %}
-
-{% block scripts %}
-<script src="{{ url_for('static', filename='js/neighborhoods.js') }}"></script>
 
 <script>
-    // --- 1. BACKUP DATA (Matches your Database Exact Values) ---
-    const csvBackupData = [
-        { name: 'Gateway', median_income: 26750, poverty_rate: 30.78, diabetes_rate: 17.0, obesity_rate: 43.9, total_population: 1693, asthma_rate: 12.1, mental_distress_rate: 20.3, unemployment_rate: 28.59, lack_health_insurance: 22.7 },
-        { name: 'Bergen Square', median_income: 12104, poverty_rate: 54.36, diabetes_rate: 15.7, obesity_rate: 47.6, total_population: 2766, asthma_rate: 11.7, mental_distress_rate: 24.1, unemployment_rate: 34.22, lack_health_insurance: 29.8 },
-        { name: 'Cooper Poynt', median_income: 29789, poverty_rate: 36.71, diabetes_rate: 18.9, obesity_rate: 44.8, total_population: 1338, asthma_rate: 14.3, mental_distress_rate: 22.3, unemployment_rate: 11.43, lack_health_insurance: 32.2 },
-        { name: 'Pyne Point', median_income: 19412, poverty_rate: 39.82, diabetes_rate: 21.4, obesity_rate: 46.6, total_population: 5211, asthma_rate: 12.9, mental_distress_rate: 22.9, unemployment_rate: 14.21, lack_health_insurance: 36.1 },
-        { name: 'Cramer Hill', median_income: 28198, poverty_rate: 38.68, diabetes_rate: 18.4, obesity_rate: 44.8, total_population: 3804, asthma_rate: 14.1, mental_distress_rate: 25.6, unemployment_rate: 9.42, lack_health_insurance: 39.9 },
-        { name: 'Beideman', median_income: 58983, poverty_rate: 11.91, diabetes_rate: 13.4, obesity_rate: 40.2, total_population: 5645, asthma_rate: 13.0, mental_distress_rate: 19.1, unemployment_rate: 9.73, lack_health_insurance: 29.7 },
-        { name: 'Dudley', median_income: 35491, poverty_rate: 24.96, diabetes_rate: 22.2, obesity_rate: 41.8, total_population: 3295, asthma_rate: 12.4, mental_distress_rate: 20.9, unemployment_rate: 3.93, lack_health_insurance: 34.2 },
-        { name: 'Rosedale', median_income: 51741, poverty_rate: 19.22, diabetes_rate: 16.9, obesity_rate: 38.8, total_population: 5044, asthma_rate: 13.1, mental_distress_rate: 18.6, unemployment_rate: 13.15, lack_health_insurance: 28.7 },
-        { name: 'Stockton', median_income: 44357, poverty_rate: 20.17, diabetes_rate: 17.9, obesity_rate: 41.9, total_population: 6529, asthma_rate: 11.2, mental_distress_rate: 20.1, unemployment_rate: 5.94, lack_health_insurance: 27.4 },
-        { name: 'Marlton', median_income: 31312, poverty_rate: 30.43, diabetes_rate: 19.2, obesity_rate: 43.2, total_population: 4726, asthma_rate: 11.5, mental_distress_rate: 21.0, unemployment_rate: 16.67, lack_health_insurance: 28.6 },
-        { name: 'Parkside', median_income: 45662, poverty_rate: 19.40, diabetes_rate: 15.0, obesity_rate: 46.1, total_population: 4181, asthma_rate: 10.6, mental_distress_rate: 21.9, unemployment_rate: 26.16, lack_health_insurance: 19.4 },
-        { name: 'Whitman Park', median_income: 31941, poverty_rate: 28.40, diabetes_rate: 21.5, obesity_rate: 44.8, total_population: 5394, asthma_rate: 10.6, mental_distress_rate: 22.0, unemployment_rate: 18.81, lack_health_insurance: 21.8 },
-        { name: 'Liberty Park', median_income: 29210, poverty_rate: 26.21, diabetes_rate: 23.1, obesity_rate: 48.7, total_population: 2401, asthma_rate: 11.0, mental_distress_rate: 24.9, unemployment_rate: 11.37, lack_health_insurance: 25.4 },
-        { name: 'Centerville', median_income: 22181, poverty_rate: 42.97, diabetes_rate: 14.7, obesity_rate: 51.4, total_population: 2805, asthma_rate: 13.4, mental_distress_rate: 25.5, unemployment_rate: 25.90, lack_health_insurance: 26.9 },
-        { name: 'Waterfront South', median_income: 54324, poverty_rate: 40.45, diabetes_rate: 20.3, obesity_rate: 44.3, total_population: 918, asthma_rate: 10.4, mental_distress_rate: 22.1, unemployment_rate: 8.51, lack_health_insurance: 24.6 },
-        { name: 'Morgan Village', median_income: 34796, poverty_rate: 32.57, diabetes_rate: 17.5, obesity_rate: 45.7, total_population: 2701, asthma_rate: 11.3, mental_distress_rate: 22.4, unemployment_rate: 9.16, lack_health_insurance: 21.9 },
-        { name: 'Fairview', median_income: 41840, poverty_rate: 20.76, diabetes_rate: 17.3, obesity_rate: 43.6, total_population: 6221, asthma_rate: 12.7, mental_distress_rate: 20.9, unemployment_rate: 24.87, lack_health_insurance: 19.3 },
-        { name: 'Cooper Grant', median_income: 51635, poverty_rate: 41.01, diabetes_rate: 19.4, obesity_rate: 36.0, total_population: 2274, asthma_rate: 12.3, mental_distress_rate: 19.2, unemployment_rate: 14.15, lack_health_insurance: 14.7 },
-        { name: 'Lanning Square', median_income: 38447, poverty_rate: 18.62, diabetes_rate: 18.0, obesity_rate: 41.3, total_population: 4853, asthma_rate: 13.4, mental_distress_rate: 21.0, unemployment_rate: 8.24, lack_health_insurance: 22.2 }
-    ];
-
-    document.addEventListener("DOMContentLoaded", function() {
-        const selector = document.getElementById('neighborhood-selector');
-        const profileDiv = document.getElementById('neighborhood-profile');
-        const sourceIndicator = document.getElementById('data-source-indicator');
-
-        // --- 2. DATA INGESTION & SANITIZATION ---
-        let rawDbData = [];
-        let dataSource = "Database";
-
-        try {
-            // Attempt to load from Flask Backend
-            rawDbData = {{ neighborhood_data | tojson | safe }};
-        } catch (e) {
-            console.warn("Backend data missing, using backup.");
-        }
-
-        // Safety Switch: If DB data is empty or invalid, switch to Backup
-        if (!rawDbData || rawDbData.length === 0) {
-            console.warn("Using Fallback CSV Data.");
-            rawDbData = csvBackupData;
-            dataSource = "Static Data (Backup Mode)";
-        } else {
-            console.log("Using Live Database Data.");
-        }
-
-        // Transform Data (Normalize Keys & Types)
-        const realCamdenData = rawDbData.map(d => {
-            // Merge Static Coordinates
-            const coords = (window.neighborhoodCoordinates && window.neighborhoodCoordinates[d.name]) 
-                           ? window.neighborhoodCoordinates[d.name] 
-                           : { lat: 0, lng: 0 };
-            
-            // Helper: Force to Number
-            const num = (v) => {
-                if (v === undefined || v === null) return 0;
-                return parseFloat(v) || 0;
-            };
-
-            return {
-                name: (d.name || "Unknown").trim(),
-                // Check BOTH potential key names (DB snake_case vs JS camelCase)
-                income: num(d.median_income || d.income), 
-                diabetes: num(d.diabetes_rate || d.diabetes),
-                obesity: num(d.obesity_rate || d.obesity),
-                poverty: num(d.poverty_rate || d.poverty),
-                population: num(d.total_population || d.population),
-                // Extra fields from your Database
-                asthma: num(d.asthma_rate || d.asthma),
-                mental: num(d.mental_distress_rate || d.mental),
-                unemployment: num(d.unemployment_rate || d.unemployment),
-                insurance: num(d.lack_health_insurance || d.insurance),
-                
-                lat: coords.lat,                  
-                lng: coords.lng                   
-            };
-        });
-
-        // --- 3. RANKING ENGINE ---
-        const sortedByIncome = [...realCamdenData].sort((a, b) => b.income - a.income);
-        const sortedByHealth = [...realCamdenData].sort((a, b) => a.diabetes - b.diabetes);
-        const sortedByPoverty = [...realCamdenData].sort((a, b) => a.poverty - b.poverty);
-
-        function getRank(name, sortedArray) {
-            return sortedArray.findIndex(n => n.name === name) + 1;
-        }
-
-        // --- 4. UPDATE HANDLER ---
-        selector.addEventListener('change', function() {
-            const selectedName = this.value.trim();
-            
-            if (!selectedName) {
-                profileDiv.style.display = "none";
-                return;
-            }
-
-            const n = realCamdenData.find(item => item.name === selectedName);
-
-            if (!n) {
-                console.error("Data missing for:", selectedName);
-                return;
-            }
-
-            profileDiv.style.display = "block";
-
-            const safeVal = (val, suffix = "") => (val !== undefined && val !== null) ? val.toLocaleString() + suffix : "--";
-
-            // A. Header
-            document.getElementById('profile-name').textContent = n.name;
-            document.getElementById('profile-pop').textContent = safeVal(n.population);
-            
-            let coords = (n.lat !== 0) ? `${n.lat.toFixed(3)}, ${n.lng.toFixed(3)}` : "N/A";
-            document.getElementById('profile-coords').textContent = coords;
-
-            // B. KPI Cards
-            document.getElementById('profile-income').textContent = "$" + safeVal(n.income);
-            const incomeRank = getRank(n.name, sortedByIncome);
-            document.getElementById('rank-income').textContent = incomeRank;
-            document.getElementById('income-context').textContent = incomeRank < 5 ? "Top Tier" : (incomeRank > 14 ? "Low Tier" : "Mid Tier");
-
-            document.getElementById('profile-diabetes').textContent = safeVal(n.diabetes, "%");
-            const healthRank = getRank(n.name, sortedByHealth);
-            document.getElementById('rank-diabetes').textContent = healthRank;
-            document.getElementById('health-context').textContent = healthRank > 15 ? "Critical" : "Stable";
-
-            document.getElementById('profile-poverty').textContent = safeVal(n.poverty, "%");
-            document.getElementById('rank-poverty').textContent = getRank(n.name, sortedByPoverty);
-
-            // C. Dynamic Context
-            let narrative = `<strong>${n.name}</strong> is a community of approx. ${safeVal(n.population)} residents. `;
-            
-            if (n.diabetes > 20) {
-                narrative += `It faces <span class="text-danger fw-bold">severe health challenges</span>, with a diabetes rate (${n.diabetes}%) significantly above the city average. `;
-            } else if (n.diabetes < 16) {
-                narrative += `Health outcomes here are <span class="text-success fw-bold">comparatively better</span> than the rest of the city. `;
-            } else {
-                narrative += `Health metrics align with the city-wide baseline. `;
-            }
-
-            if (n.income < 20000) {
-                narrative += `Economically, the area struggles with deep poverty, creating barriers to healthcare access.`;
-            } else if (n.income > 50000) {
-                narrative += `With a median income of $${safeVal(n.income)}, it is one of Camden's more economically resilient neighborhoods.`;
-            }
-            document.getElementById('context-paragraph').innerHTML = narrative;
-
-            // D. Challenges (Using ALL DB Fields)
-            let challengesHTML = "";
-            let strainScore = 0;
-
-            if (n.poverty > 35) {
-                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-exclamation-triangle text-danger me-3"></i><div><strong>Severe Economic Hardship</strong><br><small class="text-muted">Poverty rate (${n.poverty}%) exceeds 35% threshold.</small></div></li>`;
-                strainScore += 30;
-            }
-            if (n.diabetes > 19) {
-                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-procedures text-danger me-3"></i><div><strong>Chronic Disease Burden</strong><br><small class="text-muted">Diabetes prevalence (${n.diabetes}%) is critical.</small></div></li>`;
-                strainScore += 25;
-            }
-            if (n.unemployment > 15) {
-                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-briefcase text-warning me-3"></i><div><strong>High Unemployment</strong><br><small class="text-muted">Unemployment rate is ${n.unemployment}%, indicating job market stress.</small></div></li>`;
-                strainScore += 20;
-            }
-            if (n.asthma > 13) {
-                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-lungs text-warning me-3"></i><div><strong>Respiratory Health</strong><br><small class="text-muted">Asthma rate (${n.asthma}%) suggests environmental factors.</small></div></li>`;
-                strainScore += 15;
-            }
-            if (n.insurance > 25) {
-                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-user-shield text-danger me-3"></i><div><strong>Lack of Insurance</strong><br><small class="text-muted">${n.insurance}% of residents lack health coverage.</small></div></li>`;
-                strainScore += 10;
-            }
-
-            if (challengesHTML === "") {
-                challengesHTML += `<li class="list-group-item d-flex align-items-center"><i class="fas fa-check-circle text-success me-3"></i><div><strong>Stable Indicators</strong><br><small class="text-muted">No critical alerts flagged.</small></div></li>`;
-                strainScore = 5;
-            }
-            
-            document.getElementById('challenges-list').innerHTML = challengesHTML;
-            document.getElementById('strain-bar').style.width = Math.min(strainScore, 100) + "%";
-
-            // E. Action Plan
-            let strategiesHTML = "<ul class='list-unstyled'>";
-            let priorityLevel = "MONITOR";
-            const pBadge = document.getElementById('priority-badge');
-            pBadge.className = "badge bg-white text-theme";
-
-            if (n.diabetes > 20) {
-                strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Mobile Screening Units</strong><br><small class="text-white text-opacity-50">Deploy bi-weekly A1C testing vans.</small></span></div></li>`;
-                priorityLevel = "URGENT";
-                pBadge.className = "badge bg-danger text-white";
-            }
-            if (n.poverty > 40) {
-                strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Food Prescription Rx</strong><br><small class="text-white text-opacity-50">Subsidize fresh produce for residents.</small></span></div></li>`;
-                priorityLevel = (priorityLevel === "URGENT") ? "CRITICAL" : "HIGH";
-                if(priorityLevel === "HIGH") pBadge.className = "badge bg-warning text-dark";
-            }
-            if (n.income < 25000) {
-                strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Medicaid Outreach</strong><br><small class="text-white text-opacity-50">Increase enrollment assistance.</small></span></div></li>`;
-            }
-            if (n.unemployment > 20) {
-                strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Workforce Development</strong><br><small class="text-white text-opacity-50">Partner with local unions for job training.</small></span></div></li>`;
-            }
-
-            if (strategiesHTML === "<ul class='list-unstyled'>") {
-                strategiesHTML += `<li class="mb-3"><div class="d-flex"><i class="fas fa-check-square mt-1 me-2 text-white text-opacity-75"></i><span><strong>Community Wellness</strong><br><small class="text-white text-opacity-50">Maintain current engagement programs.</small></span></div></li>`;
-            }
-            strategiesHTML += "</ul>";
-
-            document.getElementById('strategy-list').innerHTML = strategiesHTML;
-            pBadge.textContent = priorityLevel;
-        });
-    });
+    window.NEIGHBORHOOD_DATA = {{ neighborhood_data | default([], true) | tojson | safe }};
 </script>
+<script src="{{ url_for('static', filename='js/neighborhoods.js') }}"></script>
 {% endblock %}
