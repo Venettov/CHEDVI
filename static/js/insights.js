@@ -393,7 +393,6 @@ function createHousingHealthChart() {
     const selector = document.getElementById('housingOutcomeSelector');
     const outcomeKey = selector ? selector.value : 'asthma';
 
-    // 1. DATA-DRIVEN TEXT UPDATES
     const explanations = {
         asthma: { 
             title: 'Overcrowding & Respiratory Health', 
@@ -408,7 +407,7 @@ function createHousingHealthChart() {
         mentalDistress: { 
             title: 'Housing & Psychological Stress', 
             main: 'Living in areas with high overcrowding impacts community mental health.', 
-            detail: 'Neighborhoods with higher overcrowded housing units (like Cramer Hill at 13.1%) show a direct spike in reports of frequent mental distress.' 
+            detail: 'Neighborhoods with higher overcrowded housing units show a direct spike in reports of frequent mental distress.' 
         },
         diabetes: { 
             title: 'Housing as a Health Determinant', 
@@ -417,13 +416,13 @@ function createHousingHealthChart() {
         },
         obesity: { 
             title: 'Housing Density & Obesity', 
-            main: 'Overcrowded housing (17.3% in Dudley) correlates with limited space for physical activity.', 
+            main: 'Overcrowded housing correlates with limited space for physical activity.', 
             detail: 'The data suggests that neighborhoods with high housing density and overcrowding issues face higher barriers to maintaining active lifestyles, contributing to elevated obesity rates.' 
         },
         highBloodPressure: { 
             title: 'Housing Stress & Hypertension', 
             main: 'The stress of housing insecurity is a cardiovascular risk factor.', 
-            detail: 'Tracts with the highest overcrowding percentage consistently show hypertension rates over 40%, reflecting the physical toll of living in cramped, substandard, or unstable conditions.' 
+            detail: 'Tracts with the highest overcrowding percentage consistently show elevated hypertension rates.' 
         }
     };
 
@@ -447,59 +446,28 @@ function createHousingHealthChart() {
         highBloodPressure: 'High Blood Pressure (%)'
     };
 
-    function toNumber(value) {
-        if (value === null || value === undefined || value === '') return null;
-        if (typeof value === 'number') return Number.isFinite(value) ? value : null;
-        const num = parseFloat(String(value).replace(/[%,$\s]/g, ''));
-        return Number.isFinite(num) ? num : null;
-    }
-
-    function getFirstNumber(obj, keys) {
-        for (const key of keys) {
-            const val = toNumber(obj[key]);
-            if (val !== null) return val;
-        }
-        return null;
-    }
-
-    // Use frontend aliases first, then DB/model names as fallback
-    const yKeyMap = {
-        asthma: ['asthma', 'asthma_rate'],
-        leadRisk: ['leadRisk', 'poverty', 'poverty_rate'],
-        mentalDistress: ['mentalDistress', 'mental_distress_rate', 'mental_distress'],
-        diabetes: ['diabetes', 'diabetes_rate'],
-        obesity: ['obesity', 'obesity_rate'],
-        highBloodPressure: ['highBloodPressure', 'high_blood_pressure']
-    };
-
-    console.log('housing row sample:', window.dbData[0]);
-
     const bubbleData = window.dbData
         .map(d => {
-            const xVal = getFirstNumber(d, [
-                'overcrowded_housing',
-                'overcrowding',
-                'housing_overcrowding',
-                'overcrowdedHousing'
-            ]);
+            const xVal = parseFloat(d.overcrowded_housing);
+            const yVal = outcomeKey === 'leadRisk'
+                ? parseFloat(d.poverty)
+                : parseFloat(d[outcomeKey]);
+            const povertyVal = parseFloat(d.poverty);
 
-            const yVal = getFirstNumber(d, yKeyMap[outcomeKey] || [outcomeKey]);
-            const povertyVal = getFirstNumber(d, ['poverty', 'poverty_rate']);
-
-            if (xVal === null || yVal === null) return null;
+            if (!Number.isFinite(xVal) || !Number.isFinite(yVal)) return null;
 
             return {
                 x: parseFloat(xVal.toFixed(1)),
                 y: yVal,
-                r: povertyVal !== null ? Math.max(povertyVal / 4, 4) : 4,
+                r: Number.isFinite(povertyVal) ? Math.max(povertyVal / 4, 4) : 4,
                 name: d.name || 'Unknown',
-                poverty: povertyVal !== null ? povertyVal : 0
+                poverty: Number.isFinite(povertyVal) ? povertyVal : 0
             };
         })
         .filter(Boolean);
 
     if (bubbleData.length === 0) {
-        console.warn('Housing chart: no valid data found', window.dbData[0]);
+        console.warn('Housing chart: no valid data found');
         return;
     }
 

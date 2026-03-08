@@ -555,7 +555,8 @@ def get_neighborhood_data():
                 'education': n.high_school_higher,
                 'unemployment': n.unemployment_rate,    # Ensure this matches the JS d.unemployment
                 'housing_vacant': n.vacant_housing,     # Used for the housing math
-                'housing_total': n.housing_units        # Used for the housing math
+                'housing_total': n.housing_units,        # Used for the housing math
+                "overcrowded_housing": n.overcrowded_housing
             })
 
         return jsonify(data_list)
