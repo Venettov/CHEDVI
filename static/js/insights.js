@@ -438,18 +438,6 @@ function createHousingHealthChart() {
         if (detailEl) detailEl.textContent = textData.detail;
     }
 
-    // 2. MAP FRONTEND SELECTOR KEYS TO ACTUAL DATABASE/API FIELD NAMES
-    const dataKeys = {
-        asthma: 'asthma_rate',
-        leadRisk: 'poverty_rate',              // proxy used for this view
-        mentalDistress: 'mental_distress_rate',
-        diabetes: 'diabetes_rate',
-        obesity: 'obesity_rate',
-        highBloodPressure: 'high_blood_pressure'
-    };
-
-    const yDataKey = dataKeys[outcomeKey];
-
     const labels = {
         asthma: 'Asthma Rate (%)',
         leadRisk: 'Lead Exposure Risk Index',
@@ -459,36 +447,64 @@ function createHousingHealthChart() {
         highBloodPressure: 'High Blood Pressure (%)'
     };
 
-    // 3. BUILD BUBBLE DATA
+    function toNumber(value) {
+        if (value === null || value === undefined || value === '') return null;
+        if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+        const num = parseFloat(String(value).replace(/[%,$\s]/g, ''));
+        return Number.isFinite(num) ? num : null;
+    }
+
+    function getFirstNumber(obj, keys) {
+        for (const key of keys) {
+            const val = toNumber(obj[key]);
+            if (val !== null) return val;
+        }
+        return null;
+    }
+
+    // Use frontend aliases first, then DB/model names as fallback
+    const yKeyMap = {
+        asthma: ['asthma', 'asthma_rate'],
+        leadRisk: ['leadRisk', 'poverty', 'poverty_rate'],
+        mentalDistress: ['mentalDistress', 'mental_distress_rate', 'mental_distress'],
+        diabetes: ['diabetes', 'diabetes_rate'],
+        obesity: ['obesity', 'obesity_rate'],
+        highBloodPressure: ['highBloodPressure', 'high_blood_pressure']
+    };
+
     const bubbleData = window.dbData
         .map(d => {
-            const xVal = parseFloat(d.overcrowded_housing);
-            const yVal = parseFloat(d[yDataKey]);
-            const povertyVal = parseFloat(d.poverty_rate);
+            const xVal = getFirstNumber(d, [
+                'overcrowded_housing',
+                'overcrowding',
+                'housing_overcrowding',
+                'overcrowdedHousing'
+            ]);
 
-            if (!Number.isFinite(xVal) || !Number.isFinite(yVal)) return null;
+            const yVal = getFirstNumber(d, yKeyMap[outcomeKey] || [outcomeKey]);
+            const povertyVal = getFirstNumber(d, ['poverty', 'poverty_rate']);
+
+            if (xVal === null || yVal === null) return null;
 
             return {
                 x: parseFloat(xVal.toFixed(1)),
                 y: yVal,
-                r: Number.isFinite(povertyVal) ? Math.max(povertyVal / 4, 4) : 4,
+                r: povertyVal !== null ? Math.max(povertyVal / 4, 4) : 4,
                 name: d.name || 'Unknown',
-                poverty: Number.isFinite(povertyVal) ? povertyVal : 0
+                poverty: povertyVal !== null ? povertyVal : 0
             };
         })
         .filter(Boolean);
 
     if (bubbleData.length === 0) {
-        console.warn('No valid data found for housing chart');
+        console.warn('Housing chart: no valid data found', window.dbData[0]);
         return;
     }
 
-    // 4. DYNAMIC X-AXIS RANGE
     const xValues = bubbleData.map(d => d.x);
     const minX = Math.min(...xValues);
     const maxX = Math.max(...xValues);
 
-    // 5. DRAW CHART
     housingHealthChart = new Chart(ctx, {
         type: 'bubble',
         data: {
