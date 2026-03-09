@@ -1309,7 +1309,7 @@
         updateMetricCard("metric-mental", "metric-mental-note", formatPercent(n.mentalDistress), valueNote(n.mentalDistress, city.avgMental));
 
         document.getElementById("city-comparison-chip").textContent = `Diabetes: ${differenceLabel(n.diabetes, city.avgDiabetes)}`;
-        document.getElementById("priority-chip").innerHTML = `<span class="priority-badge ${priorityCss}">${priorityText} Priority</span>`;
+        document.getElementById("priority-chip-wrap").innerHTML = `<span class="priority-badge ${priorityCss}">${priorityText} Priority</span>`;
 
         if (!profile) {
             console.warn(`No narrative profile found for ${n.name}`);
