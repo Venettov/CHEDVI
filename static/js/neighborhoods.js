@@ -1129,20 +1129,24 @@
 
     function normalizeNeighborhood(raw) {
         const name = safeName(raw.name);
+
+        // Find matching backup record for any missing values
+        const backup = csvBackupData.find(d => safeName(d.name) === name) || {};
+
         return {
             name,
-            income: num(raw.median_income ?? raw.income),
-            diabetes: num(raw.diabetes_rate ?? raw.diabetes),
-            obesity: num(raw.obesity_rate ?? raw.obesity),
-            poverty: num(raw.poverty_rate ?? raw.poverty),
-            population: num(raw.total_population ?? raw.population),
-            asthma: num(raw.asthma_rate ?? raw.asthma),
-            mentalDistress: num(raw.mental_distress_rate ?? raw.mentalDistress ?? raw.mental),
-            unemployment: num(raw.unemployment_rate ?? raw.unemployment),
-            uninsured: num(raw.lack_health_insurance ?? raw.uninsured ?? raw.insurance),
-            foodAccess: num(raw.food_access_score ?? raw.foodAccess),
-            education: num(raw.high_school_higher ?? raw.education),
-            highBloodPressure: num(raw.high_blood_pressure ?? raw.highBloodPressure),
+            income: num(raw.median_income ?? raw.income ?? backup.income),
+            diabetes: num(raw.diabetes_rate ?? raw.diabetes ?? backup.diabetes),
+            obesity: num(raw.obesity_rate ?? raw.obesity ?? backup.obesity),
+            poverty: num(raw.poverty_rate ?? raw.poverty ?? backup.poverty),
+            population: num(raw.total_population ?? raw.population ?? backup.population),
+            asthma: num(raw.asthma_rate ?? raw.asthma ?? backup.asthma),
+            mentalDistress: num(raw.mental_distress_rate ?? raw.mentalDistress ?? raw.mental ?? backup.mentalDistress),
+            unemployment: num(raw.unemployment_rate ?? raw.unemployment ?? backup.unemployment),
+            uninsured: num(raw.lack_health_insurance ?? raw.uninsured ?? raw.insurance ?? backup.uninsured),
+            foodAccess: num(raw.food_access_score ?? raw.foodAccess ?? backup.foodAccess),
+            education: num(raw.high_school_higher ?? raw.education ?? backup.education),
+            highBloodPressure: num(raw.high_blood_pressure ?? raw.highBloodPressure ?? backup.highBloodPressure),
             coords: neighborhoodCoordinates[name] || null
         };
     }
