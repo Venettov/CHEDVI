@@ -5,7 +5,6 @@
 {% block body_class %}home-page{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
 <section class="hero-section bg-primary text-white position-relative">
     <div class="container">
         <div class="row min-vh-100 align-items-center">
@@ -38,7 +37,6 @@
     </div>
 </section>
 
-<!-- Key Features Section -->
 <section class="py-5" id="transforming-data">
     <div class="container py-4">
         <div class="row text-center mb-5">
@@ -385,4 +383,35 @@
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Initialize the Bootstrap Modal
+        const welcomeModalElement = document.getElementById('welcomeModal');
+        const welcomeModal = new bootstrap.Modal(welcomeModalElement);
+
+        // 2. Show the modal on page load (using sessionStorage to only show once per session)
+        if (!sessionStorage.getItem('welcomeShown')) {
+            welcomeModal.show();
+            sessionStorage.setItem('welcomeShown', 'true');
+        }
+
+        // 3. Define the CHEDVI global object for the "Start Exploring" button
+        window.CHEDVI = {
+            launchExperience: function() {
+                // Trigger confetti for a "welcome" effect
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#0d6efd', '#198754', '#ffc107']
+                });
+
+                // Wait a moment for the confetti effect then hide modal
+                setTimeout(() => {
+                    welcomeModal.hide();
+                }, 800);
+            }
+        };
+    });
+</script>
 {% endblock %}
