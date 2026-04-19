@@ -41,22 +41,22 @@ function createIncomeHealthChart() {
     // --- TEXT UPDATES ---
     const explanations = {
         'diabetes': { 
-            title: 'Income & Diabetes', 
+            title: 'Income vs. Diabetes Rate', 
             main: 'Communities with lower median incomes have higher diabetes rates, declining from 20-23% in low-income areas to 13-20% in higher-income communities. The relationship shows moderate strength, with a 10 percentage-point range across the income spectrum. Notable variation exists at each income level, with communities earning similar amounts showing up to 5-10 percentage point differences in diabetes prevalence.', 
             detail: 'Lower income restricts access to healthy food, regular healthcare visits, diabetes medications, and safe spaces for physical activity. It also increases chronic stress, which directly affects blood sugar regulation. Higher medical costs from diabetes can further trap families in poverty, creating a cycle where economic hardship and disease reinforce each other.' 
         },
         'obesity': { 
-            title: 'Income & Obesity', 
+            title: 'Income vs. Obesity Rate', 
             main: 'There is a clear inverse relationship: as neighborhood income rises, obesity rates tend to fall. The red line shows obesity declining from approximately 42-48% in the lowest-income communities to 36-42% in higher-income areas. However, the relationship shows considerable fluctuation, with some middle-income communities experiencing obesity rates similar to both poor and wealthy areas, indicating income alone does not determine obesity outcomes.', 
             detail: 'Low-income areas often lack affordable gyms and fresh produce markets (food deserts), making a healthy lifestyle prohibitively expensive for many residents in both money and time. When you are working two jobs to make ends meet, there is no time for the gym or meal prep. When processed foods cost less than fresh vegetables, and you are on a tight budget, the choice is economically rational even if unhealthy. Additionally, chronic economic stress affects metabolism and fat storage through cortisol pathways.' 
         },
-        'highBloodPressure': { 
+        'Income vs. High Blood Pressure': { 
             title: 'Income & Hypertension', 
             main: 'Financial stress and lower income are strong predictors of high blood pressure in Camden neighborhoods. The red line shows blood pressure rates ranging from approximately 35-38% in wealthier communities to 45-49% in the poorest areas. The relationship is relatively consistent with some fluctuation in the middle-income range, where blood pressure rates vary between 38-48% despite similar income levels.', 
             detail: 'Chronic financial stress releases cortisol, which raises blood pressure and damages the cardiovascular system over time. Lower-income residents also face a double burden: they are more likely to consume cheaper processed foods high in sodium (a major hypertension risk factor), AND less likely to afford blood pressure medications or have insurance for regular monitoring and treatment. This creates a vicious cycle where poverty causes hypertension, and untreated hypertension leads to expensive medical crises that further impoverish families.' 
         },
         'mentalDistress': { 
-            title: 'Income & Mental Health', 
+            title: 'Income vs. Mental Distress', 
             main: 'Mental distress reports are nearly double in the lowest-income neighborhoods (around 24-25%) compared to the wealthiest ones (around 19-20%). The red line shows a general downward trend as income rises, but with notable fluctuations—some moderate-income communities show mental distress as high as very low-income areas. The relationship is present but not perfectly linear.', 
             detail: 'The daily burden of poverty—housing instability, bill anxiety, food insecurity, and lack of resources—takes a severe toll on mental wellbeing. What makes this particularly devastating is that low-income communities typically have the least access to mental health services while experiencing the greatest need. The stress of economic insecurity is not just psychological—it is a constant cognitive load that affects decision-making, relationships, physical health, and the ability to escape poverty itself.' 
         },
@@ -66,7 +66,7 @@ function createIncomeHealthChart() {
             detail: 'This is a key data insight: income doesn\'t always protect against geography. Because Waterfront South is located near industrial zones, residents still face respiratory risks (10.4% asthma) that even a $54k median income cannot fully mitigate.' 
         },
         'poverty': { 
-            title: 'The Wealth-Poverty Gap', 
+            title: 'Income vs. Poverty Rate ', 
             main: 'This bar chart reveals a stark inverse relationship between median income and poverty rate. As median income drops from $58,000 to $12,000 across neighborhoods, poverty rate skyrockets from approximately 12% to 54%. The red line tracking poverty shows a dramatic upward trend as income bars decline. The lowest-income communities experience poverty rates over 4 times higher than the wealthiest communities.', 
             detail: 'In the most distressed neighborhoods, over 50% of families live below the poverty line, creating a concentrated cycle where essential health resources become unaffordable luxuries. This is not just about individual hardship—when poverty exceeds 40-50% in a community, it fundamentally changes the neighborhood ecosystem: businesses close, services withdraw, tax base erodes, schools lose funding, and collective resources disappear. Breaking this cycle requires addressing both individual income AND community-level disinvestment.' 
         }
@@ -154,22 +154,22 @@ function createFoodObesityChart() {
     // TEXT UPDATES 
     const explanations = {
         'obesity': { 
-            title: 'The 44% Obesity Cluster', 
+            title: 'Food Access vs. Obesity Rate', 
             main: 'Communities with lower food access scores show somewhat higher obesity rates, but this is one of the weaker correlations. The relationship spans from approximately 36-44% obesity in better access areas to 44-51% in poor access communities, with substantial overlap. Communities with identical food access scores show obesity rates varying by 8-12 percentage points, indicating food access is a poor predictor of obesity outcomes.', 
-            detail: 'Without easy access to fresh, nutritious food, residents often rely on processed options that are high in calories but low in nutrients, directly contributing to weight gain. However, the weak correlation reveals that simply opening a grocery store wont solve obesity—affordability matters as much as proximity, time to cook matters, nutrition knowledge matters, and cultural food preferences matter. The scatter shows that obesity is driven more by economic constraints, built environment, and lifestyle factors than by food access alone.' 
+            detail: 'Without easy access to fresh, nutritious food, residents often rely on processed options that are high in calories but low in nutrients, directly contributing to weight gain. However, the weak correlation reveals that simply opening a grocery store would not solve obesity—affordability matters as much as proximity, time to cook matters, nutrition knowledge matters, and cultural food preferences matter. The scatter shows that obesity is driven more by economic constraints, built environment, and lifestyle factors than by food access alone.' 
         },
         'diabetes': { 
-            title: 'Food Access & Diabetes', 
+            title: 'Food Access vs. Diabetes Rate', 
             main: 'Better food access is associated with lower diabetes rates, but this is one of the weaker relationships observed. Communities with identical food access scores show diabetes rates spanning 5 percentage points. The broad scatter pattern suggests that while the food environment plays a role, it iss not a dominant predictor of diabetes outcomes in Camden.', 
             detail: 'Having a grocery store nearby does nott guarantee diabetes prevention if residents cannot afford healthy options, lack knowledge about diabetes-friendly cooking, cannot access healthcare for screening and management, or face time constraints that make meal preparation difficult. Food access creates opportunity, but does not overcome other barriers to diabetes prevention.' 
         },
         'highBloodPressure': { 
-            title: 'Food Access & Hypertension', 
+            title: 'Food Access vs. High Blood Pressure', 
             main: 'Limited food access correlates with higher blood pressure rates, showing communities with poor access at 40-49% prevalence versus 36-45% in better access areas. This represents one of the clearer food-health relationships in the dataset. However, a 12 percentage point spread exists among communities with similar food access scores.', 
             detail: 'Reliance on processed, shelf-stable foods in food deserts means higher sodium intake, a direct contributor to hypertension. Beyond diet, many residents in these areas lack blood pressure monitoring, cannot afford antihypertensive medications, or do not know they have high blood pressure. Untreated hypertension leads to heart attacks, strokes, and kidney disease.' 
         },
         'mentalDistress': { 
-            title: 'Food Access & Mental Health', 
+            title: 'Food Access vs. Mental Distress', 
             main: 'Communities with limited food access show moderately elevated mental distress (22-26%) compared to better access areas (19-22%). The relationship shows moderate strength, with mental health concerns prevalent across the entire food access spectrum. Even the best food access communities still have nearly 1 in 5 residents experiencing frequent mental distress.', 
             detail: 'The daily uncertainty of not knowing where your next meal will come from creates chronic anxiety and stress. Food insecurity forces impossible choices between food, rent, and medicine. Poor nutrition from limited access also affects brain chemistry, mood regulation, and energy levels, making it harder to cope with other life challenges.' 
         },
@@ -179,7 +179,7 @@ function createFoodObesityChart() {
             detail: 'While asthma is environmental, a diet low in anti-inflammatory antioxidants (found in fresh produce) reduces the biological resilience of residents living in high-risk zones.' 
         },
         'poverty': { 
-            title: 'The Nutrition-Poverty Intersection', 
+            title: 'Food Access vs. Poverty Rate', 
             main: 'This is the strongest correlation in the dataset. Communities with higher poverty rates consistently show lower food access scores, with the relationship spanning from 54% poverty/poor access to 12% poverty/good access. Despite the strong pattern, a 4-point spread in food access still exists among communities with similar poverty rates.', 
             detail: 'Grocery chains avoid high-poverty areas due to perceived lower profitability and higher risk, leaving residents dependent on corner stores with limited selection and higher prices. Residents in poor neighborhoods often lack cars and face limited public transit, making it difficult to reach distant supermarkets. This creates a "poverty tax" where the poorest pay most for the lowest quality food.' 
         }
@@ -261,27 +261,27 @@ function createEducationHealthChart() {
     // --- TEXT UPDATES ---
     const explanations = {
         'diabetes': { 
-            title: 'Education & Diabetes Resilience', 
+            title: 'Education vs. Diabetes Rate', 
             main: 'Higher graduation rates associate with lower diabetes prevalence, ranging from 20-23% in low-education communities to 13-19% in high-education areas. The relationship is moderate, with communities at similar education levels showing diabetes rates differing by 6-9 percentage points. A general downward trend is visible but with considerable variation.', 
             detail: 'Education improves health literacy—the ability to read nutrition labels, understand medication instructions, recognize diabetes symptoms, and navigate the healthcare system. Higher educational attainment also typically means better health insurance, regular access to preventive care, and jobs with sick leave that allow time for doctor appointments and diabetes self-management.' 
         },
         'obesity': { 
-            title: 'Education & Obesity', 
+            title: 'Education vs. Obesity Rate', 
             main: 'This is the weakest correlation in the dataset. Communities across vastly different education levels show remarkably similar obesity rates clustering around 40-48%. Communities with 40% graduation show rates (38-44%) that completely overlap with 60% graduation communities (43-48%). Education appears to be a poor predictor of obesity outcomes.', 
             detail: 'Obesity reflects factors that cut across education levels: neighborhood walkability, availability of parks and recreation facilities, proximity to fast food versus healthy options, work schedules that leave no time for exercise, and food prices that make calorie-dense processed foods the most affordable choice. The weak relationship suggests interventions should focus on environment and access rather than education.' 
         },
         'poverty': { 
-            title: 'The Education-Poverty Cycle', 
+            title: 'Education vs. Poverty Rate', 
             main: 'This shows one of the strongest correlations observed, with higher graduation rates strongly associated with lower poverty. The relationship spans from 54% poverty in low-education areas to as low as 11% in some moderate-education communities. However, dramatic outliers exist, including a 90% graduation community with 41% poverty—higher than many communities with half the graduation rate.', 
             detail: 'High school graduation opens access to jobs that pay living wages, while lacking a diploma excludes people from most employment above minimum wage. The generational cycle is self-perpetuating: children in poor families face barriers to graduation, limiting their future earning potential and repeating the pattern. Breaking this cycle is difficult but not impossible, as outlier communities demonstrate.' 
         },
         'mentalDistress': { 
-            title: 'Education & Mental Well-being', 
+            title: 'Education vs. Mental Distress', 
             main: 'Communities with lower education show slightly higher mental distress (21-26%) versus higher education areas (19-22%), but this is one of the weakest relationships observed. Most communities cluster tightly around 20-23% mental distress regardless of education level. A 90% graduation community shows nearly identical mental distress to many 40-50% graduation communities.', 
             detail: 'Mental distress appears more evenly distributed across education levels than other health outcomes, suggesting it stems from experiences common to many communities: economic uncertainty, social isolation, lack of accessible mental health services, and exposure to trauma. Education may provide some protective factors like problem-solving skills and social networks, but does not shield communities from mental health challenges.' 
         },
         'income': { 
-            title: 'Education & Income', 
+            title: 'Education vs. Median Income', 
             main: 'This shows a strong positive correlation, with higher graduation rates associated with higher median incomes ranging from $12k-$30k in low-education areas to $26k-$58k in high-education communities. Despite the strong pattern, communities with identical graduation rates show income differences of $15k-$25k, and some lower-education communities out-earn higher-education ones.', 
             detail: 'Educational credentials serve as gatekeepers to better-paying jobs in todays economy. High school graduation is often the minimum requirement for jobs offering living wages, benefits, and career advancement. However, the exceptions reveal that strong local industries—manufacturing, trades, union jobs—can provide middle-class incomes without requiring high educational attainment, showing alternative pathways to economic security exist.' 
         }
@@ -399,39 +399,39 @@ function createHousingHealthChart() {
     const explanations = {
 
         asthma: {
-            title: 'Overcrowding & Respiratory Health',
-            main: 'Neighborhoods with higher overcrowding rates (such as Dudley at 17.3%) show a strong correlation with elevated asthma prevalence.',
-            detail: 'Overcrowded housing units often face higher moisture, mold, and allergen exposure — all major asthma triggers.'
+            title: 'Housing Problems vs. Asthma Rate',
+            main: 'Communities with more housing problems show elevated asthma rates (21-26%) compared to better housing areas (19-21%). The bubble size reveals that the poorest communities (largest bubbles) experience a "triple threat"—they cluster at the intersection of high poverty, severe housing problems, and elevated asthma. This visualization effectively shows how disadvantages compound.',
+            detail: 'Substandard housing exposes residents to mold, pest allergens, poor ventilation, and environmental toxins that trigger and worsen asthma. Children in these conditions miss school due to asthma attacks, parents miss work, and medical costs accumulate. Overcrowding spreads respiratory infections that exacerbate asthma. These communities often also sit near highways and industrial facilities, adding outdoor air pollution to indoor housing hazards.'
         },
 
         leadRisk: {
-            title: 'Lead Exposure Risk Index',
-            main: 'Housing age and overcrowding are primary drivers of lead exposure risk.',
-            detail: 'Children in overcrowded housing are more likely to be exposed to environmental toxins such as lead paint.'
+            title: '',
+            main: '',
+            detail: ''
         },
 
         mentalDistress: {
-            title: 'Housing & Psychological Stress',
-            main: 'Living in areas with high overcrowding impacts community mental health.',
-            detail: 'Overcrowded housing environments increase stress levels and contribute to elevated mental distress.'
+            title: '',
+            main: '',
+            detail: ''
         },
 
         diabetes: {
-            title: 'Housing as a Health Determinant',
-            main: 'Housing density and instability makes chronic disease management significantly harder.',
-            detail: 'Residents in overcrowded homes often face barriers to proper medication storage and healthy routines.'
+            title: '',
+            main: '',
+            detail: ''
         },
 
         obesity: {
-            title: 'Housing Density & Obesity',
-            main: 'Overcrowded housing correlates with limited space for physical activity.',
-            detail: 'Neighborhoods with housing density issues often lack adequate recreational space.'
+            title: '',
+            main: '',
+            detail: ''
         },
 
         highBloodPressure: {
-            title: 'Housing Stress & Hypertension',
-            main: 'Housing insecurity is a cardiovascular risk factor.',
-            detail: 'Residents living in cramped housing environments experience chronic stress that contributes to hypertension.'
+            title: '',
+            main: '',
+            detail: ''
         }
 
     };
@@ -629,24 +629,24 @@ function createMentalHealthChart() {
     // --- 1. DATA-DRIVEN TEXT UPDATES ---
     const explanations = {
         'mentalDistress': { 
-            title: 'Poverty Rate vs. Mental Distress (Social Stressors)', 
-            main: 'Communities with higher poverty show moderately elevated mental distress, ranging from approximately 19-22% in low-poverty areas to 22-26% in high-poverty communities. The bubble size reveals that communities experiencing both high poverty and high unemployment (largest bubbles) consistently show the highest mental distress rates around 24-26%. However, mental distress rates vary by 4-6 percentage points even among communities with similar poverty levels.', 
-            detail: 'Financial instability acts as a chronic stressor, creating what researchers call "cognitive load"—the constant mental burden of worrying about bills, housing, and food that directly contributes to anxiety and depression. The largest bubbles show the compounding effect: when poverty combines with unemployment, mental health deteriorates further as people lose not just income but also purpose, routine, social connections, and hope. This economic trauma affects brain chemistry and emotional wellbeing just as profoundly as clinical mental health conditions.' 
+            title: 'Stressors vs. Mental Distress ', 
+            main: 'Higher poverty associates with moderately elevated mental distress (19% in low-poverty areas to 24-26% in high-poverty communities), but the relationship shows substantial scatter. Communities with both high poverty AND high unemployment (largest bubbles) tend toward higher mental distress around 24-26%, revealing a compounding effect. However, the relatively narrow range (19-26%) across vastly different poverty levels suggests mental distress affects communities more evenly than other health outcomes.', 
+            detail: 'Chronic financial instability creates constant worry about bills, food, and housing that fuels anxiety and depression. When unemployment compounds poverty (the largest bubbles), mental health worsens further as people lose income, insurance, purpose, and social connections simultaneously. This economic trauma blocks access to mental health treatment that could help.' 
         },
         'highBloodPressure': { 
-            title: 'Poverty Rate vs. High Blood Pressure (Social Stressors)', 
-            main: 'Higher poverty correlates with elevated blood pressure rates, ranging from approximately 35-40% in low-poverty areas to 40-48% in high-poverty communities. The pattern shows moderate strength with notable scatter—communities at similar poverty levels show blood pressure rates varying by up to 8-10 percentage points. The largest bubbles (high unemployment) tend to cluster at higher blood pressure rates.', 
-            detail: 'Living in poverty keeps the body in constant "fight or flight" mode, damaging the cardiovascular system through what researchers call "allostatic load"—the cumulative wear and tear from chronic stress. Financial instability, housing insecurity, and job precarity create persistent activation of stress hormones that directly raise blood pressure. Even when residents know they have hypertension, poverty creates barriers to treatment: cannot afford medications, cannot take time off work for doctor visits, cannot afford the low-sodium fresh foods recommended for blood pressure control.' 
+            title: 'Stressors vs High Blood Pressure', 
+            main: 'The relationship between poverty and high blood pressure shows weak to moderate strength with substantial scatter. Blood pressure rates range from 35-49% across communities spanning 10-60% poverty. The bubble size (unemployment) reveals some compounding effect, larger bubbles like Bergen Square at 55% poverty with 40% blood pressure show elevated unemployment. However, communities with similar poverty rates show blood pressure varying by 10-15 percentage points. Notably, Beideman (12% poverty, 45% blood pressure, 10% unemployment) has higher blood pressure than many communities with 3-4 times its poverty rate, while some high-poverty areas show relatively lower blood pressure rates.', 
+            detail: 'Chronic financial stress keeps the body in a fight or flight mode, releasing cortisol that damages the cardiovascular system over time. When unemployment compounds poverty (the largest bubbles), the cardiovascular toll intensifies through loss of health insurance, medication access, and preventive care. However, poverty also creates structural barriers beyond stress: inability to afford blood pressure medications, reliance on processed foods, and lack of healthcare access for monitoring and treatment.' 
         },
         'obesity': { 
-            title: 'Poverty Rate vs. Obesity Rate (Social Stressors)', 
-            main: 'This shows a weak relationship between poverty and obesity, with considerable scatter across the entire poverty spectrum. Communities range from 36-51% obesity regardless of poverty level. High-poverty, high-unemployment areas (large bubbles) show slightly elevated obesity rates clustering around 44-48%, but this pattern is inconsistent. Some moderate-poverty areas have obesity rates as high as the poorest communities.', 
-            detail: 'Chronic economic stress triggers cortisol release, which increases appetite for high-calorie comfort foods and promotes fat storage, particularly abdominal fat. Combined with food deserts in poor areas where calorie-dense processed foods are cheaper and more available than fresh produce, this creates a biological and environmental trap. Time poverty from working multiple jobs leaves no time for exercise or meal preparation, making healthy lifestyle prohibitively expensive in both money and time.' 
+            title: 'Poverty Rate vs. Obesity Rate', 
+            main: 'This shows a weak relationship between poverty and obesity with substantial scatter. Obesity ranges from 36% to 51% across poverty levels from 10% to 55%. Critically, some low-poverty communities (10-20%) show obesity rates of 40-46%, while some high-poverty communities (40-45%) show similar or even lower rates around 36-44%.', 
+            detail: 'Poverty limits access to affordable, healthy food and safe places for physical activity, while chronic stress triggers cortisol release that promotes weight gain and fat storage. Time poverty from working multiple jobs leaves no time for exercise or meal preparation. However, the weak correlation suggests obesity is driven more by food environment, built environment quality, and cultural factors than by poverty level alone, indicating interventions should focus on infrastructure and access.' 
         },
         'diabetes': { 
-            title: 'Poverty Rate vs. Diabetes Rate (Social Stressors)', 
-            main: 'Communities with higher poverty show moderately elevated diabetes rates, with low-poverty areas at 13-17% and high-poverty areas at 18-23%. The bubble size (unemployment) shows that the most economically distressed communities (largest bubbles with high poverty AND high unemployment) cluster at the highest diabetes rates. Communities at similar poverty levels show diabetes varying by up to 5 percentage points, indicating poverty alone does not determine outcomes.', 
-            detail: 'Poverty creates a daily crisis management mode that leaves little mental bandwidth for the complex self-care diabetes requires—blood sugar monitoring, meal planning, medication adherence, regular doctor visits. When you are choosing between rent and food, diabetes management falls by the wayside. The large bubbles reveal that unemployment adds another layer of stress: loss of health insurance, inability to afford medications, and the physiological impact of chronic stress on blood sugar regulation.' 
+            title: 'Poverty Rate vs. Diabetes Rate ', 
+            main: 'Higher poverty shows a moderate positive relationship with diabetes rates, ranging from 13-18% in low-poverty areas to 17-23% in high-poverty communities. The bubble size (unemployment) reveals some compounding effect, larger bubbles tend toward higher diabetes rates. However, substantial scatter exists: communities with similar poverty levels show diabetes varying by 5-7 percentage points. Notably, some moderate-poverty communities (30-35%) show diabetes rates of 17-19%, similar to much higher-poverty areas, while one high-poverty community (~55%) shows relatively lower diabetes around 16%.', 
+            detail: 'Poverty creates barriers to diabetes prevention and management through multiple pathways: limited access to healthy food and healthcare, inability to afford medications and blood glucose monitors, chronic stress that dysregulates blood sugar, and time poverty that makes diabetes self-care difficult. When unemployment compounds poverty (larger bubbles), the burden intensifies through loss of health insurance and daily routine. However, the variation among similar communities suggests some have protective factors, such as better healthcare access, food programs, or community support worth studying and replicating.' 
         },
         'asthma': { 
             title: 'Poverty Rate vs. Asthma Rate (Social Stressors)', 
