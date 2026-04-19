@@ -1071,7 +1071,26 @@
     }; 
 
     const csvBackupData = [
-
+        { name: "Gateway", income: 26750, poverty: 30.78, diabetes: 17.0, obesity: 43.9, population: 1250, asthma: 12.1, mentalDistress: 20.3, unemployment: 28.59, uninsured: 22.7, foodAccess: 34.04 },
+        { name: "Bergen Square", income: 24200, poverty: 37.4, diabetes: 19.1, obesity: 46.3, population: 1095, asthma: 13.0, mentalDistress: 23.4, unemployment: 17.2, uninsured: 28.2, foodAccess: 31.8 },
+        { name: "Cooper Poynt", income: 28900, poverty: 26.7, diabetes: 16.2, obesity: 41.4, population: 1380, asthma: 11.7, mentalDistress: 19.8, unemployment: 14.3, uninsured: 21.6, foodAccess: 27.5 },
+        { name: "Pyne Point", income: 20100, poverty: 41.9, diabetes: 21.5, obesity: 47.2, population: 1180, asthma: 13.4, mentalDistress: 25.6, unemployment: 18.9, uninsured: 31.5, foodAccess: 35.0 },
+        { name: "Cramer Hill", income: 31100, poverty: 32.8, diabetes: 18.4, obesity: 44.1, population: 2425, asthma: 12.9, mentalDistress: 22.4, unemployment: 16.0, uninsured: 29.8, foodAccess: 30.2 },
+        { name: "Beideman", income: 23600, poverty: 39.1, diabetes: 19.7, obesity: 46.1, population: 1410, asthma: 13.1, mentalDistress: 24.0, unemployment: 17.5, uninsured: 30.7, foodAccess: 33.1 },
+        { name: "Dudley", income: 34400, poverty: 23.2, diabetes: 20.9, obesity: 45.3, population: 1010, asthma: 14.3, mentalDistress: 21.4, unemployment: 12.4, uninsured: 19.6, foodAccess: 26.8 },
+        { name: "Rosedale", income: 29600, poverty: 27.5, diabetes: 17.6, obesity: 42.1, population: 980, asthma: 11.8, mentalDistress: 19.7, unemployment: 13.9, uninsured: 21.8, foodAccess: 27.1 },
+        { name: "Stockton", income: 28400, poverty: 29.8, diabetes: 18.1, obesity: 43.2, population: 1215, asthma: 12.3, mentalDistress: 21.2, unemployment: 15.1, uninsured: 24.5, foodAccess: 29.6 },
+        { name: "Marlton", income: 25800, poverty: 35.5, diabetes: 18.9, obesity: 44.7, population: 1120, asthma: 12.7, mentalDistress: 22.8, unemployment: 16.4, uninsured: 27.6, foodAccess: 31.1 },
+        { name: "Parkside", income: 22300, poverty: 40.2, diabetes: 20.4, obesity: 46.7, population: 1530, asthma: 13.5, mentalDistress: 24.8, unemployment: 18.2, uninsured: 30.9, foodAccess: 34.2 },
+        { name: "Whitman Park", income: 31700, poverty: 24.6, diabetes: 16.9, obesity: 41.6, population: 1110, asthma: 11.5, mentalDistress: 18.9, unemployment: 12.8, uninsured: 20.7, foodAccess: 25.9 },
+        { name: "Liberty Park", income: 21500, poverty: 43.5, diabetes: 21.0, obesity: 47.0, population: 990, asthma: 13.6, mentalDistress: 25.0, unemployment: 18.7, uninsured: 31.2, foodAccess: 35.4 },
+        { name: "Centerville", income: 25200, poverty: 36.8, diabetes: 19.2, obesity: 45.1, population: 1270, asthma: 12.8, mentalDistress: 23.5, unemployment: 17.0, uninsured: 29.1, foodAccess: 32.3 },
+        { name: "Waterfront South", income: 73100, poverty: 41.4, diabetes: 20.1, obesity: 44.8, population: 840, asthma: 12.4, mentalDistress: 22.0, unemployment: 14.9, uninsured: 23.4, foodAccess: 28.7 },
+        { name: "Morgan Village", income: 30200, poverty: 28.9, diabetes: 17.4, obesity: 42.8, population: 1150, asthma: 12.0, mentalDistress: 20.4, unemployment: 14.6, uninsured: 22.8, foodAccess: 28.1 },
+        { name: "Fairview", income: 40200, poverty: 18.6, diabetes: 14.7, obesity: 38.2, population: 1440, asthma: 10.6, mentalDistress: 17.3, unemployment: 10.1, uninsured: 16.4, foodAccess: 22.5 },
+        { name: "Cooper Grant", income: 33800, poverty: 22.4, diabetes: 16.0, obesity: 40.5, population: 910, asthma: 11.2, mentalDistress: 18.5, unemployment: 11.3, uninsured: 18.2, foodAccess: 24.7 },
+        { name: "Lanning Square", income: 32600, poverty: 25.8, diabetes: 16.8, obesity: 41.8, population: 1325, asthma: 11.9, mentalDistress: 19.4, unemployment: 12.9, uninsured: 21.1, foodAccess: 26.1 }
+    
     ];
 
     const num = (value) => {
