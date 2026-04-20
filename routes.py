@@ -544,12 +544,17 @@ def api_health_metrics():
 @app.route('/debug-email')
 def debug_email():
     import socket
-    socket.setdefaulttimeout(5)
+    socket.setdefaulttimeout(10)
 
     try:
         sender = app.config.get('MAIL_DEFAULT_SENDER')
+        password = app.config.get('MAIL_PASSWORD')
+
         if not sender:
             return "Error: MAIL_DEFAULT_SENDER is not set in config.", 200
+
+        if not password:
+            return "Error: MAIL_PASSWORD is not set in config.", 200
 
         msg = Message(
             subject="Debug Test Email",
@@ -600,3 +605,48 @@ def not_found_error(error):
 def internal_error(error):
     db.session.rollback()
     return render_template('500.html'), 500
+
+@app.route('/debug-mail-config')
+def debug_mail_config():
+    password = app.config.get('MAIL_PASSWORD')
+    sender = app.config.get('MAIL_DEFAULT_SENDER')
+    username = app.config.get('MAIL_USERNAME')
+    server = app.config.get('MAIL_SERVER')
+    port = app.config.get('MAIL_PORT')
+
+    masked_password = None
+    if password:
+        if len(password) > 8:
+            masked_password = f"{password[:4]}...{password[-4:]}"
+        else:
+            masked_password = "***set***"
+
+    return jsonify({
+        "MAIL_SERVER": server,
+        "MAIL_PORT": port,
+        "MAIL_USERNAME": username,
+        "MAIL_DEFAULT_SENDER": sender,
+        "MAIL_PASSWORD_present": bool(password),
+        "MAIL_PASSWORD_length": len(password) if password else 0,
+        "MAIL_PASSWORD_preview": masked_password
+    })
+
+@app.route('/debug-smtp-login')
+def debug_smtp_login():
+    import os
+    import smtplib
+
+    host = app.config.get('MAIL_SERVER')
+    port = app.config.get('MAIL_PORT')
+    username = app.config.get('MAIL_USERNAME')
+    password = app.config.get('MAIL_PASSWORD')
+
+    try:
+        with smtplib.SMTP(host, port, timeout=10) as server:
+            server.ehlo()
+            server.starttls()
+            server.ehlo()
+            server.login(username, password)
+            return "SMTP login successful", 200
+    except Exception as e:
+        return f"SMTP login failed: {type(e).__name__}: {str(e)}", 200
