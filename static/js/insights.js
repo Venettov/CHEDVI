@@ -405,33 +405,33 @@ function createHousingHealthChart() {
         },
 
         leadRisk: {
-            title: '',
-            main: '',
-            detail: ''
+            title: 'Housing Problems vs. Lead Exposure Risk',
+            main: 'Neighborhoods with greater housing problems generally appear to show higher lead exposure risk, though the pattern is uneven rather than perfectly linear. Several communities with moderate to high overcrowding also sit in the upper lead-risk range, while lower-overcrowding areas show a broader spread from lower to moderately high risk. The larger bubbles suggest that poorer neighborhoods often face overlapping housing and environmental burdens at the same time.',
+            detail: 'Older and poorly maintained housing increases the likelihood of lead exposure through deteriorating paint, contaminated dust, deferred repairs, and aging infrastructure. Overcrowding can worsen these risks by accelerating housing wear and reducing a household’s ability to control indoor hazards. Lead exposure is especially concerning because its harms often accumulate quietly over time, affecting child development, learning, and long-term health even before the problem is clearly visible.'
         },
 
         mentalDistress: {
-            title: '',
-            main: '',
-            detail: ''
+            title: 'Housing Problems vs. Mental Distress',
+            main: 'Mental distress tends to be somewhat higher in neighborhoods with more overcrowded housing, but the relationship is modest rather than strong. Most communities cluster within a fairly narrow band, showing that mental distress is present across Camden even when housing conditions differ. Still, several of the more overcrowded areas sit toward the upper end of mental distress, and the larger bubbles suggest poverty can intensify the strain.',
+            detail: 'Housing instability creates a constant background stress: lack of privacy, noise, crowding, poor living conditions, and uncertainty about repairs or displacement. These pressures can affect sleep, family relationships, and a person’s sense of safety and control. When overcrowding combines with poverty, the burden often becomes cumulative, making it harder for residents to recover from stress or access mental health support.'
         },
 
         diabetes: {
-            title: '',
-            main: '',
-            detail: ''
+            title: 'Housing Problems vs. Diabetes Rate',
+            main: 'Neighborhoods with greater housing problems show slightly higher diabetes rates overall, but the pattern is mixed and not tightly clustered. Some of the highest-overcrowding communities also have elevated diabetes, while several low-overcrowding neighborhoods still show moderate to high rates. That suggests housing conditions may contribute to diabetes vulnerability, but they are likely interacting with other factors such as income, food access, and healthcare access.',
+            detail: 'Poor housing can influence diabetes indirectly through chronic stress, unstable daily routines, limited space for healthy food storage or preparation, and greater difficulty managing long-term care. Residents dealing with crowded or substandard living conditions may find it harder to prioritize regular meals, medication adherence, sleep, and exercise. Housing stress does not act alone, but it can reinforce the same structural barriers that make diabetes prevention and management harder.'
         },
 
         obesity: {
-            title: '',
-            main: '',
-            detail: ''
+            title: 'Housing Problems vs. Obesity Rate',
+            main: 'Obesity rates remain high across nearly the full range of housing conditions, so the relationship with overcrowding appears relatively weak. Communities with both low and high housing problems still cluster in the low-40% to upper-40% range, with only a few notable outliers. The chart suggests housing stress may matter, but it is not a strong standalone predictor of obesity outcomes in this dataset.',
+            detail: 'Housing conditions can still shape obesity risk through stress, neighborhood disinvestment, limited recreation space, unsafe outdoor environments, and daily routines that make healthy behaviors harder to sustain. In overcrowded homes, residents may have less time, space, and stability for cooking, exercise, and restorative sleep. Even so, obesity is usually driven by a wider mix of factors, including food affordability, walkability, work schedules, and broader economic conditions.'
         },
 
         highBloodPressure: {
-            title: '',
-            main: '',
-            detail: ''
+            title: 'Housing Problems vs. High Blood Pressure',
+            main: 'Higher housing problems are associated with somewhat higher blood pressure in several neighborhoods, but the pattern shows substantial variation. Some of the most overcrowded communities sit at the upper end of high blood pressure, yet a number of low-overcrowding neighborhoods also show elevated rates. This suggests housing stress may be part of the picture, though it does not fully explain cardiovascular risk by itself.',
+            detail: 'Overcrowded or poor-quality housing can raise blood pressure indirectly by increasing stress, sleep disruption, noise exposure, and day-to-day instability. These conditions may also limit access to healthy routines that protect cardiovascular health, including regular rest, physical activity, and medication adherence. When housing stress overlaps with poverty, residents may face both the biological burden of chronic stress and the practical barriers that make hypertension harder to control.'
         }
 
     };
