@@ -486,7 +486,7 @@ Message:
 
                     except Exception as e:
                         print(f"EMAIL FAILED [{type(e).__name__}]: {str(e)}", file=sys.stderr)
-                        flash(f'Message saved, but email notification failed: {str(e)}', 'warning')
+                        #flash(f'Message saved, but email notification failed: {str(e)}', 'warning')
 
                     return redirect(url_for('resources', _anchor='contact'))
 
