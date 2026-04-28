@@ -435,7 +435,11 @@ def policy():
             "income": n.median_income,
             "poverty": n.poverty_rate,
             "diabetes": n.diabetes_rate,
+            "obesity": n.obesity_rate,
             "asthma": n.asthma_rate,
+            "mentalDistress": n.mental_distress_rate,
+            "unemployment": n.unemployment_rate,
+            "foodAccess": n.food_access_score,
             "uninsured": n.lack_health_insurance
         } for n in raw_data
     ]

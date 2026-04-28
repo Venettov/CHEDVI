@@ -3,42 +3,56 @@
  * Logic to calculate city-wide metrics from window.NEIGHBORHOOD_DATA
  */
 
-const PolicyEngine = {
-    data: window.NEIGHBORHOOD_DATA || [],
-
-    init: function() {
-        if (this.data.length === 0) {
-            console.warn("Policy Engine: No data found. Check database connection.");
-            return;
-        }
-        this.calculateAndRender();
-    },
-
-    calculateAndRender: function() {
-        // 1. Identify Extremes (Highest Poverty, Lowest Income)
-        const highestPoverty = [...this.data].sort((a, b) => b.poverty - a.poverty)[0];
-        const highestIncome = [...this.data].sort((a, b) => b.income - a.income)[0];
-
-        // 2. Calculate Averages for "Current Status"
-        const avgAsthma = this.data.reduce((acc, curr) => acc + curr.asthma, 0) / this.data.length;
-        const avgDiabetes = this.data.reduce((acc, curr) => acc + curr.diabetes, 0) / this.data.length;
-        const avgUninsured = this.data.reduce((acc, curr) => acc + curr.uninsured, 0) / this.data.length;
-
-        // 3. Update the UI
-        document.getElementById('highest-poverty-name').textContent = highestPoverty.name;
-        document.getElementById('highest-poverty-value').textContent = highestPoverty.poverty.toFixed(1);
-        document.getElementById('highest-income-name').textContent = highestIncome.name;
-
-        // Update Target Metric Status
-        if(document.getElementById('current-asthma-avg')) {
-            document.getElementById('current-asthma-avg').textContent = `${avgAsthma.toFixed(1)}%`;
-        }
-        if(document.getElementById('current-diabetes-avg')) {
-            document.getElementById('current-diabetes-avg').textContent = `${avgDiabetes.toFixed(1)}%`;
-        }
-        
-        console.log("Policy Engine: UI updated with live database stats.");
+document.addEventListener('DOMContentLoaded', function() {
+    const data = window.NEIGHBORHOOD_DATA;
+    
+    // Safety check: Don't run if data failed to load
+    if (!data || data.length === 0) {
+        console.warn("Policy Engine: No database data found.");
+        return;
     }
-};
 
-document.addEventListener('DOMContentLoaded', () => PolicyEngine.init());
+    // Helper function to calculate city-wide averages easily
+    const getAverage = (key) => {
+        const sum = data.reduce((acc, current) => acc + (current[key] || 0), 0);
+        return (sum / data.length).toFixed(1);
+    };
+
+    try {
+        // --- 1. Populate City-Wide Average Statistics ---
+        document.getElementById('stat-poverty-avg').textContent = getAverage('poverty') + '%';
+        document.getElementById('stat-asthma-avg').textContent = getAverage('asthma') + '%';
+        
+        document.getElementById('stat-uninsured-avg').textContent = getAverage('uninsured') + '%';
+        document.getElementById('stat-diabetes-avg').textContent = getAverage('diabetes') + '%';
+        
+        document.getElementById('stat-foodaccess-avg').textContent = getAverage('foodAccess');
+        document.getElementById('stat-obesity-avg').textContent = getAverage('obesity') + '%';
+        
+        document.getElementById('stat-mental-avg').textContent = getAverage('mentalDistress') + '%';
+        document.getElementById('stat-unemployment-avg').textContent = getAverage('unemployment') + '%';
+
+        // --- 2. Calculate Extremes for Key Findings Cards ---
+        // Sort poverty descending (highest first)
+        const sortedByPoverty = [...data].sort((a, b) => b.poverty - a.poverty);
+        // Sort income ascending (lowest first)
+        const sortedByIncome = [...data].sort((a, b) => a.income - b.income);
+
+        const highestPovertyTract = sortedByPoverty[0];
+        const lowestIncomeTract = sortedByIncome[0]; 
+        const highestIncomeTract = sortedByIncome[sortedByIncome.length - 1]; 
+
+        // Inject findings into Priority Card
+        document.getElementById('priority-neighborhood').textContent = highestPovertyTract.name;
+        document.getElementById('priority-poverty').textContent = highestPovertyTract.poverty.toFixed(1);
+        document.getElementById('priority-unemployment').textContent = highestPovertyTract.unemployment.toFixed(1);
+
+        // Inject findings into Health Gap Card
+        document.getElementById('gap-diabetes-high').textContent = lowestIncomeTract.diabetes.toFixed(1);
+        document.getElementById('gap-diabetes-low').textContent = highestIncomeTract.diabetes.toFixed(1);
+        
+        console.log("Policy Engine initialized successfully with live data.");
+    } catch (error) {
+        console.error("Policy Engine Error: Could not map data to HTML elements.", error);
+    }
+});
