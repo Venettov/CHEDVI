@@ -48,6 +48,8 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('priority-unemployment').textContent = highestPovertyTract.unemployment.toFixed(1);
 
         // Inject findings into Health Gap Card
+        document.getElementById('gap-name-low').textContent = lowestIncomeTract.name; // <--- ADD THIS
+        document.getElementById('gap-name-high').textContent = highestIncomeTract.name; // <--- ADD THIS
         document.getElementById('gap-diabetes-high').textContent = lowestIncomeTract.diabetes.toFixed(1);
         document.getElementById('gap-diabetes-low').textContent = highestIncomeTract.diabetes.toFixed(1);
         
