@@ -425,27 +425,6 @@ def rankings():
     ]
     return render_template('rankings.html', rankings_data=rankings_data)
 
-# The policy page is not needed
-""" @app.route('/policy')
-def policy():
-    # Fetch data for the dynamic policy engine
-    raw_data = NeighborhoodHealth.query.all()
-    neighborhood_data = [
-        {
-            "name": n.name,
-            "income": n.median_income,
-            "poverty": n.poverty_rate,
-            "diabetes": n.diabetes_rate,
-            "obesity": n.obesity_rate,
-            "asthma": n.asthma_rate,
-            "mentalDistress": n.mental_distress_rate,
-            "unemployment": n.unemployment_rate,
-            "foodAccess": n.food_access_score,
-            "uninsured": n.lack_health_insurance
-        } for n in raw_data
-    ]
-    return render_template('policy.html', neighborhood_data=neighborhood_data) """
-
 @app.route('/resources', methods=['GET', 'POST'])
 def resources():
     contact_form = ContactForm()
