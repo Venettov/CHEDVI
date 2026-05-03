@@ -1093,6 +1093,7 @@
     
     ];
 
+
     const num = (value) => {
         if (value === undefined || value === null || value === "") return null;
         const parsed = parseFloat(value);
@@ -1130,8 +1131,6 @@
 
     function normalizeNeighborhood(raw) {
         const name = safeName(raw.name);
-
-        // Find matching backup record for any missing values
         const backup = csvBackupData.find(d => safeName(d.name) === name) || {};
 
         return {
@@ -1212,8 +1211,31 @@
         return diff > 0 ? `${abs} above Camden average` : `${abs} below Camden average`;
     }
 
+    // --- NEW: Renders Key Insights as Bullet Points ---
+    function renderKeyInsightsList(text) {
+        const el = document.getElementById("key-insight-list");
+        if (!el) return;
+        
+        if (!text || text === "Profile text not available.") {
+            el.innerHTML = `<li><span class="priority-dot"></span><span>Profile text not available.</span></li>`;
+            return;
+        }
+
+        // Split the text into sentences (handles periods followed by spaces or newlines)
+        const sentences = text.split(/\.\s+|\n/).map(s => s.trim()).filter(s => s.length > 0);
+
+        el.innerHTML = sentences.map(sentence => `
+            <li>
+                <span class="priority-dot"></span>
+                <span>${sentence}${sentence.endsWith('.') ? '' : '.'}</span>
+            </li>
+        `).join("");
+    }
+
     function renderPriorityAreas(items) {
         const el = document.getElementById("priority-areas-list");
+        if (!el) return;
+        
         el.innerHTML = items.map(item => `
             <li>
                 <span class="priority-dot"></span>
@@ -1222,40 +1244,25 @@
         `).join("");
     }
 
-
     function renderPolicyTab(profile) {
-        const html = `
+        document.getElementById("policy-tab-content").innerHTML = `
             <h4>Policy Maker</h4>
-            <div class="tab-copy" style="white-space: pre-line;">
-    ${profile.policy}
-            </div>
+            <div class="tab-copy" style="white-space: pre-line;">${profile.policy}</div>
         `;
-
-        document.getElementById("policy-tab-content").innerHTML = html;
     }
-
 
     function renderResearchTab(profile) {
-        const html = `
+        document.getElementById("research-tab-content").innerHTML = `
             <h4>Researcher</h4>
-            <div class="tab-copy" style="white-space: pre-line;">
-    ${profile.research}
-            </div>
+            <div class="tab-copy" style="white-space: pre-line;">${profile.research}</div>
         `;
-
-        document.getElementById("research-tab-content").innerHTML = html;
     }
 
-
     function renderCommunityTab(profile) {
-        const html = `
+        document.getElementById("community-tab-content").innerHTML = `
             <h4>Community Organization / Resident</h4>
-            <div class="tab-copy" style="white-space: pre-line;">
-    ${profile.community}
-            </div>
+            <div class="tab-copy" style="white-space: pre-line;">${profile.community}</div>
         `;
-
-        document.getElementById("community-tab-content").innerHTML = html;
     }
 
     function updateMetricCard(idValue, idNote, displayValue, noteValue) {
@@ -1307,12 +1314,17 @@
 
         if (!profile) {
             console.warn(`No narrative profile found for ${n.name}`);
+            
+            // UPDATED: Use the new list renderer for the empty state
+            renderKeyInsightsList("Profile text not available.");
+            renderPriorityAreas(["Profile text not available."]);
 
             document.getElementById("policy-tab-content").innerHTML = "<p>Profile text not available.</p>";
             document.getElementById("research-tab-content").innerHTML = "<p>Profile text not available.</p>";
             document.getElementById("community-tab-content").innerHTML = "<p>Profile text not available.</p>";
         } else {
-            document.getElementById("key-insight-copy").textContent = extractKeyInsight(profile.overview);
+            // UPDATED: Render the Key Insight as a list
+            renderKeyInsightsList(extractKeyInsight(profile.overview));
             renderPriorityAreas(extractPriorityAreas(profile.overview));
 
             renderPolicyTab(profile);
