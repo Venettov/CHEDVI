@@ -1248,18 +1248,36 @@
     function formatNarrativeToBullets(text) {
         if (!text) return "";
         
-        // Split text into lines and remove empty ones
-        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        // 1. Pre-process text to separate headers ending in colons that might be on the same line
+        // This ensures "Economic support: Host job fairs..." becomes two separate lines
+        const keywordsForLineBreak = ["Economic support:", "Healthcare access:", "Health support:", "Food access:", "Diabetes prevention:"];
+        let processedText = text;
+        keywordsForLineBreak.forEach(kw => {
+            const regex = new RegExp(`(${kw})`, 'g');
+            processedText = processedText.replace(regex, '\n$1\n');
+        });
+
+        const lines = processedText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
         let html = "";
         let inList = false;
+
+        // Keywords for "Smart Split" (splitting points inside a single long line)
+        const internalKeywords = [
+            "Current status", "Recommended investment", "Expected impact", 
+            "Evidence base", "Risk", "Potential expected return", 
+            "Potential expected impact", "Expected return", "Target",
+            "Strengths", "Limitations"
+        ];
+        
+        const splitPattern = new RegExp(`(?=\\b(?:${internalKeywords.join('|')})\\b:)`, 'gi');
 
         lines.forEach((line, index) => {
             const lowerLine = line.toLowerCase();
             
-            // Detect headers: Starts with a number (1.) or specific section keywords
+            // Detect headers: Starts with a number (1.), ends with a colon (:), or specific keywords
             const isNumbered = /^\d+\./.test(line);
-            const isHeader = isNumbered || 
-                lowerLine.includes("funding opportunities") ||
+            const endsWithColon = line.endsWith(':');
+            const isKnownHeader = lowerLine.includes("funding opportunities") ||
                 lowerLine.includes("measurable outcomes") ||
                 lowerLine.includes("immediate actions") ||
                 lowerLine.includes("available grants") ||
@@ -1273,8 +1291,10 @@
                 lowerLine.includes("understanding") ||
                 lowerLine.includes("advocacy messages") ||
                 lowerLine.includes("critical message");
+
+            const isHeader = isNumbered || endsWithColon || isKnownHeader;
             
-            // Detect main title (first line if it contains specific titles)
+            // Title logic
             const isMainTitle = index === 0 && (
                 lowerLine.includes("recommendations") ||
                 lowerLine.includes("research profile") ||
@@ -1286,34 +1306,31 @@
             if (isMainTitle) {
                 html += `<p class="fw-bold text-primary mb-3">${line}</p>`;
             } else if (isHeader) {
-                // If we were in a list, close it before starting a new header
                 if (inList) { html += "</ul>"; inList = false; }
-                
                 html += `<div class="mt-4 mb-2"><strong>${line}</strong></div>`;
                 html += `<ul class="priority-list mb-3">`;
                 inList = true;
             } else {
-                // This is a detail line. Split into sentences to ensure each gets a bullet.
-                const sentences = line.split(/\.\s+/).map(s => s.trim()).filter(s => s.length > 0);
+                // Smart split for long paragraphs (like Beideman)
+                const segments = line.split(splitPattern).map(s => s.trim()).filter(s => s.length > 0);
                 
-                sentences.forEach(s => {
-                    // Remove existing bullet characters if they exist in the raw text
-                    let cleanS = s.replace(/^•\s*/, '');
-                    
-                    // Add period only if it doesn't already end with punctuation
-                    const hasEndPunc = /[.?!]$/.test(cleanS);
-                    cleanS = hasEndPunc ? cleanS : cleanS + '.';
-                    
-                    if (inList) {
-                        html += `<li><span class="priority-dot"></span><span>${cleanS}</span></li>`;
-                    } else {
-                        html += `<p class="mb-2">${cleanS}</p>`;
-                    }
+                segments.forEach(segment => {
+                    const sentences = segment.split(/\.\s+/).map(s => s.trim()).filter(s => s.length > 0);
+                    sentences.forEach(s => {
+                        let cleanS = s.replace(/^•\s*/, '');
+                        const hasEndPunc = /[.?!]$/.test(cleanS);
+                        cleanS = hasEndPunc ? cleanS : cleanS + '.';
+                        
+                        if (inList) {
+                            html += `<li><span class="priority-dot"></span><span>${cleanS}</span></li>`;
+                        } else {
+                            html += `<p class="mb-2">${cleanS}</p>`;
+                        }
+                    });
                 });
             }
         });
 
-        // Close the final list if one was open
         if (inList) html += "</ul>";
         return html;
     }
