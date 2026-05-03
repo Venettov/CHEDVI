@@ -1173,8 +1173,7 @@
     function formatNarrativeToBullets(text) {
         if (!text) return "";
         
-        // 1. Pre-process text to separate headers ending in colons that might be on the same line
-        // This ensures "Economic support: Host job fairs..." becomes two separate lines
+        // 1. Pre-process text for consistent line breaks
         const keywordsForLineBreak = ["Economic support:", "Healthcare access:", "Health support:", "Food access:", "Diabetes prevention:"];
         let processedText = text;
         keywordsForLineBreak.forEach(kw => {
@@ -1185,8 +1184,8 @@
         const lines = processedText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
         let html = "";
         let inList = false;
+        let currentSection = ""; // Track the current header for targeted styling
 
-        // Keywords for "Smart Split" (splitting points inside a single long line)
         const internalKeywords = [
             "Current status", "Recommended investment", "Expected impact", 
             "Evidence base", "Risk", "Potential expected return", 
@@ -1199,7 +1198,6 @@
         lines.forEach((line, index) => {
             const lowerLine = line.toLowerCase();
             
-            // Detect headers: Starts with a number (1.), ends with a colon (:), or specific keywords
             const isNumbered = /^\d+\./.test(line);
             const endsWithColon = line.endsWith(':');
             const isKnownHeader = lowerLine.includes("funding opportunities") ||
@@ -1219,7 +1217,6 @@
 
             const isHeader = isNumbered || endsWithColon || isKnownHeader;
             
-            // Title logic
             const isMainTitle = index === 0 && (
                 lowerLine.includes("recommendations") ||
                 lowerLine.includes("research profile") ||
@@ -1232,20 +1229,26 @@
                 html += `<p class="fw-bold text-primary mb-3">${line}</p>`;
             } else if (isHeader) {
                 if (inList) { html += "</ul>"; inList = false; }
+                currentSection = lowerLine; // SET CURRENT SECTION HERE
                 html += `<div class="mt-4 mb-2"><strong>${line}</strong></div>`;
                 html += `<ul class="priority-list mb-3">`;
                 inList = true;
             } else {
-                // Smart split for long paragraphs (like Beideman)
                 const segments = line.split(splitPattern).map(s => s.trim()).filter(s => s.length > 0);
                 
                 segments.forEach(segment => {
                     const sentences = segment.split(/\.\s+/).map(s => s.trim()).filter(s => s.length > 0);
                     sentences.forEach(s => {
                         let cleanS = s.replace(/^•\s*/, '');
+                        const isQuestion = cleanS.endsWith('?');
                         const hasEndPunc = /[.?!]$/.test(cleanS);
                         cleanS = hasEndPunc ? cleanS : cleanS + '.';
                         
+                        // NEW LOGIC: Bold and Italic if it's a question in the Research section
+                        if (isQuestion && currentSection.includes("research question")) {
+                            cleanS = `<strong><em>${cleanS}</em></strong>`;
+                        }
+
                         if (inList) {
                             html += `<li><span class="priority-dot"></span><span>${cleanS}</span></li>`;
                         } else {
