@@ -1277,7 +1277,7 @@
 
     function renderCommunityTab(profile) {
         document.getElementById("community-tab-content").innerHTML = `
-            <h4>Community Organization / Resident</h4>
+            <h4> </h4>
             <div class="tab-copy">${formatNarrativeToBullets(profile.community)}</div>
         `;
     }
