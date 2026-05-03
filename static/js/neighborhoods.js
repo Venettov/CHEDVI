@@ -1222,17 +1222,6 @@
         `).join("");
     }
 
-    function renderOverviewTab(n, profile) {
-        const html = `
-            <h4>${n.name}: General Overview</h4>
-            <div class="tab-copy" style="white-space: pre-line;">
-    ${profile.overview}
-            </div>
-        `;
-
-        document.getElementById("overview-tab-content").innerHTML = html;
-    }
-
 
     function renderPolicyTab(profile) {
         const html = `
@@ -1319,10 +1308,6 @@
         if (!profile) {
             console.warn(`No narrative profile found for ${n.name}`);
 
-            document.getElementById("key-insight-copy").textContent = "Profile text not available.";
-            renderPriorityAreas(["Profile text not available."]);
-
-            document.getElementById("overview-tab-content").innerHTML = "<p>Profile text not available.</p>";
             document.getElementById("policy-tab-content").innerHTML = "<p>Profile text not available.</p>";
             document.getElementById("research-tab-content").innerHTML = "<p>Profile text not available.</p>";
             document.getElementById("community-tab-content").innerHTML = "<p>Profile text not available.</p>";
@@ -1330,7 +1315,6 @@
             document.getElementById("key-insight-copy").textContent = extractKeyInsight(profile.overview);
             renderPriorityAreas(extractPriorityAreas(profile.overview));
 
-            renderOverviewTab(n, profile);
             renderPolicyTab(profile);
             renderResearchTab(profile);
             renderCommunityTab(profile);
