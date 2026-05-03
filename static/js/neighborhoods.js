@@ -1244,24 +1244,74 @@
         `).join("");
     }
 
+// --- HELPER: Formats raw text into bold headers and bulleted lists ---
+    function formatNarrativeToBullets(text) {
+        if (!text) return "";
+        
+        // Split text into lines and remove empty ones
+        const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        let html = "";
+        let inList = false;
+
+        lines.forEach((line, index) => {
+            // Detect headers: Starts with a number (1.) or specific keywords
+            const isNumbered = /^\d+\./.test(line);
+            const isFunding = line.toLowerCase().includes("funding opportunities");
+            const isOutcome = line.toLowerCase().includes("measurable outcomes");
+            const isActions = line.toLowerCase().includes("immediate actions");
+            const isGrants = line.toLowerCase().includes("available grants");
+            
+            // Detect main title (first line if it contains neighborhood name)
+            const isMainTitle = index === 0 && line.toLowerCase().includes("recommendations");
+
+            if (isMainTitle) {
+                html += `<p class="fw-bold text-primary mb-3">${line}</p>`;
+            } else if (isNumbered || isFunding || isOutcome || isActions || isGrants) {
+                // If we were in a list, close it before starting a new header
+                if (inList) { html += "</ul>"; inList = false; }
+                
+                html += `<div class="mt-4 mb-2"><strong>${line}</strong></div>`;
+                html += `<ul class="priority-list mb-3">`;
+                inList = true;
+            } else {
+                // This is a detail line. Split it into sentences to ensure each gets a bullet.
+                const sentences = line.split(/\.\s+/).map(s => s.trim()).filter(s => s.length > 0);
+                
+                sentences.forEach(s => {
+                    const cleanS = s.endsWith('.') ? s : s + '.';
+                    if (inList) {
+                        html += `<li><span class="priority-dot"></span><span>${cleanS}</span></li>`;
+                    } else {
+                        html += `<p class="mb-2">${cleanS}</p>`;
+                    }
+                });
+            }
+        });
+
+        // Close the final list if one was open
+        if (inList) html += "</ul>";
+        return html;
+    }
+
+    // --- Updated Tab Rendering Functions ---
     function renderPolicyTab(profile) {
         document.getElementById("policy-tab-content").innerHTML = `
             <h4>Policy Maker</h4>
-            <div class="tab-copy" style="white-space: pre-line;">${profile.policy}</div>
+            <div class="tab-copy">${formatNarrativeToBullets(profile.policy)}</div>
         `;
     }
 
     function renderResearchTab(profile) {
         document.getElementById("research-tab-content").innerHTML = `
             <h4>Researcher</h4>
-            <div class="tab-copy" style="white-space: pre-line;">${profile.research}</div>
+            <div class="tab-copy">${formatNarrativeToBullets(profile.research)}</div>
         `;
     }
 
     function renderCommunityTab(profile) {
         document.getElementById("community-tab-content").innerHTML = `
             <h4>Community Organization / Resident</h4>
-            <div class="tab-copy" style="white-space: pre-line;">${profile.community}</div>
+            <div class="tab-copy">${formatNarrativeToBullets(profile.community)}</div>
         `;
     }
 
