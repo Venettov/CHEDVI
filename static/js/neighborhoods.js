@@ -257,12 +257,7 @@
         Cramer Hill qualifies for HUD Community Development Block Grants, CDC REACH grants for diabetes prevention, and USDA Food Insecurity Nutrition Incentive programs.
         Measurable Outcomes (2027 Targets)
         Poverty rate: 38.68% to 34% Diabetes prevalence: maintain below 19% Job placements: 90 residents in living-wage positions Median income: $28,198 to $32,000 SNAP enrollment: reach 80%+ of eligible households`,
-            research: `Research Profile: Cramer Hill
-        Demographics
-        Population: 3,804 (ACS 2024 estimate) Median income: $28,198 (±$1,100 MOE estimated) Poverty rate: 38.68% (±3.2pp MOE estimated) Unemployment: [Data needed]
-        Health Outcomes
-        Diabetes: 18.4% vs. Camden average 18.2% Mental distress: [Data needed] Obesity: [Data needed]
-        Research Question
+            research: `Research Question
         Cramer Hill maintains diabetes prevalence close to Camden average (18.4% vs 18.2%) despite poverty rate substantially above city levels (38.68% vs 28.5%). What protective factors enable relatively stable health outcomes under economic stress, and how can these be leveraged while addressing economic barriers?
         Potential explanatory variables:
         Healthcare access including proximity to primary care and insurance coverage rates. Existing community health programs and diabetes management resources. Food assistance program utilization including SNAP, food pantries, and WIC. Social support networks and community cohesion buffering economic stress. Built environment supporting physical activity. Age distribution potentially affecting diabetes baseline risk.
@@ -311,12 +306,7 @@
         Beideman qualifies for community health innovation grants, best practices documentation funding, and affordable housing preservation programs.
         Measurable Outcomes (2027 Targets)
         Diabetes prevalence: maintain below 15% Poverty rate: maintain below 15% Affordable housing units: preserve 200 units Economic diversity: maintain mix of income levels Health program participation: increase by 20%`,
-            research: `Research Profile: Beideman
-        Demographics
-        Population: 5,645 (ACS 2024 estimate) Median income: $58,983 (±$2,000 MOE estimated) Poverty rate: 11.91% (±2.0pp MOE estimated) Unemployment: [Data needed]
-        Health Outcomes
-        Diabetes: 13.4% vs. Camden average 18.2% Mental distress: [Data needed] Obesity: [Data needed]
-        Research Question
+            research: `Research Question
         Beideman represents the positive end of Camden's socioeconomic spectrum with median income 54% above city average and diabetes prevalence 26% below average. What specific factors—economic, environmental, programmatic, or social—enable these outcomes, and which are replicable in lower-income communities?
         Potential explanatory variables:
         Economic stability enabling healthcare access, healthy food, and preventive care. Built environment quality including walkability, parks, and recreation facilities. Food environment with proximity to quality grocery stores and healthy food options. Healthcare facility access and insurance coverage rates approaching universal. Social capital and community cohesion supporting health behaviors. Education levels and health literacy. Age distribution with potentially younger, healthier population.
@@ -365,12 +355,7 @@
         Dudley qualifies for CDC REACH grants for high-burden diabetes communities, emergency health intervention funding, and HUD Community Development Block Grants.
         Measurable Outcomes (2027 Targets)
         Diabetes prevalence: 22.2% to 19% Poverty rate: 24.96% to 22% Healthcare access: 40% increase in diabetes screening rates Medicaid enrollment: reach 75%+ of eligible residents Median income: $35,491 to $39,000`,
-            research: `Research Profile: Dudley
-        Demographics
-        Population: 3,295 (ACS 2024 estimate) Median income: $35,491 (±$1,300 MOE estimated) Poverty rate: 24.96% (±3.5pp MOE estimated) Unemployment: [Data needed]
-        Health Outcomes
-        Diabetes: 22.2% vs. Camden average 18.2% Mental distress: [Data needed] Obesity: [Data needed]
-        Research Question
+            research: `Research Question
         Dudley presents a critical research puzzle: diabetes prevalence of 22.2% is 22% higher than Camden average despite poverty (24.96%) being below city average (28.5%) and median income only 7% below city levels. What specific factors drive elevated chronic disease burden independent of economic status?
         Potential explanatory variables:
         Healthcare access barriers including distance to facilities, insurance gaps, or care quality issues. Food environment with potential food desert conditions despite moderate income. Built environment limiting physical activity opportunities. Age distribution with potentially older population at higher diabetes risk. Cultural or linguistic barriers to healthcare access. Occupational hazards or work schedules limiting preventive care. Legacy environmental contamination affecting metabolic health. Healthcare provider density and availability of diabetes specialists.
@@ -420,12 +405,7 @@
         Rosedale qualifies for community health innovation grants, best practices documentation funding, CDC diabetes prevention programs, and economic development initiatives.
         Measurable Outcomes (2027 Targets)
         Diabetes prevalence: 16.9% to 15% Poverty rate: 19.22% to 17% Median income: $51,741 to $55,000 Community health program participation: increase by 25% Successful program replications in other neighborhoods: 3-5`,
-            research: `Research Profile: Rosedale
-        Demographics
-        Population: 5,044 (ACS 2024 estimate) Median income: $51,741 (±$1,800 MOE estimated) Poverty rate: 19.22% (±2.5pp MOE estimated) Unemployment: [Data needed]
-        Health Outcomes
-        Diabetes: 16.9% vs. Camden average 18.2% Mental distress: [Data needed] Obesity: [Data needed]
-        Research Question
+            research: `Research Question
         Rosedale achieves diabetes prevalence 7% below Camden average with median income 35% above city levels and poverty well below average. What combination of economic stability, community resources, healthcare access, and environmental factors enables these outcomes, and which elements are replicable in lower-income settings?
         Potential explanatory variables:
         Economic stability providing healthcare access, healthy food affordability, and preventive care utilization. Healthcare facility proximity and quality of available services. Food environment with access to quality grocery stores and healthy options. Built environment supporting physical activity including walkable streets, parks, and recreation facilities. Insurance coverage rates likely higher than city average. Social capital and community cohesion supporting health behaviors. Education levels and health literacy. Age distribution potentially affecting diabetes baseline risk.
@@ -474,12 +454,7 @@
         Stockton qualifies for HUD Community Development Block Grants, CDC diabetes prevention programs, and workforce development initiatives supporting middle-income stability.
         Measurable Outcomes (2027 Targets)
         Diabetes prevalence: 17.9% to 16% Poverty rate: 20.17% to 18% Median income: $44,357 to $48,000 Job placements: 75 residents in stable employment Community health program participation: increase by 20%`,
-            research: `Research Profile: Stockton
-        Demographics
-        Population: 6,529 (ACS 2024 estimate) Median income: $44,357 (±$1,500 MOE estimated) Poverty rate: 20.17% (±2.3pp MOE estimated) Unemployment: [Data needed]
-        Health Outcomes
-        Diabetes: 17.9% vs. Camden average 18.2% Mental distress: [Data needed] Obesity: [Data needed]
-        Research Question
+            research: `Research Question
         Stockton achieves diabetes prevalence marginally below Camden average with median income 16% above city levels and poverty below average. As a middle-income neighborhood, what factors enable stable health outcomes, and how can economic and health stability be preserved as urban conditions change?
         Potential explanatory variables:
         Economic stability providing consistent healthcare access and healthy food affordability. Healthcare facility proximity and insurance coverage rates. Food environment with access to grocery stores and healthy options. Built environment supporting physical activity and community engagement. Social capital and neighborhood cohesion. Employment stability and job quality. Age distribution affecting baseline health risks.
@@ -528,12 +503,7 @@
         Marlton qualifies for HUD Community Development Block Grants, CDC REACH grants for elevated diabetes burden, and USDA Food Insecurity Nutrition Incentive programs.
         Measurable Outcomes (2027 Targets)
         Diabetes prevalence: 19.2% to 17.5% Poverty rate: 30.43% to 27% Job placements: 85 residents in living-wage positions Median income: $31,312 to $35,000 Healthcare access: 40% increase in diabetes screening rates`,
-            research: `Research Profile: Marlton
-        Demographics
-        Population: 4,726 (ACS 2024 estimate) Median income: $31,312 (±$1,200 MOE estimated) Poverty rate: 30.43% (±3.3pp MOE estimated) Unemployment: [Data needed]
-        Health Outcomes
-        Diabetes: 19.2% vs. Camden average 18.2% Mental distress: [Data needed] Obesity: [Data needed]
-        Research Question
+            research: `Research Question
         Marlton shows diabetes prevalence 5% above Camden average (19.2% vs 18.2%) with poverty rate also above city levels (30.43% vs 28.5%). What factors drive the elevated chronic disease burden, and what combination of healthcare access improvements, economic support, and community-based interventions could reduce diabetes disparities?
         Potential explanatory variables:
         Healthcare access barriers including facility proximity, insurance coverage gaps, transportation limitations. Food environment quality with potential food desert conditions. Physical activity barriers from unsafe streets or limited recreation facilities. Social determinants including chronic stress from economic instability. Age distribution potentially affecting diabetes baseline risk. Existing diabetes management programs and healthcare resources. Cultural or linguistic barriers to healthcare access.
@@ -582,12 +552,7 @@
         Parkside qualifies for community health innovation grants, best practices documentation funding, affordable housing preservation programs, and economic development initiatives.
         Measurable Outcomes (2027 Targets)
         Diabetes prevalence: 15% to 13% Poverty rate: maintain below 20% Median income: $45,662 to $50,000 Affordable housing units: preserve 150 units Health program participation: increase by 25%`,
-            research: `Research Profile: Parkside
-        Demographics
-        Population: 4,181 (ACS 2024 estimate) Median income: $45,662 (±$1,600 MOE estimated) Poverty rate: 19.4% (±2.8pp MOE estimated) Unemployment: [Data needed]
-        Health Outcomes
-        Diabetes: 15% vs. Camden average 18.2% Mental distress: [Data needed] Obesity: [Data needed]
-        Research Question
+            research: `Research Question
         Parkside achieves diabetes prevalence 18% below Camden average with median income 19% above city levels and poverty well below average. What combination of economic stability, community resources, healthcare access, and environmental factors enables these exceptional outcomes, and which elements are replicable in lower-income settings?
         Potential explanatory variables:
         Economic stability enabling healthcare access, healthy food affordability, and preventive care utilization. Healthcare facility proximity and quality of available services. Food environment with access to quality grocery stores and healthy options. Built environment supporting physical activity including walkable streets, parks, and recreation facilities. Insurance coverage rates likely higher than city average. Social capital and community cohesion supporting health behaviors. Education levels and health literacy. Age distribution potentially affecting diabetes baseline risk. Specific community health programs and initiatives.
@@ -637,12 +602,7 @@
         Whitman Park qualifies for CDC REACH grants for critical diabetes burden, emergency health intervention funding, HRSA Community Health Centers expansion grants, and HUD Community Development Block Grants.
         Measurable Outcomes (2027 Targets)
         Diabetes prevalence: 21.5% to 18.5% Poverty rate: 28.4% to 25% Healthcare access: 50% increase in diabetes screening rates Medicaid enrollment: reach 80%+ of eligible residents Median income: $31,941 to $35,500`,
-            research: `Research Profile: Whitman Park
-        Demographics
-        Population: 5,394 (ACS 2024 estimate) Median income: $31,941 (±$1,200 MOE estimated) Poverty rate: 28.4% (±2.7pp MOE estimated) Unemployment: [Data needed]
-        Health Outcomes
-        Diabetes: 21.5% vs. Camden average 18.2% Mental distress: [Data needed] Obesity: [Data needed]
-        Research Question
+            research: `Research Question
         Whitman Park presents a critical public health puzzle: diabetes prevalence of 21.5% is 18% higher than Camden average despite poverty (28.4%) being similar to or slightly below city average (28.5%) and median income only 16% below city levels. What specific factors drive dramatically elevated chronic disease burden independent of economic status?
         Potential explanatory variables:
         Healthcare access barriers including facility distance, insurance gaps, care quality deficits, or provider availability. Food environment potentially worse than income level predicts with severe food desert conditions. Built environment severely limiting physical activity opportunities or creating safety barriers. Age distribution with potentially older population at substantially higher diabetes risk. Environmental contamination or occupational hazards affecting metabolic health. Cultural or linguistic barriers creating healthcare access obstacles. Healthcare provider shortage or turnover affecting care continuity. Historical disinvestment in health infrastructure.
@@ -692,12 +652,7 @@
         Liberty Park qualifies for CDC emergency diabetes intervention grants, HRSA crisis response funding for highest-burden communities, emergency health intervention appropriations, and HUD Community Development Block Grants.
         Measurable Outcomes (2027 Targets)
         Diabetes prevalence: 23.1% to 19.5% Poverty rate: 26.21% to 23% Healthcare access: 60% increase in diabetes screening rates Emergency department diabetes visits: reduce by 40% Median income: $29,210 to $33,000`,
-            research: `Research Profile: Liberty Park
-        Demographics
-        Population: 2,401 (ACS 2024 estimate) Median income: $29,210 (±$1,500 MOE estimated) Poverty rate: 26.21% (±4.0pp MOE estimated) Unemployment: [Data needed]
-        Health Outcomes
-        Diabetes: 23.1% vs. Camden average 18.2% Mental distress: [Data needed] Obesity: [Data needed]
-        Research Question
+            research: `Research Question
         Liberty Park presents Camden's most extreme diabetes crisis: prevalence of 23.1% is 27% higher than city average and the highest of all neighborhoods, yet poverty (26.21%) is below city average (28.5%) and median income only 23% below city levels. What catastrophic failures in healthcare access, environmental conditions, or other factors drive the worst diabetes burden in Camden independent of economic status?
         Potential explanatory variables:
         Healthcare access catastrophic failure including complete facility absence, severe provider shortage, or care quality collapse. Food environment potentially representing city's worst food desert conditions despite moderate income. Built environment creating severe physical activity barriers or safety obstacles. Age distribution with dramatically older population. Environmental contamination or industrial exposure affecting metabolic health at crisis levels. Healthcare provider discrimination or systemic exclusion. Complete absence of diabetes management infrastructure. Historical trauma or chronic stress independent of current economic measures.
@@ -748,12 +703,7 @@
         Centerville qualifies for positive deviance research funding, HUD Choice Neighborhoods grants, CDC innovation awards, guaranteed income demonstration projects, and national foundation support for replicable models.
         Measurable Outcomes (2027 Targets)
         Diabetes prevalence: maintain below 15%, target 13% Poverty rate: 42.97% to 38% Median income: $22,181 to $26,000 National recognition: 3-5 published case studies Replication pilots: 5-10 communities adopt Centerville model`,
-            research: `Research Profile: Centerville
-        Demographics
-        Population: 2,805 (ACS 2024 estimate) Median income: $22,181 (±$1,400 MOE estimated) Poverty rate: 42.97% (±4.2pp MOE estimated) Unemployment: [Data needed]
-        Health Outcomes
-        Diabetes: 14.7% vs. Camden average 18.2% Mental distress: [Data needed] Obesity: [Data needed]
-        Research Question
+            research: `Research Question
         Centerville represents possibly the most extreme positive deviance case in the national literature: How does a community with 42.97% poverty—nearly half of all households—and median income of $22,181 achieve diabetes prevalence of 14.7%, which is 19% lower than the city average and better than neighborhoods with three times the income? This challenges fundamental assumptions about the poverty-health relationship and demands comprehensive investigation.
         Potential explanatory variables requiring immediate study:
         Healthcare access despite poverty through free clinics, community health workers, mobile units, or exceptional Medicaid enrollment. Food assistance program saturation creating effective food security despite income poverty. Social capital and mutual aid networks providing material and emotional support buffering economic stress. Faith-based or community organization infrastructure providing comprehensive support. Built environment enabling physical activity despite economic constraints. Cultural practices or dietary patterns protective against diabetes. Age distribution with younger population. Strong family networks providing childcare, housing, meal sharing. Community health worker or promotora programs. Exceptional primary care relationship or clinic quality.
@@ -808,12 +758,7 @@
         Waterfront South qualifies for anti-displacement grants, equitable development funding, CDC diabetes prevention for high-burden communities, and affordable housing preservation programs.
         Measurable Outcomes (2027 Targets)
         Diabetes prevalence: 20.3% to 18% Poverty rate: 40.45% to 35% Affordable housing units: preserve 150 units Displacement: prevent 200 low-income resident relocations Income inequality: reduce gap between high and low-income residents`,
-            research: `Research Profile: Waterfront South
-        Demographics
-        Population: 918 (ACS 2024 estimate) Median income: $54,324 (±$3,000 MOE estimated, large due to small population) Poverty rate: 40.45% (±6.0pp MOE estimated) Unemployment: [Data needed]
-        Health Outcomes
-        Diabetes: 20.3% vs. Camden average 18.2% Mental distress: [Data needed] Obesity: [Data needed]
-        Research Question
+            research: `Research Question
         Waterfront South presents extreme income inequality: How can a neighborhood have Camden's second-highest median income ($54,324) while 40.45% of households live in poverty? This bifurcation likely reflects gentrification with wealthy newcomers and longtime low-income residents. What are the health consequences of extreme within-neighborhood inequality, and does diabetes burden concentrate among low-income residents while wealthy residents achieve better outcomes?
         Potential explanatory variables:
         Gentrification creating income inequality with wealthy newcomers and displaced longtime residents remaining. Diabetes burden likely concentrated among low-income 40% while high-income residents achieve better outcomes. Stress from displacement threat or neighborhood change affecting health. Healthcare access bifurcated with wealthy residents accessing private care while poor residents face barriers. Food environment potentially improved for wealthy residents but inaccessible (unaffordable) for poor. Age distribution potentially bimodal with young wealthy professionals and older longtime residents.
@@ -866,12 +811,7 @@
         Morgan Village qualifies for HUD Community Development Block Grants, CDC diabetes prevention programs, workforce development funding, and community health sustainability grants.
         Measurable Outcomes (2027 Targets)
         Diabetes prevalence: 17.5% to 16% Poverty rate: 32.57% to 29% Job placements: 80 residents in living-wage positions Median income: $34,796 to $38,500 Community health program participation: increase by 25%`,
-            research: `Research Profile: Morgan Village
-        Demographics
-        Population: 2,701 (ACS 2024 estimate) Median income: $34,796 (±$1,300 MOE estimated) Poverty rate: 32.57% (±3.5pp MOE estimated) Unemployment: [Data needed]
-        Health Outcomes
-        Diabetes: 17.5% vs. Camden average 18.2% Mental distress: [Data needed] Obesity: [Data needed]
-        Research Question
+            research: `Research Question
         Morgan Village maintains diabetes prevalence marginally below Camden average (17.5% vs 18.2%) despite poverty above city levels (32.57% vs 28.5%). What factors enable stable health outcomes under economic stress, and how can economic and health stability be preserved and enhanced?
         Potential explanatory variables:
         Healthcare access including facility proximity and insurance coverage. Existing community health programs and diabetes prevention resources. Food environment quality relative to income level. Built environment supporting physical activity. Social support networks buffering economic stress. Age distribution affecting baseline diabetes risk. Community cohesion and collective efficacy.
@@ -921,12 +861,7 @@
         Fairview qualifies for HUD Community Development Block Grants, CDC diabetes prevention programs, workforce development initiatives, and community health sustainability funding.
         Measurable Outcomes (2027 Targets)
         Diabetes prevalence: 17.3% to 15.5% Poverty rate: 20.76% to 18% Job placements: 85 residents in stable employment Median income: $41,840 to $46,000 Community health program participation: increase by 30%`,
-            research: `Research Profile: Fairview
-        Demographics
-        Population: 6,221 (ACS 2024 estimate) Median income: $41,840 (±$1,400 MOE estimated) Poverty rate: 20.76% (±2.2pp MOE estimated) Unemployment: [Data needed]
-        Health Outcomes
-        Diabetes: 17.3% vs. Camden average 18.2% Mental distress: [Data needed] Obesity: [Data needed]
-        Research Question
+            research: `Research Question
         Fairview achieves diabetes prevalence 5% below Camden average with median income 9% above city levels and poverty well below average. What factors enable better health outcomes in this middle-income neighborhood, and how can economic and health stability be preserved as urban conditions change?
         Potential explanatory variables:
         Economic stability providing consistent healthcare access and healthy food affordability. Healthcare facility proximity and insurance coverage rates. Food environment with access to quality grocery stores and healthy options. Built environment supporting physical activity and community engagement. Social capital and neighborhood cohesion. Employment stability and job quality. Age distribution affecting baseline health risks. Existing community health programs and resources.
@@ -976,12 +911,7 @@
         Cooper Grant qualifies for emergency anti-displacement grants, equitable development funding, CDC diabetes prevention for communities with elevated burden and inequality, and affordable housing preservation emergency programs.
         Measurable Outcomes (2027 Targets)
         Diabetes prevalence: 19.4% to 17.5% Poverty rate: 41.01% to 36% Affordable housing units: preserve 200 units Displacement: prevent 250 low-income resident relocations Income inequality: reduce gap between high and low-income residents by 20%`,
-            research: `Research Profile: Cooper Grant
-        Demographics
-        Population: 2,274 (ACS 2024 estimate) Median income: $51,635 (±$2,500 MOE estimated) Poverty rate: 41.01% (±4.5pp MOE estimated) Unemployment: [Data needed]
-        Health Outcomes
-        Diabetes: 19.4% vs. Camden average 18.2% Mental distress: [Data needed] Obesity: [Data needed]
-        Research Question
+            research: `Research Question
         Cooper Grant presents extreme income inequality requiring urgent investigation: How can a neighborhood have Camden's fourth-highest median income ($51,635) while 41.01% of households live in poverty? This bifurcation likely reflects advanced gentrification with wealthy newcomers and longtime low-income residents. What are the health consequences of this extreme within-neighborhood inequality, particularly regarding diabetes burden concentrated among low-income residents experiencing displacement stress?
         Potential explanatory variables:
         Advanced gentrification creating severe income inequality with wealthy newcomers and longtime low-income residents facing displacement threat. Diabetes burden almost certainly concentrated among low-income 41% while high-income residents achieve better outcomes creating bifurcated health landscape. Chronic stress from displacement threat, neighborhood change, and daily exposure to inequality affecting metabolic health. Healthcare access bifurcated with wealthy residents accessing private care while poor residents face barriers. Food environment improved for wealthy but economically inaccessible for poor residents. Mental health impacts of inequality and displacement trauma.
@@ -1034,12 +964,7 @@
         Lanning Square qualifies for best practices documentation funding, CDC diabetes prevention programs, workforce development initiatives, and community economic stability grants.
         Measurable Outcomes (2027 Targets)
         Diabetes prevalence: 18% to 16% Poverty rate: 18.62% to 16% (maintain lowest in Camden) Median income: $38,447 to $43,000 Job placements: 70 residents in stable employment Economic stability model: replicated in 3-5 other neighborhoods`,
-            research: `Research Profile: Lanning Square
-        Demographics
-        Population: 4,853 (ACS 2024 estimate) Median income: $38,447 (±$1,400 MOE estimated) Poverty rate: 18.62% (±2.5pp MOE estimated, lowest in Camden) Unemployment: [Data needed]
-        Health Outcomes
-        Diabetes: 18% vs. Camden average 18.2% Mental distress: [Data needed] Obesity: [Data needed]
-        Research Question
+            research: `Research Question
         Lanning Square achieves Camden's lowest poverty rate (18.62%) with median income matching city average. What factors enable this exceptional economic stability compared to other neighborhoods with similar or higher incomes but substantially higher poverty? Understanding Lanning Square's success can inform citywide poverty reduction strategies.
         Potential explanatory variables:
         Employment stability and job quality with residents in stable positions. Industry composition with access to union jobs or stable employers. Education levels and skills training access. Housing stability and affordability relative to income. Social capital and community networks supporting employment. Historic investment or infrastructure advantages. Geographic location providing access advantages. Community organizations supporting economic stability. Age distribution with prime working-age population.
