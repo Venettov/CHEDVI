@@ -1263,14 +1263,14 @@
     // --- Updated Tab Rendering Functions ---
     function renderPolicyTab(profile) {
         document.getElementById("policy-tab-content").innerHTML = `
-            <h4>Policy Maker</h4>
+            <h4> </h4>
             <div class="tab-copy">${formatNarrativeToBullets(profile.policy)}</div>
         `;
     }
 
     function renderResearchTab(profile) {
         document.getElementById("research-tab-content").innerHTML = `
-            <h4>Researcher</h4>
+            <h4> </h4>
             <div class="tab-copy">${formatNarrativeToBullets(profile.research)}</div>
         `;
     }
