@@ -198,7 +198,7 @@ function syncDatabaseWithMaps(dbData) {
                 high_blood_pressure: findVal('high_blood_pressure') || fallbackData.highBloodPressure[idx],
                 income: findVal('median_income') || fallbackData.income[idx],
                 education: findVal('high_school_higher') || fallbackData.education[idx],
-                food_access: findVal('food_access_score') || findVal('low_food_access_score') || fallbackData.foodAccess[idx],
+                food_access: findVal('foodAccess') || fallbackData.foodAccess[idx],
                 poverty_rate: findVal('poverty_rate') || fallbackData.poverty[idx],
                 unemployment: findVal('unemployment_rate') || fallbackData.unemployment[idx],
                 lack_health_insurance: findVal('lack_health_insurance') || fallbackData.insurance[idx],
