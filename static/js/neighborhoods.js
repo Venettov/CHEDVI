@@ -38,14 +38,14 @@
             policy: `Policy Recommendations for Gateway
         1. Economic Development Initiative
         Investment in job training and placement 
-        Potential expected return: $2.4M in tax revenue over 5 years 
+        Expected return: $2.4M in tax revenue over 5 years 
         Evidence base: Similar programs in comparable cities reduced poverty 3-4 percentage points
         2. Food Access Infrastructure
         Investment in mobile food market and SNAP incentive programs 
-        Potential expected impact: 15% improvement in diet quality, estimated 2% obesity reduction over 3 years
+        Expected impact: 15% improvement in diet quality, estimated 2% obesity reduction over 3 years
         3. Diabetes Prevention Research and Replication
         Investment in studying Gateway's protective factors
-        Potential expected impact: Prevent 50 new diabetes cases annually citywide through replication
+        Expected impact: Prevent 50 new diabetes cases annually citywide through replication
         Funding Opportunities
         Gateway qualifies for HUD Community Development Block Grants, CDC REACH grants for diabetes prevention, and USDA Food Insecurity Nutrition Incentive programs.`,
             research: `Research Question
@@ -87,11 +87,11 @@
             policy: `Policy Recommendations for Bergen Square
         1. Economic Emergency Intervention
         Recommended investment for comprehensive poverty alleviation, including guaranteed income pilot, job training and placement, and emergency assistance
-        Potential Expected return: Stabilize the community, prevent further economic collapse 
+        Expected return: Stabilize the community, prevent further economic collapse 
         Evidence base: Guaranteed income pilots in Stockton, CA, and Jackson, MS showed 25-30% poverty reduction
         2. Healthcare Access Study and Expansion
         Recommended investment to study protective factors and expand successful programs 
-        Potential expected impact: Maintain diabetes rate below 18%.
+        Expected impact: Maintain diabetes rate below 18%.
         3. Food Security Infrastructure
         Recommended investment: $400,000 for daily food pantry, SNAP outreach, free meal programs, and mobile market due to severe food insecurity given income levels.
         Expected impact: Eliminate hunger while improving health outcomes
