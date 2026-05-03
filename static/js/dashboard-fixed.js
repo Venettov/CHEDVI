@@ -315,9 +315,11 @@ function addLegend(mapInstance, min, max, scheme, metric) {
     const legend = L.control({position: 'bottomright'});
     legend.onAdd = function () {
         const div = L.DomUtil.create('div', 'info legend');
+        
+        // UPDATED FORMATTER: Explicitly catch both possible variable names
         const format = (num) => {
             if (metric === 'income') return '$' + (num/1000).toFixed(0) + 'k';
-            if (['food_access'].includes(metric)) return num.toFixed(1);
+            if (metric === 'food_access' || metric === 'foodAccess') return num.toFixed(1);
             return num.toFixed(0) + '%';
         };
 
@@ -345,7 +347,18 @@ function createPopupContent(n, metric) {
     let statsHtml = `<div style="color:#666; font-style:italic;">Select a metric...</div>`;
     if (metric && n.data[metric] !== undefined) {
         let value = n.data[metric];
-        if (typeof value === 'number') value = (metric === 'income') ? `$${value.toLocaleString()}` : `${value.toFixed(1)}%`;
+        
+        // UPDATED FORMATTER: Remove percent sign for Food Access Score
+        if (typeof value === 'number') {
+            if (metric === 'income') {
+                value = `$${value.toLocaleString()}`;
+            } else if (metric === 'food_access' || metric === 'foodAccess') {
+                value = value.toFixed(1); // Leave as raw number
+            } else {
+                value = `${value.toFixed(1)}%`; // Everything else gets a percentage
+            }
+        }
+        
         statsHtml = `<div style="font-size: 1.1rem; color: #1e8449; margin-top:5px;"><strong>${getMetricLabel(metric)}:</strong> ${value}</div>`;
     }
     return `<div style="text-align: left; min-width: 150px;">
