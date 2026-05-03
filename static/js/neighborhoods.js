@@ -1254,19 +1254,38 @@
         let inList = false;
 
         lines.forEach((line, index) => {
-            // Detect headers: Starts with a number (1.) or specific keywords
-            const isNumbered = /^\d+\./.test(line);
-            const isFunding = line.toLowerCase().includes("funding opportunities");
-            const isOutcome = line.toLowerCase().includes("measurable outcomes");
-            const isActions = line.toLowerCase().includes("immediate actions");
-            const isGrants = line.toLowerCase().includes("available grants");
+            const lowerLine = line.toLowerCase();
             
-            // Detect main title (first line if it contains neighborhood name)
-            const isMainTitle = index === 0 && line.toLowerCase().includes("recommendations");
+            // Detect headers: Starts with a number (1.) or specific section keywords
+            const isNumbered = /^\d+\./.test(line);
+            const isHeader = isNumbered || 
+                lowerLine.includes("funding opportunities") ||
+                lowerLine.includes("measurable outcomes") ||
+                lowerLine.includes("immediate actions") ||
+                lowerLine.includes("available grants") ||
+                lowerLine.includes("research question") ||
+                lowerLine.includes("potential explanatory variables") ||
+                lowerLine.includes("recommended study design") ||
+                lowerLine.includes("demographics") ||
+                lowerLine.includes("health outcomes") ||
+                lowerLine.includes("data quality notes") ||
+                lowerLine.includes("critical data gaps") ||
+                lowerLine.includes("understanding") ||
+                lowerLine.includes("advocacy messages") ||
+                lowerLine.includes("critical message");
+            
+            // Detect main title (first line if it contains specific titles)
+            const isMainTitle = index === 0 && (
+                lowerLine.includes("recommendations") ||
+                lowerLine.includes("research profile") ||
+                lowerLine.includes("community action guide") ||
+                lowerLine.includes("researcher") ||
+                lowerLine.includes("policy maker")
+            );
 
             if (isMainTitle) {
                 html += `<p class="fw-bold text-primary mb-3">${line}</p>`;
-            } else if (isNumbered || isFunding || isOutcome || isActions || isGrants) {
+            } else if (isHeader) {
                 // If we were in a list, close it before starting a new header
                 if (inList) { html += "</ul>"; inList = false; }
                 
@@ -1274,11 +1293,17 @@
                 html += `<ul class="priority-list mb-3">`;
                 inList = true;
             } else {
-                // This is a detail line. Split it into sentences to ensure each gets a bullet.
+                // This is a detail line. Split into sentences to ensure each gets a bullet.
                 const sentences = line.split(/\.\s+/).map(s => s.trim()).filter(s => s.length > 0);
                 
                 sentences.forEach(s => {
-                    const cleanS = s.endsWith('.') ? s : s + '.';
+                    // Remove existing bullet characters if they exist in the raw text
+                    let cleanS = s.replace(/^•\s*/, '');
+                    
+                    // Add period only if it doesn't already end with punctuation
+                    const hasEndPunc = /[.?!]$/.test(cleanS);
+                    cleanS = hasEndPunc ? cleanS : cleanS + '.';
+                    
                     if (inList) {
                         html += `<li><span class="priority-dot"></span><span>${cleanS}</span></li>`;
                     } else {
