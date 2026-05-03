@@ -128,7 +128,7 @@ const fallbackData = {
     poverty: [30.78, 54.36, 36.71, 39.82, 38.68, 11.91, 24.96, 19.22, 20.17, 30.43, 19.40, 28.40, 26.21, 42.97, 40.45, 32.57, 20.76, 41.01, 18.62],
     unemployment: [28.59, 34.22, 11.43, 14.21, 9.42, 9.73, 3.93, 13.15, 5.94, 16.67, 26.16, 18.81, 11.37, 25.90, 8.51, 9.16, 24.87, 14.15, 8.24],
     education: [69.34, 57.70, 41.41, 36.94, 25.47, 43.14, 37.81, 44.01, 49.38, 45.20, 48.07, 60.14, 55.44, 41.57, 43.90, 61.16, 62.64, 90.55, 61.43],
-    foodAccess: [3.1, 2.2, 3.7, 2.8, 3.5, 7.2, 5.1, 6.8, 6.2, 4.8, 5.9, 4.9, 4.2, 2.8, 6.7, 5.2, 6.1, 6.9, 5.7],
+    foodAccess: [34.04, 77.61, 8.97, 0.31, 1.16, 44.54, 1.64, 28.39, 1.64, 0.06, 6.07, 5.25, 45.53, 77.96, 81.58, 42.91, 27.51, 29.17, 67.15],
     insurance: [36.2, 25.1, 25.6, 30.1, 21.2, 45.7, 41.8, 48.5, 47.3, 37.6, 31.9, 36.2, 37.6, 15.6, 45.6, 34.8, 28.3, 70.4, 62.7],
     diabetes: [17.0, 15.7, 18.9, 21.4, 18.4, 13.4, 22.2, 16.9, 17.9, 19.2, 15.0, 21.5, 23.1, 14.7, 20.3, 17.5, 17.3, 19.4, 18.0],
     obesity: [43.9, 47.6, 44.8, 46.6, 44.8, 40.2, 41.8, 38.8, 41.9, 43.2, 46.1, 44.8, 48.7, 51.4, 44.3, 45.7, 43.6, 36.0, 41.3],
@@ -198,7 +198,7 @@ function syncDatabaseWithMaps(dbData) {
                 high_blood_pressure: findVal('high_blood_pressure') || fallbackData.highBloodPressure[idx],
                 income: findVal('median_income') || fallbackData.income[idx],
                 education: findVal('high_school_higher') || fallbackData.education[idx],
-                food_access: findVal('food_access_score') || fallbackData.foodAccess[idx],
+                food_access: findVal('food_access_score') || findVal('low_food_access_score') || fallbackData.foodAccess[idx],
                 poverty_rate: findVal('poverty_rate') || fallbackData.poverty[idx],
                 unemployment: findVal('unemployment_rate') || fallbackData.unemployment[idx],
                 lack_health_insurance: findVal('lack_health_insurance') || fallbackData.insurance[idx],
@@ -317,7 +317,7 @@ function addLegend(mapInstance, min, max, scheme, metric) {
         const div = L.DomUtil.create('div', 'info legend');
         const format = (num) => {
             if (metric === 'income') return '$' + (num/1000).toFixed(0) + 'k';
-            if (metric === 'food_access' || metric === 'foodAccess') return num.toFixed(1);
+            if (['food_access'].includes(metric)) return num.toFixed(1);
             return num.toFixed(0) + '%';
         };
 
@@ -345,18 +345,7 @@ function createPopupContent(n, metric) {
     let statsHtml = `<div style="color:#666; font-style:italic;">Select a metric...</div>`;
     if (metric && n.data[metric] !== undefined) {
         let value = n.data[metric];
-        
-        // Exact raw value formatting
-        if (metric === 'income') {
-            value = `$${Number(value).toLocaleString()}`;
-        } else if (metric === 'food_access' || metric === 'foodAccess') {
-            // DO NOTHING. Show the exact number from the database.
-            value = value; 
-        } else if (typeof value === 'number') {
-            // Everything else gets a percentage sign
-            value = `${value.toFixed(1)}%`;
-        }
-        
+        if (typeof value === 'number') value = (metric === 'income') ? `$${value.toLocaleString()}` : `${value.toFixed(1)}%`;
         statsHtml = `<div style="font-size: 1.1rem; color: #1e8449; margin-top:5px;"><strong>${getMetricLabel(metric)}:</strong> ${value}</div>`;
     }
     return `<div style="text-align: left; min-width: 150px;">
