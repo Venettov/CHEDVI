@@ -317,7 +317,7 @@ function addLegend(mapInstance, min, max, scheme, metric) {
         const div = L.DomUtil.create('div', 'info legend');
         const format = (num) => {
             if (metric === 'income') return '$' + (num/1000).toFixed(0) + 'k';
-            if (['food_access'].includes(metric)) return num.toFixed(1);
+            if (metric === 'food_access' || metric === 'foodAccess') return num.toFixed(1);
             return num.toFixed(0) + '%';
         };
 
@@ -345,7 +345,18 @@ function createPopupContent(n, metric) {
     let statsHtml = `<div style="color:#666; font-style:italic;">Select a metric...</div>`;
     if (metric && n.data[metric] !== undefined) {
         let value = n.data[metric];
-        if (typeof value === 'number') value = (metric === 'income') ? `$${value.toLocaleString()}` : `${value.toFixed(1)}%`;
+        
+        // Exact raw value formatting
+        if (metric === 'income') {
+            value = `$${Number(value).toLocaleString()}`;
+        } else if (metric === 'food_access' || metric === 'foodAccess') {
+            // DO NOTHING. Show the exact number from the database.
+            value = value; 
+        } else if (typeof value === 'number') {
+            // Everything else gets a percentage sign
+            value = `${value.toFixed(1)}%`;
+        }
+        
         statsHtml = `<div style="font-size: 1.1rem; color: #1e8449; margin-top:5px;"><strong>${getMetricLabel(metric)}:</strong> ${value}</div>`;
     }
     return `<div style="text-align: left; min-width: 150px;">
