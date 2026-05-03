@@ -586,7 +586,11 @@ def get_neighborhood_data():
                 'unemployment': n.unemployment_rate,
                 'housing_vacant': n.vacant_housing,
                 'housing_total': n.housing_units,
-                'overcrowded_housing': n.overcrowded_housing
+                'overcrowded_housing': n.overcrowded_housing,
+                
+                # ADD THESE TWO MISSING LINES
+                'depression': getattr(n, 'depression_rate', 0.0),
+                'noPhysicalLeisure': getattr(n, 'no_physical_leisure', 0.0)
             })
 
         return jsonify(data_list)

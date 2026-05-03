@@ -191,21 +191,22 @@ function syncDatabaseWithMaps(dbData) {
             };
 
             neighborhood.data = {
-                diabetes: findVal('diabetes_rate') || fallbackData.diabetes[idx],
-                obesity: findVal('obesity_rate') || fallbackData.obesity[idx],
-                asthma: findVal('asthma_rate') || fallbackData.asthma[idx],
-                mental_distress: findVal('mental_distress_rate') || fallbackData.mentalDistress[idx],
-                high_blood_pressure: findVal('high_blood_pressure') || fallbackData.highBloodPressure[idx],
-                income: findVal('median_income') || fallbackData.income[idx],
-                education: findVal('high_school_higher') || fallbackData.education[idx],
+                // These now exactly match the keys generated in routes.py
+                diabetes: findVal('diabetes') || fallbackData.diabetes[idx],
+                obesity: findVal('obesity') || fallbackData.obesity[idx],
+                asthma: findVal('asthma') || fallbackData.asthma[idx],
+                mental_distress: findVal('mentalDistress') || fallbackData.mentalDistress[idx],
+                high_blood_pressure: findVal('highBloodPressure') || fallbackData.highBloodPressure[idx],
+                income: findVal('income') || fallbackData.income[idx],
+                education: findVal('education') || fallbackData.education[idx],
                 food_access: findVal('foodAccess') || fallbackData.foodAccess[idx],
-                poverty_rate: findVal('poverty_rate') || fallbackData.poverty[idx],
-                unemployment: findVal('unemployment_rate') || fallbackData.unemployment[idx],
-                lack_health_insurance: findVal('lack_health_insurance') || fallbackData.insurance[idx],
+                poverty_rate: findVal('poverty') || fallbackData.poverty[idx],
+                unemployment: findVal('unemployment') || fallbackData.unemployment[idx],
+                lack_health_insurance: findVal('uninsured') || fallbackData.insurance[idx],
                 
-                // IF THE API FORGETS TO SEND THESE, STEAL THEM FROM THE FALLBACK ARRAYS:
-                depression_rate: findVal('depression_rate') || fallbackData.depression[idx],
-                no_physical_leisure: findVal('no_physical_leisure') || fallbackData.noPhysicalLeisure[idx]
+                // These two need to be added to routes.py (see below)
+                depression_rate: findVal('depression') || fallbackData.depression[idx],
+                no_physical_leisure: findVal('noPhysicalLeisure') || fallbackData.noPhysicalLeisure[idx]
             };
         } else {
             neighborhood.data = {};
